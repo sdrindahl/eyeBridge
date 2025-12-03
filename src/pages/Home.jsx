@@ -77,22 +77,23 @@ const testimonials = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-900">
+    <div className="min-h-screen bg-slate-50 text-slate-800">
       {/* Nav */}
-      <header className="sticky top-0 z-40 backdrop-blur bg-white/70 border-b border-neutral-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <Rocket className="w-5 h-5" /> {BRAND_NAME}
+      <header className="sticky top-0 z-40 bg-gradient-to-r from-blue-700 to-blue-600 border-b border-blue-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-24">
+          <Link to="/" className="flex items-center gap-3 font-semibold text-white">
+            <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto" />
+            <span className="text-xl">{BRAND_NAME}</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <a href="#features" className="hover:text-neutral-600">Features</a>
-            <a href="#how" className="hover:text-neutral-600">How it works</a>
-            <a href="#pricing" className="hover:text-neutral-600">Pricing</a>
-            <a href="#faq" className="hover:text-neutral-600">FAQ</a>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-white">
+            <a href="#features" className="hover:text-blue-200">Features</a>
+            <a href="#how" className="hover:text-blue-200">How it works</a>
+            <a href="#pricing" className="hover:text-blue-200">Pricing</a>
+            <a href="#faq" className="hover:text-blue-200">FAQ</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="rounded-2xl">Log in</Button>
-            <Button className="rounded-2xl">Try for free</Button>
+            <Button variant="ghost" className="rounded-2xl text-white hover:bg-blue-800 hover:text-white">Log in</Button>
+            <Button className="rounded-2xl bg-white text-blue-700 hover:bg-blue-50">Try for free</Button>
           </div>
         </div>
       </header>
@@ -102,8 +103,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">{TAGLINE}</h1>
-              <p className="mt-6 text-lg text-neutral-600">
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900">{TAGLINE}</h1>
+              <p className="mt-6 text-lg text-slate-600">
                 Find trusted partners and compare products faster. Search by category, indications, certifications, and more—then connect with the right reps.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -116,14 +117,14 @@ export default function Home() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-              <div className="bg-white border border-neutral-200 rounded-3xl shadow-sm p-4">
-                <div className="aspect-[16/10] rounded-2xl bg-neutral-100 grid place-items-center text-neutral-400">
+              <div className="bg-slate-200 border border-slate-300 rounded-3xl shadow-sm p-4">
+                <div className="aspect-[16/10] rounded-2xl bg-slate-300 grid place-items-center text-slate-500">
                   <span className="text-sm">Replace with a product screenshot or demo video</span>
                 </div>
-                <div className="mt-4 grid grid-cols-3 gap-3 text-xs text-neutral-500">
-                  <div className="p-3 rounded-xl bg-neutral-50 border">Usage Metrics</div>
-                  <div className="p-3 rounded-xl bg-neutral-50 border">Customer Tenants</div>
-                  <div className="p-3 rounded-xl bg-neutral-50 border">Automations</div>
+                <div className="mt-4 grid grid-cols-3 gap-3 text-xs text-slate-600">
+                  <div className="p-3 rounded-xl bg-slate-100 border border-slate-300">Usage Metrics</div>
+                  <div className="p-3 rounded-xl bg-slate-100 border border-slate-300">Customer Tenants</div>
+                  <div className="p-3 rounded-xl bg-slate-100 border border-slate-300">Automations</div>
                 </div>
               </div>
             </motion.div>
@@ -132,7 +133,7 @@ export default function Home() {
       </section>
 
       {/* Directory Preview */}
-      <section id="directory" className="py-20 bg-white border-y">
+      <section id="directory" className="py-20 bg-slate-100 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold">Explore vendors & product lines</h2>
@@ -147,7 +148,7 @@ export default function Home() {
               { name: "CornealTech", tags: ["Surgery", "Equipment"], blurb: "Ophthalmic surgical tools & disposables." },
               { name: "Vision Billing Pro", tags: ["RevCycle", "Services"], blurb: "Revenue cycle management for ODs & MDs." }
             ].map((v) => (
-              <Card key={v.name} className="rounded-3xl">
+              <Card key={v.name} className="rounded-3xl bg-slate-200 border-slate-300">
                 <CardHeader>
                   <CardTitle className="text-lg">{v.name}</CardTitle>
                   <div className="flex flex-wrap gap-2 mt-2">
@@ -171,12 +172,12 @@ export default function Home() {
       </section>
 
       {/* Logos */}
-      <section className="py-6 border-y bg-white">
+      <section className="py-6 border-y border-slate-200 bg-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-neutral-500">Trusted by fast-moving teams</p>
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 opacity-80">
             {["Acme", "Northbeam", "Tecton", "Vector", "Rain", "Nimbus"].map((logo) => (
-              <div key={logo} className="h-10 rounded-lg bg-neutral-100 border grid place-items-center text-neutral-400">
+              <div key={logo} className="h-10 rounded-lg bg-slate-200 border border-slate-300 grid place-items-center text-slate-500">
                 {logo}
               </div>
             ))}
@@ -193,9 +194,9 @@ export default function Home() {
           </div>
           <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((f) => (
-              <Card key={f.title} className="rounded-3xl">
+              <Card key={f.title} className="rounded-3xl bg-slate-200 border-slate-300">
                 <CardHeader>
-                  <div className="w-10 h-10 rounded-xl bg-neutral-100 border grid place-items-center text-neutral-600">{f.icon}</div>
+                  <div className="w-10 h-10 rounded-xl bg-slate-300 border border-slate-400 grid place-items-center text-slate-700">{f.icon}</div>
                   <CardTitle className="mt-4 text-lg">{f.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-neutral-600">{f.desc}</CardContent>
@@ -206,7 +207,7 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section id="how" className="py-20 bg-white border-y">
+      <section id="how" className="py-20 bg-slate-100 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold">How it works</h2>
@@ -214,7 +215,7 @@ export default function Home() {
           </div>
           <div className="mt-10 grid md:grid-cols-3 gap-6">
             {["Model your tenants & roles", "Compose dashboards & workflows", "Connect billing & go live"].map((step, i) => (
-              <Card key={i} className="rounded-3xl">
+              <Card key={i} className="rounded-3xl bg-slate-200 border-slate-300">
                 <CardHeader>
                   <div className="text-xs text-neutral-500">Step {i + 1}</div>
                   <CardTitle className="text-lg">{step}</CardTitle>
@@ -237,7 +238,7 @@ export default function Home() {
           </div>
           <div className="mt-10 grid md:grid-cols-3 gap-6">
             {plans.map((p) => (
-              <Card key={p.name} className={`${p.highlighted ? "ring-2 ring-neutral-900" : ""} rounded-3xl`}>
+              <Card key={p.name} className={`${p.highlighted ? "ring-2 ring-teal-600" : ""} rounded-3xl bg-slate-200 border-slate-300`}>
                 <CardHeader>
                   <CardTitle className="flex items-baseline justify-between">
                     <span>{p.name}</span>
@@ -265,7 +266,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-white border-y">
+      <section className="py-20 bg-slate-100 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold">Loved by founders & operators</h2>
@@ -273,8 +274,8 @@ export default function Home() {
           </div>
           <div className="mt-10 grid md:grid-cols-2 gap-6">
             {testimonials.map((t) => (
-              <Card key={t.name} className="rounded-3xl">
-                <CardContent className="pt-6 text-neutral-700">
+              <Card key={t.name} className="rounded-3xl bg-slate-200 border-slate-300">
+                <CardContent className="pt-6 text-slate-700">
                   <p className="text-lg leading-relaxed">"{t.quote}"</p>
                   <p className="mt-4 text-sm text-neutral-500">
                     {t.name} — {t.role}
@@ -292,7 +293,7 @@ export default function Home() {
           <h3 className="text-3xl font-bold">Ready to validate your platform?</h3>
           <p className="mt-3 text-neutral-600">Join the waitlist to get early access, templates, and migration help.</p>
           <form className="mt-6 max-w-md mx-auto flex gap-2">
-            <input type="email" placeholder="you@company.com" className="flex-1 rounded-2xl border px-4 h-11" />
+            <input type="email" placeholder="you@company.com" className="flex-1 rounded-2xl border border-slate-300 bg-slate-100 px-4 h-11 text-slate-800" />
             <Button className="rounded-2xl h-11">
               <Mail className="w-4 h-4 mr-2" /> Notify me
             </Button>
@@ -302,7 +303,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="py-20 bg-white border-t">
+      <section id="faq" className="py-20 bg-sky-50 border-t border-sky-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-2xl font-bold">Frequently asked questions</h3>
           <div className="mt-8 grid md:grid-cols-2 gap-6">
@@ -325,8 +326,9 @@ export default function Home() {
       <footer className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-6 text-sm text-neutral-600">
           <div>
-            <div className="flex items-center gap-2 font-semibold text-neutral-900">
-              <Rocket className="w-4 h-4" /> {BRAND_NAME}
+            <div className="flex items-center gap-3 font-semibold text-neutral-900">
+              <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-16 w-auto" />
+              <span className="text-lg">{BRAND_NAME}</span>
             </div>
             <p className="mt-3">{BRAND_NAME} helps teams ship platforms customers love.</p>
           </div>
