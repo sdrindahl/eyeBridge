@@ -193,16 +193,16 @@ export default function Vendors() {
   return (
     <div className="min-h-screen bg-gray-300">
       {/* Header */}
-      <header className="border-b border-slate-800 sticky top-0 z-10" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <header data-testid="vendors-header" className="border-b border-slate-800 sticky top-0 z-10" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 bg-slate-900/50"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2 sm:gap-4">
-              <Link to="/" className="hover:opacity-80 transition-opacity">
+              <Link to="/" data-testid="logo-link" className="hover:opacity-80 transition-opacity">
                 <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-16 sm:h-20 w-auto cursor-pointer" />
               </Link>
               <div>
-                <h1 className="text-xl sm:text-3xl font-bold text-white">Vendor Directory</h1>
+                <h1 data-testid="vendors-title" className="text-xl sm:text-3xl font-bold text-white">Vendor Directory</h1>
                 <p className="text-slate-200 mt-1 text-xs sm:text-base hidden sm:block">
                   Search through {vendorsData.length} eye care vendors and suppliers
                 </p>
@@ -210,6 +210,7 @@ export default function Vendors() {
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <Button 
+                data-testid="home-button"
                 onClick={() => navigate("/")}
                 variant="ghost" 
                 className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4"
@@ -219,6 +220,7 @@ export default function Vendors() {
               {isLoggedIn ? (
                 <>
                   <Button 
+                    data-testid="dashboard-button"
                     onClick={() => navigate("/dashboard")}
                     variant="ghost" 
                     className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4"
@@ -226,6 +228,7 @@ export default function Vendors() {
                     Dashboard
                   </Button>
                   <Button 
+                    data-testid="logout-button"
                     onClick={() => {
                       localStorage.removeItem("isLoggedIn");
                       localStorage.removeItem("userEmail");
@@ -239,6 +242,7 @@ export default function Vendors() {
                 </>
               ) : (
                 <Button 
+                  data-testid="login-button"
                   onClick={() => navigate("/login")}
                   variant="outline" 
                   className="border-white text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4"

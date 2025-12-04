@@ -94,10 +94,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-300 text-slate-800">
       {/* Nav */}
-      <header className="sticky top-0 z-40 border-b border-slate-800 relative" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <header data-testid="home-header" className="sticky top-0 z-40 border-b border-slate-800 relative" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 bg-slate-900/50"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-4 sm:h-24 relative z-10">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 font-semibold text-white">
+          <Link to="/" data-testid="logo-link" className="flex items-center gap-2 sm:gap-3 font-semibold text-white">
             <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-16 sm:h-20 w-auto" />
             <span className="text-lg sm:text-xl">{BRAND_NAME}</span>
           </Link>

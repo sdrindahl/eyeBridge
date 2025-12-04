@@ -142,29 +142,29 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-300">
       {/* Header */}
-      <header className="border-b border-slate-800 sticky top-0 z-10" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <header data-testid="dashboard-header" className="border-b border-slate-800 sticky top-0 z-10" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 bg-slate-900/50"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
+            <Link to="/" data-testid="logo-link" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
               <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-16 sm:h-20 w-auto cursor-pointer" />
               <span className="text-xl sm:text-2xl font-bold text-white">Eye Bridges</span>
             </Link>
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
               <Link to="/">
-                <Button variant="ghost" className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
+                <Button data-testid="home-button" variant="ghost" className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
                   Home
                 </Button>
               </Link>
               <Link to="/vendors">
-                <Button variant="ghost" className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
+                <Button data-testid="browse-vendors-button" variant="ghost" className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
                   <span className="hidden sm:inline">Browse Vendors</span>
                   <span className="sm:hidden">Vendors</span>
                 </Button>
               </Link>
               <div className="flex items-center gap-2 sm:gap-3 text-white">
-                <span className="text-xs sm:text-sm hidden md:inline">{userEmail}</span>
-                <Button onClick={handleLogout} variant="outline" className="border-white text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
+                <span data-testid="user-email" className="text-xs sm:text-sm hidden md:inline">{userEmail}</span>
+                <Button data-testid="logout-button" onClick={handleLogout} variant="outline" className="border-white text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
                   Logout
                 </Button>
               </div>
@@ -174,9 +174,9 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main data-testid="dashboard-main" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900">My Dashboard</h1>
+          <h1 data-testid="dashboard-title" className="text-4xl font-bold text-slate-900">My Dashboard</h1>
           <p className="text-slate-700 mt-2">Welcome back! Here's your personalized overview.</p>
           
           {/* Quick Search with Filters */}
@@ -185,6 +185,7 @@ export default function Dashboard() {
               {/* Category Dropdown */}
               <div className="relative">
                 <button
+                  data-testid="category-dropdown"
                   onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                   className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors whitespace-nowrap"
                 >
@@ -247,6 +248,7 @@ export default function Dashboard() {
               <div className="relative flex-1 max-w-xl">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <input
+                  data-testid="search-input"
                   type="text"
                   placeholder="Search vendors..."
                   value={searchQuery}
@@ -269,6 +271,7 @@ export default function Dashboard() {
               {/* Clear Button */}
               {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all") && (
                 <Button
+                  data-testid="clear-search-button"
                   onClick={() => {
                     setSearchQuery("");
                     setSelectedCategory("all");
@@ -283,6 +286,7 @@ export default function Dashboard() {
 
               {/* Search Button */}
               <Button
+                data-testid="search-button"
                 onClick={() => {
                   let url = '/vendors';
                   const params = new URLSearchParams();
@@ -301,16 +305,17 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div data-testid="quick-stats" className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card 
+            data-testid="favorites-stat-card"
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('favorites-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Favorites</p>
-                  <p className="text-3xl font-bold text-slate-900">{favorites.length}</p>
+                  <p data-testid="favorites-label" className="text-sm text-slate-600">Favorites</p>
+                  <p data-testid="favorites-count" className="text-3xl font-bold text-slate-900">{favorites.length}</p>
                 </div>
                 <Heart className="w-8 h-8 text-red-500 fill-red-500" />
               </div>
@@ -318,14 +323,15 @@ export default function Dashboard() {
           </Card>
 
           <Card 
+            data-testid="searches-stat-card"
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('searches-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Recent Searches</p>
-                  <p className="text-3xl font-bold text-slate-900">{recentSearches.length}</p>
+                  <p data-testid="searches-label" className="text-sm text-slate-600">Recent Searches</p>
+                  <p data-testid="searches-count" className="text-3xl font-bold text-slate-900">{recentSearches.length}</p>
                 </div>
                 <Search className="w-8 h-8 text-slate-600" />
               </div>
@@ -333,14 +339,15 @@ export default function Dashboard() {
           </Card>
 
           <Card 
+            data-testid="contacted-stat-card"
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('contacts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Contacted</p>
-                  <p className="text-3xl font-bold text-slate-900">{contactHistory.length}</p>
+                  <p data-testid="contacted-label" className="text-sm text-slate-600">Contacted</p>
+                  <p data-testid="contacted-count" className="text-3xl font-bold text-slate-900">{contactHistory.length}</p>
                 </div>
                 <Phone className="w-8 h-8 text-green-600" />
               </div>
@@ -348,14 +355,15 @@ export default function Dashboard() {
           </Card>
 
           <Card 
+            data-testid="comparisons-stat-card"
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('comparisons-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Comparisons</p>
-                  <p className="text-3xl font-bold text-slate-900">{savedComparisons.length}</p>
+                  <p data-testid="comparisons-label" className="text-sm text-slate-600">Comparisons</p>
+                  <p data-testid="comparisons-count" className="text-3xl font-bold text-slate-900">{savedComparisons.length}</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-blue-600" />
               </div>

@@ -53,8 +53,8 @@ export default function Login() {
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userEmail", email);
     
-    // Redirect to vendors page
-    navigate("/vendors");
+    // Redirect to dashboard page
+    navigate("/dashboard");
   };
 
   return (
@@ -77,15 +77,15 @@ export default function Login() {
 
       {/* Login Form */}
       <div className="flex items-center justify-center px-4 py-16">
-        <Card className="w-full max-w-md rounded-3xl bg-white border-slate-300 shadow-xl">
+        <Card data-testid="login-card" className="w-full max-w-md rounded-3xl bg-white border-slate-300 shadow-xl">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-3xl font-bold text-slate-900">Welcome Back</CardTitle>
             <p className="text-slate-600 mt-2">Sign in to your account</p>
           </CardHeader>
           <CardContent className="pt-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} data-testid="login-form" className="space-y-4">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div data-testid="login-error" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                   {error}
                 </div>
               )}
@@ -95,6 +95,7 @@ export default function Login() {
                   Email Address
                 </label>
                 <input
+                  data-testid="email-input"
                   id="email"
                   type="email"
                   value={email}
@@ -109,6 +110,7 @@ export default function Login() {
                   Password
                 </label>
                 <input
+                  data-testid="password-input"
                   id="password"
                   type="password"
                   value={password}
