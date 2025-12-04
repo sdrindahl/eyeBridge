@@ -145,25 +145,26 @@ export default function Dashboard() {
       <header className="border-b border-slate-800 sticky top-0 z-10" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 bg-slate-900/50"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto cursor-pointer" />
-              <span className="text-2xl font-bold text-white">Eye Bridges</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
+              <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-16 sm:h-20 w-auto cursor-pointer" />
+              <span className="text-xl sm:text-2xl font-bold text-white">Eye Bridges</span>
             </Link>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
               <Link to="/">
-                <Button variant="ghost" className="text-white hover:bg-slate-800">
+                <Button variant="ghost" className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
                   Home
                 </Button>
               </Link>
               <Link to="/vendors">
-                <Button variant="ghost" className="text-white hover:bg-slate-800">
-                  Browse Vendors
+                <Button variant="ghost" className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
+                  <span className="hidden sm:inline">Browse Vendors</span>
+                  <span className="sm:hidden">Vendors</span>
                 </Button>
               </Link>
-              <div className="flex items-center gap-3 text-white">
-                <span className="text-sm">{userEmail}</span>
-                <Button onClick={handleLogout} variant="outline" className="border-white text-white hover:bg-slate-800">
+              <div className="flex items-center gap-2 sm:gap-3 text-white">
+                <span className="text-xs sm:text-sm hidden md:inline">{userEmail}</span>
+                <Button onClick={handleLogout} variant="outline" className="border-white text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
                   Logout
                 </Button>
               </div>

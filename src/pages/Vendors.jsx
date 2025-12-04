@@ -196,23 +196,23 @@ export default function Vendors() {
       <header className="border-b border-slate-800 sticky top-0 z-10" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 bg-slate-900/50"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Link to="/" className="hover:opacity-80 transition-opacity">
-                <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto cursor-pointer" />
+                <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-16 sm:h-20 w-auto cursor-pointer" />
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-white">Vendor Directory</h1>
-                <p className="text-slate-200 mt-1">
+                <h1 className="text-xl sm:text-3xl font-bold text-white">Vendor Directory</h1>
+                <p className="text-slate-200 mt-1 text-xs sm:text-base hidden sm:block">
                   Search through {vendorsData.length} eye care vendors and suppliers
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <Button 
                 onClick={() => navigate("/")}
                 variant="ghost" 
-                className="text-white hover:bg-slate-800"
+                className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4"
               >
                 Home
               </Button>
@@ -221,7 +221,7 @@ export default function Vendors() {
                   <Button 
                     onClick={() => navigate("/dashboard")}
                     variant="ghost" 
-                    className="text-white hover:bg-slate-800"
+                    className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4"
                   >
                     Dashboard
                   </Button>
@@ -232,7 +232,7 @@ export default function Vendors() {
                       navigate("/");
                     }}
                     variant="outline" 
-                    className="border-white text-white hover:bg-slate-800"
+                    className="border-white text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4"
                   >
                     Logout
                   </Button>
@@ -241,9 +241,10 @@ export default function Vendors() {
                 <Button 
                   onClick={() => navigate("/login")}
                   variant="outline" 
-                  className="border-white text-white hover:bg-slate-800"
+                  className="border-white text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4"
                 >
-                  Login to Your Dashboard
+                  <span className="hidden sm:inline">Login to Your Dashboard</span>
+                  <span className="sm:hidden">Login</span>
                 </Button>
               )}
             </div>
