@@ -206,13 +206,34 @@ export default function Vendors() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {isLoggedIn && (
+              {isLoggedIn ? (
+                <>
+                  <Button 
+                    onClick={() => navigate("/dashboard")}
+                    variant="ghost" 
+                    className="text-white hover:bg-slate-800"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      localStorage.removeItem("isLoggedIn");
+                      localStorage.removeItem("userEmail");
+                      navigate("/");
+                    }}
+                    variant="outline" 
+                    className="border-white text-white hover:bg-slate-800"
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
                 <Button 
-                  onClick={() => navigate("/dashboard")}
-                  variant="ghost" 
-                  className="text-white hover:bg-slate-800"
+                  onClick={() => navigate("/login")}
+                  variant="outline" 
+                  className="border-white text-white hover:bg-slate-800"
                 >
-                  Dashboard
+                  Login to Your Dashboard
                 </Button>
               )}
             </div>
@@ -222,10 +243,24 @@ export default function Vendors() {
           <div className="space-y-3">
             {/* Filter Dropdowns */}
             <div className="flex gap-2 flex-wrap items-center">
-              {/* Back to Home Button */}
-              <Button variant="outline" className="border-white text-white hover:bg-slate-800" onClick={() => window.location.href = "/"}>
-                ← Back to Home
-              </Button>
+              {/* Back to Dashboard Button */}
+              {isLoggedIn ? (
+                <Button 
+                  variant="outline" 
+                  className="border-white text-white hover:bg-slate-800" 
+                  onClick={() => navigate("/dashboard")}
+                >
+                  ← Back to Dashboard
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  className="border-white text-white hover:bg-slate-800" 
+                  onClick={() => window.location.href = "/"}
+                >
+                  ← Back to Home
+                </Button>
+              )}
               
               {/* Category Dropdown */}
               <div className="relative">

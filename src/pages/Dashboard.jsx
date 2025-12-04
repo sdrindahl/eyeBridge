@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2 } from "lucide-react";
+import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
@@ -16,6 +16,44 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [compareList, setCompareList] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedProduct, setSelectedProduct] = useState("all");
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+
+  const categoryOptions = [
+    "All Categories",
+    "Equipment",
+    "Contact Lens",
+    "Pharmaceuticals",
+    "Optical Lab",
+    "Software",
+    "Practice Management"
+  ];
+
+  // Get unique product types from the filtered vendors
+  const productOptions = useMemo(() => {
+    let vendorsToCheck = vendorsData;
+    
+    if (selectedCategory !== "all") {
+      vendorsToCheck = vendorsData.filter(vendor => 
+        vendor.Category?.toLowerCase().includes(selectedCategory.toLowerCase())
+      );
+    }
+
+    const products = new Set();
+    vendorsToCheck.forEach(vendor => {
+      if (vendor["Products Offered"]) {
+        vendor["Products Offered"].split(',').forEach(product => {
+          const trimmed = product.trim();
+          if (trimmed) products.add(trimmed);
+        });
+      }
+    });
+    
+    return ["All Products", ...Array.from(products).sort()];
+  }, [selectedCategory]);
 
   useEffect(() => {
     // Check if user is logged in
@@ -133,11 +171,134 @@ export default function Dashboard() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-900">My Dashboard</h1>
           <p className="text-slate-700 mt-2">Welcome back! Here's your personalized overview.</p>
+          
+          {/* Quick Search with Filters */}
+          <div className="mt-6">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              {/* Category Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors whitespace-nowrap"
+                >
+                  <span className="font-medium">
+                    {selectedCategory === "all" ? "All Categories" : selectedCategory}
+                  </span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                {showCategoryDropdown && (
+                  <div className="absolute top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 min-w-[200px]">
+                    {categoryOptions.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => {
+                          setSelectedCategory(category === "All Categories" ? "all" : category);
+                          setSelectedProduct("all");
+                          setShowCategoryDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700"
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Product Dropdown */}
+              {selectedCategory !== "all" && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowProductDropdown(!showProductDropdown)}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors whitespace-nowrap"
+                  >
+                    <span className="font-medium">
+                      {selectedProduct === "all" ? "All Products" : selectedProduct}
+                    </span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  {showProductDropdown && (
+                    <div className="absolute top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 max-h-[300px] overflow-y-auto min-w-[200px]">
+                      {productOptions.map((product) => (
+                        <button
+                          key={product}
+                          onClick={() => {
+                            setSelectedProduct(product === "All Products" ? "all" : product);
+                            setShowProductDropdown(false);
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700"
+                        >
+                          {product}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Search Input */}
+              <div className="relative flex-1 max-w-xl">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search vendors..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      let url = '/vendors';
+                      const params = new URLSearchParams();
+                      if (searchQuery) params.append('q', searchQuery);
+                      if (selectedCategory !== 'all') params.append('category', selectedCategory);
+                      if (selectedProduct !== 'all') params.append('product', selectedProduct);
+                      if (params.toString()) url += '?' + params.toString();
+                      navigate(url);
+                    }
+                  }}
+                  className="w-full pl-12 pr-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent bg-slate-200 text-slate-800"
+                />
+              </div>
+
+              {/* Clear Button */}
+              {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all") && (
+                <Button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("all");
+                    setSelectedProduct("all");
+                  }}
+                  variant="outline"
+                  className="border-slate-400 text-slate-900 hover:bg-slate-100 bg-white whitespace-nowrap"
+                >
+                  Clear Search
+                </Button>
+              )}
+
+              {/* Search Button */}
+              <Button
+                onClick={() => {
+                  let url = '/vendors';
+                  const params = new URLSearchParams();
+                  if (searchQuery) params.append('q', searchQuery);
+                  if (selectedCategory !== 'all') params.append('category', selectedCategory);
+                  if (selectedProduct !== 'all') params.append('product', selectedProduct);
+                  if (params.toString()) url += '?' + params.toString();
+                  navigate(url);
+                }}
+                className="bg-slate-600 hover:bg-slate-700 text-white whitespace-nowrap"
+              >
+                Search Vendors
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white border-slate-300 rounded-xl">
+          <Card 
+            className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => document.getElementById('favorites-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -149,7 +310,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-slate-300 rounded-xl">
+          <Card 
+            className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => document.getElementById('searches-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -161,7 +325,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-slate-300 rounded-xl">
+          <Card 
+            className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => document.getElementById('contacts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -173,7 +340,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-slate-300 rounded-xl">
+          <Card 
+            className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => document.getElementById('comparisons-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -188,7 +358,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Searches */}
-          <Card className="bg-white border-slate-300 rounded-xl">
+          <Card id="searches-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -268,7 +438,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Favorite Vendors */}
-          <Card className="bg-white border-slate-300 rounded-xl">
+          <Card id="favorites-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -368,7 +538,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Contact History */}
-          <Card className="bg-white border-slate-300 rounded-xl">
+          <Card id="contacts-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Phone className="w-5 h-5 text-green-600" />
@@ -433,7 +603,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Saved Comparisons */}
-          <Card className="bg-white border-slate-300 rounded-xl lg:col-span-2">
+          <Card id="comparisons-section" className="bg-white border-slate-300 rounded-xl lg:col-span-2 scroll-mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-blue-600" />
