@@ -27,18 +27,18 @@ export default function Vendors() {
 
   // Category color mapping
   const getCategoryColor = (category) => {
-    if (!category) return "bg-gradient-to-r from-blue-600 to-blue-700";
+    if (!category) return "bg-gradient-to-r from-slate-600 to-slate-700";
     
     const categoryLower = category.toLowerCase();
     
-    if (categoryLower.includes("equipment")) return "bg-gradient-to-r from-purple-600 to-purple-700";
-    if (categoryLower.includes("contact lens")) return "bg-gradient-to-r from-teal-600 to-teal-700";
-    if (categoryLower.includes("pharmaceutical")) return "bg-gradient-to-r from-pink-600 to-pink-700";
-    if (categoryLower.includes("optical lab")) return "bg-gradient-to-r from-amber-600 to-amber-700";
-    if (categoryLower.includes("software")) return "bg-gradient-to-r from-indigo-600 to-indigo-700";
-    if (categoryLower.includes("practice management")) return "bg-gradient-to-r from-emerald-600 to-emerald-700";
+    if (categoryLower.includes("equipment")) return "bg-gradient-to-r from-slate-500 to-slate-600";
+    if (categoryLower.includes("contact lens")) return "bg-gradient-to-r from-slate-600 to-slate-700";
+    if (categoryLower.includes("pharmaceutical")) return "bg-gradient-to-r from-slate-700 to-slate-800";
+    if (categoryLower.includes("optical lab")) return "bg-gradient-to-r from-gray-600 to-gray-700";
+    if (categoryLower.includes("software")) return "bg-gradient-to-r from-zinc-600 to-zinc-700";
+    if (categoryLower.includes("practice management")) return "bg-gradient-to-r from-neutral-600 to-neutral-700";
     
-    return "bg-gradient-to-r from-blue-600 to-blue-700";
+    return "bg-gradient-to-r from-slate-600 to-slate-700";
   };
 
   // Get unique product types from the filtered vendors
@@ -102,16 +102,16 @@ export default function Vendors() {
   }, [searchQuery, selectedCategory, selectedProduct]);
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-300">
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-700 to-blue-600 border-b border-blue-800 sticky top-0 z-10">
+      <header className="bg-gradient-to-r from-slate-700 to-slate-600 border-b border-slate-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto" />
               <div>
                 <h1 className="text-3xl font-bold text-white">Vendor Directory</h1>
-                <p className="text-blue-100 mt-1">
+                <p className="text-slate-200 mt-1">
                   Search through {vendorsData.length} eye care vendors and suppliers
                 </p>
               </div>
@@ -123,7 +123,7 @@ export default function Vendors() {
             {/* Filter Dropdowns */}
             <div className="flex gap-2 flex-wrap items-center">
               {/* Back to Home Button */}
-              <Button variant="outline" className="border-white text-white hover:bg-blue-800" onClick={() => window.location.href = "/"}>
+              <Button variant="outline" className="border-white text-white hover:bg-slate-800" onClick={() => window.location.href = "/"}>
                 ← Back to Home
               </Button>
               
@@ -233,7 +233,7 @@ export default function Vendors() {
                   placeholder="Search vendors..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent bg-blue-200 text-slate-800"
+                  className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent bg-slate-200 text-slate-800"
                 />
               </div>
               {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all") && (
@@ -244,7 +244,7 @@ export default function Vendors() {
                     setSelectedProduct("all");
                   }}
                   variant="outline"
-                  className="px-6 py-3 whitespace-nowrap border-slate-300 text-slate-700 hover:bg-slate-200"
+                  className="px-6 py-3 whitespace-nowrap border-slate-400 text-slate-900 hover:bg-slate-200 bg-white"
                 >
                   Clear Search
                 </Button>

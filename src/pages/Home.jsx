@@ -77,29 +77,29 @@ const testimonials = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800">
+    <div className="min-h-screen bg-slate-300 text-slate-800">
       {/* Nav */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-blue-700 to-blue-600 border-b border-blue-800">
+      <header className="sticky top-0 z-40 bg-gradient-to-r from-slate-700 to-slate-600 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-24">
           <Link to="/" className="flex items-center gap-3 font-semibold text-white">
             <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto" />
             <span className="text-xl">{BRAND_NAME}</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-white">
-            <a href="#features" className="hover:text-blue-200">Features</a>
-            <a href="#how" className="hover:text-blue-200">How it works</a>
-            <a href="#pricing" className="hover:text-blue-200">Pricing</a>
-            <a href="#faq" className="hover:text-blue-200">FAQ</a>
+            <a href="#features" className="hover:text-slate-200">Features</a>
+            <a href="#how" className="hover:text-slate-200">How it works</a>
+            <a href="#pricing" className="hover:text-slate-200">Pricing</a>
+            <a href="#faq" className="hover:text-slate-200">FAQ</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="rounded-2xl text-white hover:bg-blue-800 hover:text-white">Log in</Button>
-            <Button className="rounded-2xl bg-white text-blue-700 hover:bg-blue-50">Try for free</Button>
+            <Button variant="ghost" className="rounded-2xl text-white hover:bg-slate-800 hover:text-white">Log in</Button>
+            <Button className="rounded-2xl bg-white text-slate-700 hover:bg-slate-50">Try for free</Button>
           </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-sky-50">
+      <section className="relative overflow-hidden bg-slate-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
@@ -117,7 +117,7 @@ export default function Home() {
                   whileTap={{ scale: 0.95 }}
                   className="inline-block"
                 >
-                  <Button className="rounded-2xl px-12 py-8 text-2xl font-bold shadow-2xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+                  <Button className="rounded-2xl px-12 py-8 text-2xl font-bold shadow-2xl bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800">
                     Browse Vendors Directory →
                   </Button>
                 </motion.div>
@@ -129,20 +129,20 @@ export default function Home() {
               
               {/* Quick Stats */}
               <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
-                <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-blue-600">3,746</div>
+                <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
+                  <div className="text-3xl font-bold text-slate-600">3,746</div>
                   <div className="text-sm text-slate-600 mt-1">Vendors</div>
                 </div>
-                <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-blue-600">50+</div>
+                <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
+                  <div className="text-3xl font-bold text-slate-600">50+</div>
                   <div className="text-sm text-slate-600 mt-1">Categories</div>
                 </div>
-                <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-blue-600">1000+</div>
+                <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
+                  <div className="text-3xl font-bold text-slate-600">1000+</div>
                   <div className="text-sm text-slate-600 mt-1">Products</div>
                 </div>
-                <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-blue-600">Free</div>
+                <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
+                  <div className="text-3xl font-bold text-slate-600">Free</div>
                   <div className="text-sm text-slate-600 mt-1">To Browse</div>
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default function Home() {
       </section>
 
       {/* Directory Preview */}
-      <section id="directory" className="py-20 bg-slate-100 border-y border-slate-200">
+      <section id="directory" className="py-20 bg-slate-300 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold">Explore vendors & product lines</h2>
@@ -191,7 +191,7 @@ export default function Home() {
       </section>
 
       {/* Logos */}
-      <section className="py-6 border-y border-slate-200 bg-slate-100">
+      <section className="py-6 border-y border-slate-200 bg-slate-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-neutral-500">Trusted by fast-moving teams</p>
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 opacity-80">
@@ -226,7 +226,7 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section id="how" className="py-20 bg-slate-100 border-y border-slate-200">
+      <section id="how" className="py-20 bg-slate-300 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold">How it works</h2>
@@ -285,7 +285,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-slate-100 border-y border-slate-200">
+      <section className="py-20 bg-slate-300 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold">Loved by founders & operators</h2>
@@ -312,7 +312,7 @@ export default function Home() {
           <h3 className="text-3xl font-bold">Ready to validate your platform?</h3>
           <p className="mt-3 text-neutral-600">Join the waitlist to get early access, templates, and migration help.</p>
           <form className="mt-6 max-w-md mx-auto flex gap-2">
-            <input type="email" placeholder="you@company.com" className="flex-1 rounded-2xl border border-slate-300 bg-slate-100 px-4 h-11 text-slate-800" />
+            <input type="email" placeholder="you@company.com" className="flex-1 rounded-2xl border border-slate-300 bg-slate-200 px-4 h-11 text-slate-800" />
             <Button className="rounded-2xl h-11">
               <Mail className="w-4 h-4 mr-2" /> Notify me
             </Button>
