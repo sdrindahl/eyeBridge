@@ -92,18 +92,17 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-300 text-slate-800">
+    <div className="min-h-screen bg-gray-300 text-slate-800">
       {/* Nav */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-slate-700 to-slate-600 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-24">
+      <header className="sticky top-0 z-40 border-b border-slate-800" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="absolute inset-0 bg-slate-900/50"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-24 relative z-10">
           <Link to="/" className="flex items-center gap-3 font-semibold text-white">
             <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto" />
             <span className="text-xl">{BRAND_NAME}</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-white">
             <a href="#features" className="hover:text-slate-200">Features</a>
-            <a href="#how" className="hover:text-slate-200">How it works</a>
-            <a href="#pricing" className="hover:text-slate-200">Pricing</a>
             <a href="#faq" className="hover:text-slate-200">FAQ</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -121,19 +120,16 @@ export default function Home() {
                 </Button>
               </>
             ) : (
-              <>
-                <Link to="/login">
-                  <Button variant="ghost" className="rounded-2xl text-white hover:bg-slate-800 hover:text-white">Log in</Button>
-                </Link>
-                <Button className="rounded-2xl bg-white text-slate-700 hover:bg-slate-50">Try for free</Button>
-              </>
+              <Link to="/login">
+                <Button variant="ghost" className="rounded-2xl text-white hover:bg-slate-800 hover:text-white">Log in</Button>
+              </Link>
             )}
           </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-slate-300">
+      <section className="relative overflow-hidden bg-gray-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
@@ -141,7 +137,7 @@ export default function Home() {
                 Find Your Eye Care Vendors
               </h1>
               <p className="text-xl sm:text-2xl text-slate-700 mb-12 max-w-3xl mx-auto">
-                Search through 3,746+ verified vendors and suppliers in one place
+                Search through 312 verified vendors and suppliers in one place
               </p>
               
               {/* Large CTA Button */}
@@ -158,26 +154,22 @@ export default function Home() {
               </Link>
               
               <p className="mt-8 text-base text-slate-600">
-                Free to browse • 3,746+ vendors • Equipment, Contact Lenses, Pharmaceuticals & More
+                312 vendors • Equipment, Contact Lenses, Pharmaceuticals & More
               </p>
               
               {/* Quick Stats */}
-              <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+              <div className="mt-16 grid grid-cols-3 gap-6 max-w-3xl mx-auto">
                 <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-slate-600">3,746</div>
+                  <div className="text-3xl font-bold text-slate-600">312</div>
                   <div className="text-sm text-slate-600 mt-1">Vendors</div>
                 </div>
                 <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-slate-600">50+</div>
+                  <div className="text-3xl font-bold text-slate-600">153</div>
                   <div className="text-sm text-slate-600 mt-1">Categories</div>
                 </div>
                 <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-slate-600">1000+</div>
+                  <div className="text-3xl font-bold text-slate-600">236</div>
                   <div className="text-sm text-slate-600 mt-1">Products</div>
-                </div>
-                <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-slate-600">Free</div>
-                  <div className="text-sm text-slate-600 mt-1">To Browse</div>
                 </div>
               </div>
             </motion.div>
@@ -186,7 +178,7 @@ export default function Home() {
       </section>
 
       {/* Directory Preview */}
-      <section id="directory" className="py-20 bg-slate-300 border-y border-slate-200">
+      <section id="directory" className="py-20 bg-white border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold">Explore vendors & product lines</h2>
@@ -224,20 +216,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Logos */}
-      <section className="py-6 border-y border-slate-200 bg-slate-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-neutral-500">Trusted by fast-moving teams</p>
-          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 opacity-80">
-            {["Acme", "Northbeam", "Tecton", "Vector", "Rain", "Nimbus"].map((logo) => (
-              <div key={logo} className="h-10 rounded-lg bg-slate-200 border border-slate-300 grid place-items-center text-slate-500">
-                {logo}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Features */}
       <section id="features" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -253,87 +231,6 @@ export default function Home() {
                   <CardTitle className="mt-4 text-lg">{f.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-neutral-600">{f.desc}</CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how" className="py-20 bg-slate-300 border-y border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl font-bold">How it works</h2>
-            <p className="mt-3 text-neutral-600">From idea to launch in three simple steps.</p>
-          </div>
-          <div className="mt-10 grid md:grid-cols-3 gap-6">
-            {["Model your tenants & roles", "Compose dashboards & workflows", "Connect billing & go live"].map((step, i) => (
-              <Card key={i} className="rounded-3xl bg-slate-200 border-slate-300">
-                <CardHeader>
-                  <div className="text-xs text-neutral-500">Step {i + 1}</div>
-                  <CardTitle className="text-lg">{step}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-neutral-600">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius libero.
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl font-bold">Simple, transparent pricing</h2>
-            <p className="mt-3 text-neutral-600">Start free and scale as you grow.</p>
-          </div>
-          <div className="mt-10 grid md:grid-cols-3 gap-6">
-            {plans.map((p) => (
-              <Card key={p.name} className={`${p.highlighted ? "ring-2 ring-teal-600" : ""} rounded-3xl bg-slate-200 border-slate-300`}>
-                <CardHeader>
-                  <CardTitle className="flex items-baseline justify-between">
-                    <span>{p.name}</span>
-                    <span className="text-2xl font-bold">
-                      {p.price}
-                      <span className="text-base font-medium text-neutral-500">{p.period}</span>
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2">
-                        <Check className="w-4 h-4 mt-1" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button className="w-full mt-6 rounded-2xl">{p.cta}</Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 bg-slate-300 border-y border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl font-bold">Loved by founders & operators</h2>
-            <p className="mt-3 text-neutral-600">Don't just take our word for it.</p>
-          </div>
-          <div className="mt-10 grid md:grid-cols-2 gap-6">
-            {testimonials.map((t) => (
-              <Card key={t.name} className="rounded-3xl bg-slate-200 border-slate-300">
-                <CardContent className="pt-6 text-slate-700">
-                  <p className="text-lg leading-relaxed">"{t.quote}"</p>
-                  <p className="mt-4 text-sm text-neutral-500">
-                    {t.name} — {t.role}
-                  </p>
-                </CardContent>
               </Card>
             ))}
           </div>

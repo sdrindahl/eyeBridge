@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 
 export default function Vendors() {
   const navigate = useNavigate();
@@ -191,13 +191,16 @@ export default function Vendors() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-300">
+    <div className="min-h-screen bg-gray-300">
       {/* Header */}
-      <header className="bg-gradient-to-r from-slate-700 to-slate-600 border-b border-slate-800 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <header className="border-b border-slate-800 sticky top-0 z-10" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="absolute inset-0 bg-slate-900/50"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto" />
+              <Link to="/" className="hover:opacity-80 transition-opacity">
+                <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto cursor-pointer" />
+              </Link>
               <div>
                 <h1 className="text-3xl font-bold text-white">Vendor Directory</h1>
                 <p className="text-slate-200 mt-1">

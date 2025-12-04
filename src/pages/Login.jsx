@@ -58,12 +58,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-300">
+    <div className="min-h-screen bg-gray-300">
       {/* Header */}
-      <header className="bg-gradient-to-r from-slate-700 to-slate-600 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-24">
-          <Link to="/" className="flex items-center gap-3 font-semibold text-white">
-            <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto" />
+      <header className="border-b border-slate-800 relative" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="absolute inset-0 bg-slate-900/50"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-24 relative z-10">
+          <Link to="/" className="flex items-center gap-3 font-semibold text-white hover:opacity-80 transition-opacity">
+            <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto cursor-pointer" />
             <span className="text-xl">Eye Bridges</span>
           </Link>
           <Link to="/">
