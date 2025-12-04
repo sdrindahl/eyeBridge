@@ -1,19 +1,27 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Phone, Mail, Globe, ChevronDown } from "lucide-react";
+import { Search, MapPin, Phone, Mail, Globe, ChevronDown, Heart, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function Vendors() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedProduct, setSelectedProduct] = useState("all");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
+  const [selectedProduct, setSelectedProduct] = useState(searchParams.get("product") || "all");
   const [animationKey, setAnimationKey] = useState(0);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [compareList, setCompareList] = useState([]);
+  const [showComparison, setShowComparison] = useState(false);
 
   const categoryOptions = [
     "All Categories",
@@ -98,8 +106,89 @@ export default function Vendors() {
       });
     }
 
+    // Filter by favorites if that option is selected
+    if (showFavoritesOnly) {
+      results = results.filter(vendor => favorites.includes(vendor["Company Name"]));
+    }
+
     return results;
-  }, [searchQuery, selectedCategory, selectedProduct]);
+  }, [searchQuery, selectedCategory, selectedProduct, showFavoritesOnly, favorites]);
+
+  // Load favorites and login state
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    setIsLoggedIn(loggedIn);
+    
+    if (loggedIn) {
+      const storedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+      setFavorites(storedFavorites);
+    }
+  }, []);
+
+  // Track searches with debounce - only save after user stops typing for 2 seconds
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    
+    const timeoutId = setTimeout(() => {
+      if (searchQuery || selectedCategory !== "all" || selectedProduct !== "all") {
+        const recentSearches = JSON.parse(localStorage.getItem("recentSearches") || "[]");
+        const newSearch = {
+          query: searchQuery,
+          category: selectedCategory,
+          product: selectedProduct,
+          date: new Date().toISOString()
+        };
+        
+        // Add to beginning and limit to 20 searches
+        const updatedSearches = [newSearch, ...recentSearches.filter(s => 
+          !(s.query === searchQuery && s.category === selectedCategory && s.product === selectedProduct)
+        )].slice(0, 20);
+        
+        localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
+      }
+    }, 2000); // Wait 2 seconds after last keystroke
+    
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, selectedCategory, selectedProduct, isLoggedIn]);
+
+  const toggleFavorite = (vendorName) => {
+    if (!isLoggedIn) {
+      alert("Please log in to save favorites");
+      return;
+    }
+
+    const newFavorites = favorites.includes(vendorName)
+      ? favorites.filter(f => f !== vendorName)
+      : [...favorites, vendorName];
+    
+    setFavorites(newFavorites);
+    localStorage.setItem("favorites", JSON.stringify(newFavorites));
+  };
+
+  const toggleCompare = (vendorName) => {
+    if (compareList.includes(vendorName)) {
+      setCompareList(compareList.filter(v => v !== vendorName));
+    } else if (compareList.length < 4) {
+      setCompareList([...compareList, vendorName]);
+    } else {
+      alert("You can compare up to 4 vendors at a time");
+    }
+  };
+
+  const trackContact = (vendorName, type, note = "") => {
+    if (!isLoggedIn) return;
+
+    const contactHistory = JSON.parse(localStorage.getItem("contactHistory") || "[]");
+    const newContact = {
+      vendorName,
+      type,
+      note,
+      date: new Date().toISOString()
+    };
+    
+    const updatedHistory = [newContact, ...contactHistory].slice(0, 100);
+    localStorage.setItem("contactHistory", JSON.stringify(updatedHistory));
+  };
 
   return (
     <div className="min-h-screen bg-slate-300">
@@ -115,6 +204,17 @@ export default function Vendors() {
                   Search through {vendorsData.length} eye care vendors and suppliers
                 </p>
               </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {isLoggedIn && (
+                <Button 
+                  onClick={() => navigate("/dashboard")}
+                  variant="ghost" 
+                  className="text-white hover:bg-slate-800"
+                >
+                  Dashboard
+                </Button>
+              )}
             </div>
           </div>
 
@@ -249,10 +349,64 @@ export default function Vendors() {
                   Clear Search
                 </Button>
               )}
+              {isLoggedIn && favorites.length > 0 && (
+                <Button 
+                  onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                  variant={showFavoritesOnly ? "default" : "outline"}
+                  className={showFavoritesOnly 
+                    ? "px-6 py-3 whitespace-nowrap bg-red-500 hover:bg-red-600 text-white" 
+                    : "px-6 py-3 whitespace-nowrap border-slate-400 text-slate-900 hover:bg-slate-200 bg-white"
+                  }
+                >
+                  <Heart className={`w-4 h-4 mr-2 ${showFavoritesOnly ? "fill-white" : ""}`} />
+                  {showFavoritesOnly ? "Show All" : `Favorites (${favorites.length})`}
+                </Button>
+              )}
             </div>
           </div>
         </div>
       </header>
+
+      {/* Comparison Bar */}
+      {compareList.length > 0 && (
+        <div className="bg-blue-600 border-b border-blue-700 sticky top-[120px] z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-white font-medium">
+                  Comparing {compareList.length} vendor{compareList.length > 1 ? "s" : ""}
+                </span>
+                <div className="flex gap-2">
+                  {compareList.map((vendorName, index) => (
+                    <span key={index} className="bg-white/20 text-white px-3 py-1 rounded-lg text-sm flex items-center gap-2">
+                      {vendorName}
+                      <button onClick={() => toggleCompare(vendorName)} className="hover:text-red-200">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setShowComparison(true)}
+                  className="bg-white text-blue-600 hover:bg-blue-50"
+                  disabled={compareList.length < 2}
+                >
+                  View Comparison
+                </Button>
+                <Button 
+                  onClick={() => setCompareList([])}
+                  variant="ghost"
+                  className="text-white hover:bg-blue-700"
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Vendors Grid */}
@@ -321,8 +475,35 @@ export default function Vendors() {
                   className="bg-slate-50 rounded-xl shadow-md border border-slate-200 hover:shadow-xl hover:border-blue-400 transition-all cursor-pointer overflow-hidden group"
                 >
                   {/* Colored Header with Company Name */}
-                  <div className={`${colorClass} p-3`}>
-                    <h3 className="text-base font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-50 transition-colors">
+                  <div className={`${colorClass} p-3 relative`}>
+                    {/* Action Buttons */}
+                    <div className="absolute top-2 right-2 flex gap-1" onClick={(e) => e.stopPropagation()}>
+                      {isLoggedIn && (
+                        <>
+                          <button
+                            onClick={() => toggleFavorite(vendor["Company Name"])}
+                            className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all"
+                            title={favorites.includes(vendor["Company Name"]) ? "Remove from favorites" : "Add to favorites"}
+                          >
+                            <Heart 
+                              className={`w-4 h-4 ${favorites.includes(vendor["Company Name"]) ? "fill-red-500 text-red-500" : "text-white"}`}
+                            />
+                          </button>
+                          <button
+                            onClick={() => toggleCompare(vendor["Company Name"])}
+                            className={`px-2 py-1 rounded-lg backdrop-blur-sm transition-all text-xs font-medium ${
+                              compareList.includes(vendor["Company Name"]) 
+                                ? "bg-blue-500 text-white hover:bg-blue-600" 
+                                : "bg-white/20 hover:bg-white/30 text-white"
+                            }`}
+                            title={compareList.includes(vendor["Company Name"]) ? "Remove from comparison" : "Add to comparison"}
+                          >
+                            {compareList.includes(vendor["Company Name"]) ? "✓ Compare" : "Compare"}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <h3 className="text-base font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-50 transition-colors pr-20">
                       {vendor["Company Name"]}
                     </h3>
                     <div className="flex flex-wrap gap-1">
@@ -460,7 +641,11 @@ export default function Vendors() {
                     <Phone className="w-5 h-5 text-teal-600 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-slate-500 uppercase font-semibold">Phone</p>
-                      <a href={`tel:${selectedVendor.Phone}`} className="text-slate-700 hover:text-teal-600">
+                      <a 
+                        href={`tel:${selectedVendor.Phone}`} 
+                        className="text-slate-700 hover:text-teal-600"
+                        onClick={() => trackContact(selectedVendor["Company Name"], "phone")}
+                      >
                         {selectedVendor.Phone}
                       </a>
                     </div>
@@ -472,7 +657,11 @@ export default function Vendors() {
                     <Mail className="w-5 h-5 text-teal-600 flex-shrink-0" />
                     <div>
                       <p className="text-xs text-slate-500 uppercase font-semibold">Email</p>
-                      <a href={`mailto:${selectedVendor.Email}`} className="text-slate-700 hover:text-teal-600">
+                      <a 
+                        href={`mailto:${selectedVendor.Email}`} 
+                        className="text-slate-700 hover:text-teal-600"
+                        onClick={() => trackContact(selectedVendor["Company Name"], "email")}
+                      >
                         {selectedVendor.Email}
                       </a>
                     </div>
@@ -489,12 +678,153 @@ export default function Vendors() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-teal-600 hover:underline font-medium"
+                        onClick={() => trackContact(selectedVendor["Company Name"], "website")}
                       >
                         Visit Website
                       </a>
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Add Note Section */}
+              {isLoggedIn && (
+                <div className="border-t border-slate-300 pt-6">
+                  <h3 className="text-sm font-semibold text-slate-600 uppercase mb-3">Add Note</h3>
+                  <textarea
+                    id={`note-${selectedVendor["Company Name"]}`}
+                    placeholder="Add a note about this vendor..."
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white text-slate-800 text-sm"
+                    rows="3"
+                  />
+                  <Button
+                    onClick={() => {
+                      const noteText = document.getElementById(`note-${selectedVendor["Company Name"]}`).value;
+                      if (noteText.trim()) {
+                        trackContact(selectedVendor["Company Name"], "note", noteText);
+                        document.getElementById(`note-${selectedVendor["Company Name"]}`).value = "";
+                        alert("Note saved!");
+                      }
+                    }}
+                    className="mt-2 bg-slate-600 hover:bg-slate-700 text-white"
+                  >
+                    Save Note
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comparison Modal */}
+      {showComparison && compareList.length >= 2 && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowComparison(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-slate-200 border-b border-slate-300 p-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">Vendor Comparison</h2>
+                <p className="text-slate-600 text-sm mt-1">Comparing {compareList.length} vendors</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    const comparisonName = prompt("Enter a name for this comparison:");
+                    if (comparisonName) {
+                      const savedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
+                      const newComparison = {
+                        name: comparisonName,
+                        vendors: compareList,
+                        date: new Date().toISOString()
+                      };
+                      localStorage.setItem("savedComparisons", JSON.stringify([newComparison, ...savedComparisons]));
+                      alert("Comparison saved!");
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Save Comparison
+                </Button>
+                <button
+                  onClick={() => setShowComparison(false)}
+                  className="text-slate-500 hover:text-slate-900 text-2xl font-bold leading-none px-2"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {compareList.map((vendorName, index) => {
+                  const vendor = vendorsData.find(v => v["Company Name"] === vendorName);
+                  if (!vendor) return null;
+                  
+                  return (
+                    <div key={index} className="bg-slate-50 rounded-xl border border-slate-200 p-4">
+                      <h3 className="font-bold text-slate-900 mb-3 text-lg">{vendor["Company Name"]}</h3>
+                      
+                      <div className="space-y-3 text-sm">
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase font-semibold">Category</p>
+                          <p className="text-slate-700">{vendor.Category || "N/A"}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase font-semibold">Products</p>
+                          <p className="text-slate-700 line-clamp-3">{vendor["Products Offered"] || "N/A"}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase font-semibold">Location</p>
+                          <p className="text-slate-700 line-clamp-2">{vendor.Address || "N/A"}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase font-semibold">Contact</p>
+                          <div className="space-y-1">
+                            {vendor.Phone && (
+                              <p className="text-slate-700 flex items-center gap-1">
+                                <Phone className="w-3 h-3" />
+                                {vendor.Phone}
+                              </p>
+                            )}
+                            {vendor.Email && (
+                              <p className="text-slate-700 flex items-center gap-1">
+                                <Mail className="w-3 h-3" />
+                                {vendor.Email}
+                              </p>
+                            )}
+                            {vendor.Website && (
+                              <a 
+                                href={vendor.Website} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline flex items-center gap-1"
+                              >
+                                <Globe className="w-3 h-3" />
+                                Website
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        {vendor.Notes && (
+                          <div>
+                            <p className="text-xs text-slate-500 uppercase font-semibold">Notes</p>
+                            <p className="text-slate-700 line-clamp-3">{vendor.Notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

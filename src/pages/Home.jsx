@@ -92,7 +92,9 @@ export default function Home() {
             <a href="#faq" className="hover:text-slate-200">FAQ</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="rounded-2xl text-white hover:bg-slate-800 hover:text-white">Log in</Button>
+            <Link to="/login">
+              <Button variant="ghost" className="rounded-2xl text-white hover:bg-slate-800 hover:text-white">Log in</Button>
+            </Link>
             <Button className="rounded-2xl bg-white text-slate-700 hover:bg-slate-50">Try for free</Button>
           </div>
         </div>
