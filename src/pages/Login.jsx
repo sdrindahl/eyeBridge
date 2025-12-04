@@ -66,6 +66,11 @@ export default function Login() {
             <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto" />
             <span className="text-xl">Eye Bridges</span>
           </Link>
+          <Link to="/">
+            <Button variant="ghost" className="text-white hover:bg-slate-800">
+              Home
+            </Button>
+          </Link>
         </div>
       </header>
 

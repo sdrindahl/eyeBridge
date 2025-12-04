@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Check, Rocket, Layers, Shield, Users, Zap, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -76,12 +76,20 @@ const testimonials = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     setIsLoggedIn(loggedIn);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userEmail");
+    setIsLoggedIn(false);
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen bg-slate-300 text-slate-800">
@@ -100,9 +108,18 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
-              <Link to="/dashboard">
-                <Button className="rounded-2xl bg-white text-slate-700 hover:bg-slate-50">Go to Dashboard</Button>
-              </Link>
+              <>
+                <Link to="/dashboard">
+                  <Button className="rounded-2xl bg-white text-slate-700 hover:bg-slate-50">Go to Dashboard</Button>
+                </Link>
+                <Button 
+                  onClick={handleLogout}
+                  variant="outline" 
+                  className="rounded-2xl border-white text-white hover:bg-slate-800"
+                >
+                  Logout
+                </Button>
+              </>
             ) : (
               <>
                 <Link to="/login">

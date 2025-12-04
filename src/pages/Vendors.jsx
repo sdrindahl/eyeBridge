@@ -206,6 +206,13 @@ export default function Vendors() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Button 
+                onClick={() => navigate("/")}
+                variant="ghost" 
+                className="text-white hover:bg-slate-800"
+              >
+                Home
+              </Button>
               {isLoggedIn ? (
                 <>
                   <Button 
