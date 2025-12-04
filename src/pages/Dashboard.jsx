@@ -150,6 +150,11 @@ export default function Dashboard() {
               <span className="text-2xl font-bold text-white">Eye Bridges</span>
             </Link>
             <div className="flex items-center gap-4">
+              <Link to="/">
+                <Button variant="ghost" className="text-white hover:bg-slate-800">
+                  Home
+                </Button>
+              </Link>
               <Link to="/vendors">
                 <Button variant="ghost" className="text-white hover:bg-slate-800">
                   Browse Vendors
