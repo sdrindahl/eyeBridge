@@ -101,10 +101,6 @@ export default function Home() {
             <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-20 w-auto" />
             <span className="text-xl">{BRAND_NAME}</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-white">
-            <a href="#features" className="hover:text-slate-200">Features</a>
-            <a href="#faq" className="hover:text-slate-200">FAQ</a>
-          </nav>
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
               <>
