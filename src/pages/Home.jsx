@@ -77,7 +77,7 @@ const testimonials = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
+    <div className="min-h-screen bg-slate-100 text-slate-800">
       {/* Nav */}
       <header className="sticky top-0 z-40 bg-gradient-to-r from-blue-700 to-blue-600 border-b border-blue-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-24">
@@ -99,32 +99,51 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-sky-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+          <div className="max-w-4xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900">{TAGLINE}</h1>
-              <p className="mt-6 text-lg text-slate-600">
-                Find trusted partners and compare products faster. Search by category, indications, certifications, and more—then connect with the right reps.
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-8">
+                Find Your Eye Care Vendors
+              </h1>
+              <p className="text-xl sm:text-2xl text-slate-700 mb-12 max-w-3xl mx-auto">
+                Search through 3,746+ verified vendors and suppliers in one place
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <Link to="/vendors">
-                  <Button className="rounded-2xl px-6">Browse vendors</Button>
-                </Link>
-                <Button variant="outline" className="rounded-2xl px-6">List your company</Button>
-              </div>
-              <p className="mt-3 text-xs text-neutral-500">Free to browse. Vendors can claim and enhance profiles.</p>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-              <div className="bg-slate-200 border border-slate-300 rounded-3xl shadow-sm p-4">
-                <div className="aspect-[16/10] rounded-2xl bg-slate-300 grid place-items-center text-slate-500">
-                  <span className="text-sm">Replace with a product screenshot or demo video</span>
+              
+              {/* Large CTA Button */}
+              <Link to="/vendors">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-block"
+                >
+                  <Button className="rounded-2xl px-12 py-8 text-2xl font-bold shadow-2xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+                    Browse Vendors Directory →
+                  </Button>
+                </motion.div>
+              </Link>
+              
+              <p className="mt-8 text-base text-slate-600">
+                Free to browse • 3,746+ vendors • Equipment, Contact Lenses, Pharmaceuticals & More
+              </p>
+              
+              {/* Quick Stats */}
+              <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
+                  <div className="text-3xl font-bold text-blue-600">3,746</div>
+                  <div className="text-sm text-slate-600 mt-1">Vendors</div>
                 </div>
-                <div className="mt-4 grid grid-cols-3 gap-3 text-xs text-slate-600">
-                  <div className="p-3 rounded-xl bg-slate-100 border border-slate-300">Usage Metrics</div>
-                  <div className="p-3 rounded-xl bg-slate-100 border border-slate-300">Customer Tenants</div>
-                  <div className="p-3 rounded-xl bg-slate-100 border border-slate-300">Automations</div>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
+                  <div className="text-3xl font-bold text-blue-600">50+</div>
+                  <div className="text-sm text-slate-600 mt-1">Categories</div>
+                </div>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
+                  <div className="text-3xl font-bold text-blue-600">1000+</div>
+                  <div className="text-sm text-slate-600 mt-1">Products</div>
+                </div>
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200">
+                  <div className="text-3xl font-bold text-blue-600">Free</div>
+                  <div className="text-sm text-slate-600 mt-1">To Browse</div>
                 </div>
               </div>
             </motion.div>

@@ -1,13 +1,15 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Search, MapPin, Phone, Mail, Globe, ChevronDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Vendors() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedProduct, setSelectedProduct] = useState("all");
+  const [animationKey, setAnimationKey] = useState(0);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
@@ -22,6 +24,22 @@ export default function Vendors() {
     "Software",
     "Practice Management"
   ];
+
+  // Category color mapping
+  const getCategoryColor = (category) => {
+    if (!category) return "bg-gradient-to-r from-blue-600 to-blue-700";
+    
+    const categoryLower = category.toLowerCase();
+    
+    if (categoryLower.includes("equipment")) return "bg-gradient-to-r from-purple-600 to-purple-700";
+    if (categoryLower.includes("contact lens")) return "bg-gradient-to-r from-teal-600 to-teal-700";
+    if (categoryLower.includes("pharmaceutical")) return "bg-gradient-to-r from-pink-600 to-pink-700";
+    if (categoryLower.includes("optical lab")) return "bg-gradient-to-r from-amber-600 to-amber-700";
+    if (categoryLower.includes("software")) return "bg-gradient-to-r from-indigo-600 to-indigo-700";
+    if (categoryLower.includes("practice management")) return "bg-gradient-to-r from-emerald-600 to-emerald-700";
+    
+    return "bg-gradient-to-r from-blue-600 to-blue-700";
+  };
 
   // Get unique product types from the filtered vendors
   const productOptions = useMemo(() => {
@@ -84,7 +102,7 @@ export default function Vendors() {
   }, [searchQuery, selectedCategory, selectedProduct]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-100">
       {/* Header */}
       <header className="bg-gradient-to-r from-blue-700 to-blue-600 border-b border-blue-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -98,15 +116,17 @@ export default function Vendors() {
                 </p>
               </div>
             </div>
-            <Button variant="outline" className="border-white text-white hover:bg-blue-800" onClick={() => window.location.href = "/"}>
-              ← Back to Home
-            </Button>
           </div>
 
           {/* Search Controls */}
           <div className="space-y-3">
             {/* Filter Dropdowns */}
             <div className="flex gap-2 flex-wrap items-center">
+              {/* Back to Home Button */}
+              <Button variant="outline" className="border-white text-white hover:bg-blue-800" onClick={() => window.location.href = "/"}>
+                ← Back to Home
+              </Button>
+              
               {/* Category Dropdown */}
               <div className="relative">
                 <button
@@ -205,15 +225,30 @@ export default function Vendors() {
             </div>
 
             {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search by company name, products, category, or keywords..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent bg-slate-100 text-slate-800"
-              />
+            <div className="flex gap-2 items-center">
+              <div className="relative max-w-xl">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search vendors..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent bg-blue-200 text-slate-800"
+                />
+              </div>
+              {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all") && (
+                <Button 
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("all");
+                    setSelectedProduct("all");
+                  }}
+                  variant="outline"
+                  className="px-6 py-3 whitespace-nowrap border-slate-300 text-slate-700 hover:bg-slate-200"
+                >
+                  Clear Search
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -222,56 +257,131 @@ export default function Vendors() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Vendors Grid */}
         <main>
-          <div className="mb-4 text-sm text-neutral-600">
-            Showing {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''}
-          </div>
+          <motion.div 
+            key={`count-${animationKey}`}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="mb-6"
+          >
+            <div className="text-2xl font-bold text-neutral-900">
+              Showing {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''}
+            </div>
+            {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all") && (
+              <div className="mt-2 text-base text-slate-600 flex flex-wrap items-center gap-2">
+                <span>for:</span>
+                {searchQuery && (
+                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+                    "{searchQuery}"
+                  </span>
+                )}
+                {selectedCategory !== "all" && (
+                  <span className="px-3 py-1 bg-teal-100 text-teal-700 rounded-full font-medium">
+                    Category: {selectedCategory}
+                  </span>
+                )}
+                {selectedProduct !== "all" && (
+                  <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full font-medium">
+                    Product: {selectedProduct}
+                  </span>
+                )}
+              </div>
+            )}
+          </motion.div>
 
           {filteredVendors.length === 0 ? (
-            <div className="bg-slate-200 rounded-2xl border border-slate-300 p-12 text-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="bg-slate-200 rounded-2xl border border-slate-300 p-12 text-center"
+            >
               <p className="text-slate-500">No vendors found matching your search.</p>
-            </div>
+            </motion.div>
           ) : (
-            <div className="space-y-3">
-              {filteredVendors.map((vendor, index) => (
-                <div
+            <motion.div 
+              key={`results-${animationKey}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {filteredVendors.map((vendor, index) => {
+                const colorClass = getCategoryColor(vendor.Category);
+                return (
+                <motion.div
                   key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.02, duration: 0.3 }}
                   onClick={() => {
                     setSelectedVendor(vendor);
                     setShowModal(true);
                   }}
-                  className="bg-slate-200 border border-slate-300 rounded-xl p-4 hover:shadow-lg hover:border-teal-400 transition-all cursor-pointer"
+                  className="bg-slate-50 rounded-xl shadow-md border border-slate-200 hover:shadow-xl hover:border-blue-400 transition-all cursor-pointer overflow-hidden group"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-bold text-slate-900 mb-2">{vendor["Company Name"]}</h3>
-                      {vendor["Products Offered"] && (
-                        <p className="text-sm text-slate-600 line-clamp-2">
-                          <span className="font-semibold">Products: </span>
-                          {vendor["Products Offered"]}
-                        </p>
-                      )}
-                    </div>
-                    {vendor.Category && (
-                      <div className="flex flex-wrap gap-1 max-w-xs">
-                        {vendor.Category.split(';').slice(0, 2).map((cat, i) => (
+                  {/* Colored Header with Company Name */}
+                  <div className={`${colorClass} p-3`}>
+                    <h3 className="text-base font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-50 transition-colors">
+                      {vendor["Company Name"]}
+                    </h3>
+                    <div className="flex flex-wrap gap-1">
+                      {vendor.Category ? (
+                        vendor.Category.split(';').slice(0, 2).map((cat, i) => (
                           <span
                             key={i}
-                            className="text-xs px-2 py-1 rounded-full bg-teal-100 text-teal-700 border border-teal-300"
+                            className="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white font-medium backdrop-blur-sm"
                           >
                             {cat.trim()}
                           </span>
-                        ))}
-                        {vendor.Category.split(';').length > 2 && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-slate-300 text-slate-700">
-                            +{vendor.Category.split(';').length - 2}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                        ))
+                      ) : (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white font-medium">
+                          Vendor
+                        </span>
+                      )}
+                      {vendor.Category && vendor.Category.split(';').length > 2 && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/30 text-white font-medium">
+                          +{vendor.Category.split(';').length - 2}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+
+                  {/* Content */}
+                  <div className="p-3">
+                    {vendor["Products Offered"] && (
+                      <p className="text-xs text-slate-600 line-clamp-2 mb-2">
+                        {vendor["Products Offered"]}
+                      </p>
+                    )}
+
+                    {/* Quick Info Icons */}
+                    <div className="flex items-center gap-3 text-xs text-slate-500">
+                      {vendor.Phone && (
+                        <div className="flex items-center gap-1">
+                          <Phone className="w-3 h-3" />
+                        </div>
+                      )}
+                      {vendor.Email && (
+                        <div className="flex items-center gap-1">
+                          <Mail className="w-3 h-3" />
+                        </div>
+                      )}
+                      {vendor.Website && (
+                        <div className="flex items-center gap-1">
+                          <Globe className="w-3 h-3" />
+                        </div>
+                      )}
+                      <span className="ml-auto text-blue-600 font-medium group-hover:translate-x-0.5 transition-transform">
+                        Details →
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+              })}
+            </motion.div>
           )}
         </main>
       </div>
@@ -283,7 +393,7 @@ export default function Vendors() {
           onClick={() => setShowModal(false)}
         >
           <div 
-            className="bg-slate-100 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-slate-50 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-slate-200 border-b border-slate-300 p-6 flex items-start justify-between">
@@ -313,27 +423,27 @@ export default function Vendors() {
             <div className="p-6 space-y-6">
               {selectedVendor.Notes && (
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-500 uppercase mb-2">About</h3>
+                  <h3 className="text-sm font-semibold text-slate-600 uppercase mb-2">About</h3>
                   <p className="text-slate-700">{selectedVendor.Notes}</p>
                 </div>
               )}
 
               {selectedVendor["Products Offered"] && (
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-500 uppercase mb-2">Products Offered</h3>
+                  <h3 className="text-sm font-semibold text-slate-600 uppercase mb-2">Products Offered</h3>
                   <p className="text-slate-700">{selectedVendor["Products Offered"]}</p>
                 </div>
               )}
 
               {selectedVendor["Category Tags"] && (
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-500 uppercase mb-2">Tags</h3>
+                  <h3 className="text-sm font-semibold text-slate-600 uppercase mb-2">Tags</h3>
                   <p className="text-slate-700">{selectedVendor["Category Tags"]}</p>
                 </div>
               )}
 
               <div className="border-t border-slate-300 pt-6 space-y-4">
-                <h3 className="text-sm font-semibold text-slate-500 uppercase">Contact Information</h3>
+                <h3 className="text-sm font-semibold text-slate-600 uppercase">Contact Information</h3>
                 
                 {selectedVendor.Address && (
                   <div className="flex items-start gap-3">
