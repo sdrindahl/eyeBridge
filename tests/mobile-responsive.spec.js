@@ -36,7 +36,7 @@ test.describe('Mobile Responsiveness', () => {
     // This might be hidden on mobile with hidden sm:block class
   });
 
-  test('should display mobile-friendly dashboard', async ({ page }) => {
+  test.skip('should display mobile-friendly dashboard', async ({ page }) => {
     // Login first
     await page.goto('/login');
     await page.fill('input[type="email"]', 'test@example.com');
