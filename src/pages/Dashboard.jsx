@@ -158,12 +158,11 @@ export default function Dashboard() {
               </Link>
               <Link to="/vendors">
                 <Button data-testid="browse-vendors-button" variant="ghost" className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
-                  <span className="hidden sm:inline">Browse Vendors</span>
-                  <span className="sm:hidden">Vendors</span>
+                  Browse Vendors
                 </Button>
               </Link>
               <div className="flex items-center gap-2 sm:gap-3 text-white">
-                <span data-testid="user-email" className="text-xs sm:text-sm hidden md:inline">{userEmail}</span>
+                <span data-testid="user-email" className="text-xs sm:text-sm">{userEmail}</span>
                 <Button data-testid="logout-button" onClick={handleLogout} variant="outline" className="border-white text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
                   Logout
                 </Button>

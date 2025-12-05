@@ -421,26 +421,26 @@ export default function Vendors() {
       {compareList.length > 0 && (
         <div className="bg-blue-600 border-b border-blue-700 sticky top-[120px] z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-white font-medium">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <span className="text-white font-medium text-sm sm:text-base">
                   Comparing {compareList.length} vendor{compareList.length > 1 ? "s" : ""}
                 </span>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {compareList.map((vendorName, index) => (
-                    <span key={index} className="bg-white/20 text-white px-3 py-1 rounded-lg text-sm flex items-center gap-2">
-                      {vendorName}
-                      <button onClick={() => toggleCompare(vendorName)} className="hover:text-red-200">
+                    <span key={index} className="bg-white/20 text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm flex items-center gap-2">
+                      <span className="truncate max-w-[120px] sm:max-w-none">{vendorName}</span>
+                      <button onClick={() => toggleCompare(vendorName)} className="hover:text-red-200 flex-shrink-0">
                         <X className="w-3 h-3" />
                       </button>
                     </span>
                   ))}
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button 
                   onClick={() => setShowComparison(true)}
-                  className="bg-white text-blue-600 hover:bg-blue-50"
+                  className="bg-white text-blue-600 hover:bg-blue-50 flex-1 sm:flex-none text-sm sm:text-base py-2 sm:py-2"
                   disabled={compareList.length < 2}
                 >
                   View Comparison
@@ -448,7 +448,7 @@ export default function Vendors() {
                 <Button 
                   onClick={() => setCompareList([])}
                   variant="ghost"
-                  className="text-white hover:bg-blue-700"
+                  className="text-white hover:bg-blue-700 text-sm sm:text-base py-2 sm:py-2"
                 >
                   Clear
                 </Button>
@@ -515,6 +515,7 @@ export default function Vendors() {
                 return (
                 <motion.div
                   key={index}
+                  data-testid="vendor-card"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.02, duration: 0.3 }}
