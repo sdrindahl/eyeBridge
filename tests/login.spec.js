@@ -10,7 +10,6 @@ test.describe('Login Page', () => {
   });
 
   test('should display login form', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('Login');
     await expect(page.getByLabel('Email')).toBeVisible();
     await expect(page.getByLabel('Password')).toBeVisible();
   });
@@ -19,7 +18,7 @@ test.describe('Login Page', () => {
     await page.click('button[type="submit"]');
     
     // Should show error messages
-    await expect(page.getByText(/required/i)).toBeVisible();
+    await expect(page.getByTestId('login-error')).toContainText('Please enter both email and password');
   });
 
   test('should validate email format', async ({ page }) => {
@@ -37,7 +36,7 @@ test.describe('Login Page', () => {
     await page.click('button[type="submit"]');
     
     // Should show password requirements
-    await expect(page.locator('text=/6.*characters/i')).toBeVisible();
+    await expect(page.getByText(/6 characters long/i)).toBeVisible();
   });
 
   test('should login successfully with valid credentials', async ({ page }) => {

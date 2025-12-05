@@ -11,7 +11,7 @@ test.describe('Vendors Page', () => {
 
   test('should display vendor directory', async ({ page }) => {
     await expect(page.locator('h1')).toContainText('Vendor Directory');
-    await expect(page.getByText(/312 verified vendors/i)).toBeVisible();
+    await expect(page.getByRole('main')).toContainText('Showing 312 vendors');
   });
 
   test('should filter vendors by category', async ({ page }) => {
@@ -26,7 +26,7 @@ test.describe('Vendors Page', () => {
     
     // Should show filtered results
     const vendorCards = page.locator('[class*="motion"]').first();
-    await expect(vendorCards).toBeVisible();
+    await expect(page.getByText('Showing 46 vendors')).toBeVisible();
   });
 
   test('should search vendors by name', async ({ page }) => {
@@ -57,7 +57,8 @@ test.describe('Vendors Page', () => {
 
   test('should open vendor modal on card click', async ({ page }) => {
     // Click first vendor card
-    await page.locator('[class*="motion"]').first().click();
+    await page.getByRole('heading', { name: 'US Ophthalmic' }).click();
+    //await page.locator('[class*="motion"]').first().click();
     
     // Modal should appear
     await expect(page.locator('[class*="fixed inset-0"]')).toBeVisible();

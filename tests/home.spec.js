@@ -9,8 +9,8 @@ test.describe('Home Page', () => {
   });
 
   test('should display home page with correct branding', async ({ page }) => {
-    await expect(page.locator('text=Eye Bridges')).toBeVisible();
-    await expect(page.getByText(/Connecting optometry & ophthalmology/i)).toBeVisible();
+    await expect(page.getByTestId('logo-link')).toBeVisible();
+    await expect(page.getByText('Find Your Eye Care Vendors')).toBeVisible();
   });
 
   test('should have working navigation links', async ({ page }) => {
@@ -33,9 +33,12 @@ test.describe('Home Page', () => {
 
   test('should display vendor statistics', async ({ page }) => {
     // Check for statistics
-    await expect(page.getByText('312')).toBeVisible(); // vendors
-    await expect(page.getByText('153')).toBeVisible(); // categories
-    await expect(page.getByText('236')).toBeVisible(); // products
+    await expect(page.locator('#root')).toContainText('312');
+    await expect(page.locator('#root')).toContainText('Vendors');
+    await expect(page.locator('#root')).toContainText('153');
+    await expect(page.locator('#root')).toContainText('Categories');
+    await expect(page.locator('#root')).toContainText('236');
+    await expect(page.locator('#root')).toContainText('Products');
   });
 
   test('should navigate to Dashboard when logged in', async ({ page }) => {

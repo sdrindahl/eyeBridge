@@ -30,7 +30,7 @@ test.describe('Password Gate', () => {
     await page.click('button[type="submit"]');
     
     // Should redirect to home page
-    await expect(page.locator('text=Eye Bridges')).toBeVisible();
+    await expect(page.getByText('Find Your Eye Care Vendors')).toBeVisible();
     await expect(page.getByRole('link', { name: /Browse Vendors/i })).toBeVisible();
   });
 

@@ -19,6 +19,13 @@ export default function Login() {
       return;
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
     // Password validation
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
@@ -83,7 +90,7 @@ export default function Login() {
             <p className="text-slate-600 mt-2">Sign in to your account</p>
           </CardHeader>
           <CardContent className="pt-6">
-            <form onSubmit={handleSubmit} data-testid="login-form" className="space-y-4">
+            <form onSubmit={handleSubmit} data-testid="login-form" className="space-y-4" noValidate>
               {error && (
                 <div data-testid="login-error" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                   {error}
@@ -102,6 +109,7 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
                   className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent bg-slate-50 text-slate-900"
+                  noValidate
                 />
               </div>
 
