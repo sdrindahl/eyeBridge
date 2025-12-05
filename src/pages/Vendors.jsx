@@ -22,6 +22,11 @@ export default function Vendors() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [compareList, setCompareList] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [showSearchHistory, setShowSearchHistory] = useState(false);
+  const [appliedSearchQuery, setAppliedSearchQuery] = useState(searchParams.get("q") || "");
+  const [appliedCategory, setAppliedCategory] = useState(searchParams.get("category") || "all");
+  const [appliedProduct, setAppliedProduct] = useState(searchParams.get("product") || "all");
 
   const categoryOptions = [
     "All Categories",
@@ -73,27 +78,27 @@ export default function Vendors() {
     return ["All Products", ...Array.from(products).sort()];
   }, [selectedCategory]);
 
-  // Filter vendors based on search query, category, and product
+  // Filter vendors based on applied search query, category, and product
   const filteredVendors = useMemo(() => {
     let results = vendorsData;
 
     // First filter by category
-    if (selectedCategory !== "all") {
+    if (appliedCategory !== "all") {
       results = results.filter(vendor => 
-        vendor.Category?.toLowerCase().includes(selectedCategory.toLowerCase())
+        vendor.Category?.toLowerCase().includes(appliedCategory.toLowerCase())
       );
     }
 
     // Then filter by product type
-    if (selectedProduct !== "all") {
+    if (appliedProduct !== "all") {
       results = results.filter(vendor => 
-        vendor["Products Offered"]?.includes(selectedProduct)
+        vendor["Products Offered"]?.includes(appliedProduct)
       );
     }
 
     // Then filter by search query (searches all fields)
-    if (searchQuery !== "") {
-      const query = searchQuery.toLowerCase();
+    if (appliedSearchQuery !== "") {
+      const query = appliedSearchQuery.toLowerCase();
       
       results = results.filter(vendor => {
         return (
@@ -112,7 +117,7 @@ export default function Vendors() {
     }
 
     return results;
-  }, [searchQuery, selectedCategory, selectedProduct, showFavoritesOnly, favorites]);
+  }, [appliedSearchQuery, appliedCategory, appliedProduct, showFavoritesOnly, favorites]);
 
   // Load favorites and login state
   useEffect(() => {
@@ -122,6 +127,10 @@ export default function Vendors() {
     if (loggedIn) {
       const storedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
       setFavorites(storedFavorites);
+      
+      // Load search history
+      const storedHistory = JSON.parse(localStorage.getItem("vendorSearchHistory") || "[]");
+      setSearchHistory(storedHistory);
     }
   }, []);
 
@@ -190,6 +199,89 @@ export default function Vendors() {
     localStorage.setItem("contactHistory", JSON.stringify(updatedHistory));
   };
 
+  const calculateResultCount = (query, category, product) => {
+    let results = vendorsData;
+
+    // Filter by category
+    if (category !== "all") {
+      results = results.filter(vendor => 
+        vendor.Category?.toLowerCase().includes(category.toLowerCase())
+      );
+    }
+
+    // Filter by product type
+    if (product !== "all") {
+      results = results.filter(vendor => 
+        vendor["Products Offered"]?.includes(product)
+      );
+    }
+
+    // Filter by search query
+    if (query !== "") {
+      const searchQuery = query.toLowerCase();
+      results = results.filter(vendor => {
+        return (
+          vendor["Company Name"]?.toLowerCase().includes(searchQuery) ||
+          vendor.Category?.toLowerCase().includes(searchQuery) ||
+          vendor["Category Tags"]?.toLowerCase().includes(searchQuery) ||
+          vendor["Search Keywords"]?.toLowerCase().includes(searchQuery) ||
+          vendor["Products Offered"]?.toLowerCase().includes(searchQuery)
+        );
+      });
+    }
+
+    // Filter by favorites if that option is selected
+    if (showFavoritesOnly) {
+      results = results.filter(vendor => favorites.includes(vendor["Company Name"]));
+    }
+
+    return results.length;
+  };
+
+  const saveSearchToHistory = (resultCount) => {
+    if (!isLoggedIn) return;
+    
+    // Only save if there's actual search content
+    if (!searchQuery.trim() && selectedCategory === "all" && selectedProduct === "all") return;
+    
+    const newSearch = {
+      query: searchQuery,
+      category: selectedCategory,
+      product: selectedProduct,
+      resultCount: resultCount,
+      date: new Date().toISOString()
+    };
+    
+    // Remove duplicates based on query, category, and product
+    const updatedHistory = [
+      newSearch,
+      ...searchHistory.filter(s => 
+        !(s.query.toLowerCase() === searchQuery.toLowerCase() && 
+          s.category === selectedCategory && 
+          s.product === selectedProduct)
+      )
+    ].slice(0, 10); // Keep only last 10 searches
+    
+    setSearchHistory(updatedHistory);
+    localStorage.setItem("vendorSearchHistory", JSON.stringify(updatedHistory));
+  };
+
+  const loadSearchFromHistory = (search) => {
+    setSearchQuery(search.query);
+    setSelectedCategory(search.category);
+    setSelectedProduct(search.product);
+    setAppliedSearchQuery(search.query);
+    setAppliedCategory(search.category);
+    setAppliedProduct(search.product);
+    setShowSearchHistory(false);
+    setAnimationKey(prev => prev + 1);
+  };
+
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem("vendorSearchHistory");
+  };
+
   return (
     <div className="min-h-screen bg-gray-300">
       {/* Header */}
@@ -255,10 +347,9 @@ export default function Vendors() {
           </div>
 
           {/* Search Controls */}
-          <div className="space-y-3">
-            {/* Filter Dropdowns */}
-            <div className="flex gap-2 flex-wrap items-center">
-              {/* Back to Dashboard Button */}
+          <div className="mt-6 space-y-4">
+            {/* Back Button */}
+            <div>
               {isLoggedIn ? (
                 <Button 
                   variant="outline" 
@@ -276,7 +367,10 @@ export default function Vendors() {
                   ← Back to Home
                 </Button>
               )}
-              
+            </div>
+
+            {/* Filters and Search Row */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               {/* Category Dropdown */}
               <div className="relative">
                 <button
@@ -284,48 +378,33 @@ export default function Vendors() {
                     setShowCategoryDropdown(!showCategoryDropdown);
                     setShowProductDropdown(false);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-teal-500 text-white hover:bg-teal-600 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors whitespace-nowrap"
                 >
-                  {selectedCategory === "all" ? "All Categories" : selectedCategory}
+                  <span className="font-medium">
+                    {selectedCategory === "all" ? "All Categories" : selectedCategory}
+                  </span>
                   <ChevronDown className="w-4 h-4" />
                 </button>
-                
                 {showCategoryDropdown && (
-                  <div className="absolute right-0 mt-2 w-56 bg-slate-100 rounded-lg shadow-lg border border-slate-300 z-20">
-                    <div className="py-1">
+                  <div className="absolute top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 min-w-[200px]">
+                    {categoryOptions.map((category) => (
                       <button
+                        key={category}
                         onClick={() => {
-                          setSelectedCategory("all");
+                          setSelectedCategory(category === "All Categories" ? "all" : category);
                           setSelectedProduct("all");
                           setShowCategoryDropdown(false);
                         }}
-                        className={`w-full text-left px-4 py-2 text-sm hover:bg-neutral-100 ${
-                          selectedCategory === "all" ? "bg-neutral-50 font-medium" : ""
-                        }`}
+                        className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700"
                       >
-                        All Categories
+                        {category}
                       </button>
-                      {categoryOptions.slice(1).map((category) => (
-                        <button
-                          key={category}
-                          onClick={() => {
-                            setSelectedCategory(category);
-                            setSelectedProduct("all");
-                            setShowCategoryDropdown(false);
-                          }}
-                          className={`w-full text-left px-4 py-2 text-sm hover:bg-neutral-100 ${
-                            selectedCategory === category ? "bg-neutral-50 font-medium" : ""
-                          }`}
-                        >
-                          {category}
-                        </button>
-                      ))}
-                    </div>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Product Type Dropdown - Only show when category is selected */}
+              {/* Product Dropdown */}
               {selectedCategory !== "all" && (
                 <div className="relative">
                   <button
@@ -333,79 +412,151 @@ export default function Vendors() {
                       setShowProductDropdown(!showProductDropdown);
                       setShowCategoryDropdown(false);
                     }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-indigo-500 text-white hover:bg-indigo-600 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors whitespace-nowrap"
                   >
-                    {selectedProduct === "all" ? "All Products" : selectedProduct}
+                    <span className="font-medium">
+                      {selectedProduct === "all" ? "All Products" : selectedProduct}
+                    </span>
                     <ChevronDown className="w-4 h-4" />
                   </button>
-                  
                   {showProductDropdown && (
-                    <div className="absolute right-0 mt-2 w-64 max-h-96 overflow-y-auto bg-slate-100 rounded-lg shadow-lg border border-slate-300 z-20">
-                      <div className="py-1">
+                    <div className="absolute top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 min-w-[200px] max-h-96 overflow-y-auto">
+                      {productOptions.map((product) => (
                         <button
+                          key={product}
                           onClick={() => {
-                            setSelectedProduct("all");
+                            setSelectedProduct(product === "All Products" ? "all" : product);
                             setShowProductDropdown(false);
                           }}
-                          className={`w-full text-left px-4 py-2 text-sm hover:bg-neutral-100 ${
-                            selectedProduct === "all" ? "bg-neutral-50 font-medium" : ""
-                          }`}
+                          className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700"
                         >
-                          All Products
+                          {product}
                         </button>
-                        {productOptions.slice(1).map((product) => (
-                          <button
-                            key={product}
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setShowProductDropdown(false);
-                            }}
-                            className={`w-full text-left px-4 py-2 text-sm hover:bg-neutral-100 ${
-                              selectedProduct === product ? "bg-neutral-50 font-medium" : ""
-                            }`}
-                          >
-                            {product}
-                          </button>
-                        ))}
-                      </div>
+                      ))}
                     </div>
                   )}
                 </div>
               )}
-            </div>
 
-            {/* Search Bar */}
-            <div className="flex gap-2 items-center">
-              <div className="relative max-w-xl">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
+              {/* Search Input */}
+              <div className="relative flex-1 max-w-xl">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search vendors..."
+                  placeholder={isLoggedIn && searchHistory.length > 0 ? "Search vendors... (view history below)" : "Search vendors..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent bg-slate-200 text-slate-800"
+                  onFocus={() => {
+                    if (isLoggedIn) setShowSearchHistory(true);
+                  }}
+                  onBlur={() => setTimeout(() => setShowSearchHistory(false), 200)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const resultCount = calculateResultCount(searchQuery, selectedCategory, selectedProduct);
+                      setAppliedSearchQuery(searchQuery);
+                      setAppliedCategory(selectedCategory);
+                      setAppliedProduct(selectedProduct);
+                      saveSearchToHistory(resultCount);
+                      setShowSearchHistory(false);
+                      setAnimationKey(prev => prev + 1);
+                    }
+                  }}
+                  className="w-full pl-12 pr-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent bg-slate-200 text-slate-800"
                 />
+                
+                {/* Search History Dropdown */}
+                {isLoggedIn && showSearchHistory && searchHistory.length > 0 && (
+                  <div className="absolute top-full mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-20 max-h-80 overflow-y-auto">
+                    <div className="p-2 border-b border-slate-200 flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-600 uppercase">Recent Searches</span>
+                      <button
+                        onClick={clearSearchHistory}
+                        className="text-xs text-red-600 hover:text-red-700"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                    {searchHistory.map((search, index) => (
+                      <button
+                        key={index}
+                        onClick={() => loadSearchFromHistory(search)}
+                        className="w-full text-left p-3 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-slate-900 truncate">{search.query || "All vendors"}</p>
+                            <div className="flex gap-2 mt-1 flex-wrap">
+                              {search.category !== "all" && (
+                                <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                                  {search.category}
+                                </span>
+                              )}
+                              {search.product !== "all" && (
+                                <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded truncate max-w-[150px]">
+                                  {search.product}
+                                </span>
+                              )}
+                              {search.resultCount !== undefined && (
+                                <span className="text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded font-medium">
+                                  {search.resultCount} result{search.resultCount !== 1 ? 's' : ''}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-xs text-slate-400 flex-shrink-0">
+                            {new Date(search.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all") && (
+
+              {/* Search Button */}
+              <Button 
+                onClick={() => {
+                  const resultCount = calculateResultCount(searchQuery, selectedCategory, selectedProduct);
+                  setAppliedSearchQuery(searchQuery);
+                  setAppliedCategory(selectedCategory);
+                  setAppliedProduct(selectedProduct);
+                  saveSearchToHistory(resultCount);
+                  setShowSearchHistory(false);
+                  setAnimationKey(prev => prev + 1);
+                }}
+                className="bg-slate-600 hover:bg-slate-700 text-white whitespace-nowrap"
+              >
+                Search Vendors
+              </Button>
+
+              {/* Clear Button */}
+              {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all") && (
                 <Button 
                   onClick={() => {
                     setSearchQuery("");
                     setSelectedCategory("all");
                     setSelectedProduct("all");
+                    setAppliedSearchQuery("");
+                    setAppliedCategory("all");
+                    setAppliedProduct("all");
+                    setAnimationKey(prev => prev + 1);
                   }}
                   variant="outline"
-                  className="px-6 py-3 whitespace-nowrap border-slate-400 text-slate-900 hover:bg-slate-200 bg-white"
+                  className="border-slate-400 text-slate-900 hover:bg-slate-100 bg-white whitespace-nowrap"
                 >
                   Clear Search
                 </Button>
               )}
+
+              {/* Favorites Filter */}
               {isLoggedIn && favorites.length > 0 && (
                 <Button 
                   onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                   variant={showFavoritesOnly ? "default" : "outline"}
                   className={showFavoritesOnly 
-                    ? "px-6 py-3 whitespace-nowrap bg-red-500 hover:bg-red-600 text-white" 
-                    : "px-6 py-3 whitespace-nowrap border-slate-400 text-slate-900 hover:bg-slate-200 bg-white"
+                    ? "bg-red-500 hover:bg-red-600 text-white whitespace-nowrap" 
+                    : "border-slate-400 text-slate-900 hover:bg-slate-100 bg-white whitespace-nowrap"
                   }
                 >
                   <Heart className={`w-4 h-4 mr-2 ${showFavoritesOnly ? "fill-white" : ""}`} />

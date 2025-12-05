@@ -21,6 +21,10 @@ export default function Dashboard() {
   const [selectedProduct, setSelectedProduct] = useState("all");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const [vendorNotes, setVendorNotes] = useState({});
+  const [currentNote, setCurrentNote] = useState("");
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [showSearchHistory, setShowSearchHistory] = useState(false);
 
   const categoryOptions = [
     "All Categories",
@@ -81,12 +85,84 @@ export default function Dashboard() {
     // Load saved comparisons
     const storedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
     setSavedComparisons(storedComparisons);
+
+    // Load vendor notes
+    const storedNotes = JSON.parse(localStorage.getItem("vendorNotes") || "{}");
+    setVendorNotes(storedNotes);
+
+    // Load search history
+    const storedHistory = JSON.parse(localStorage.getItem("vendorSearchHistory") || "[]");
+    setSearchHistory(storedHistory);
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userEmail");
     navigate("/");
+  };
+
+  const saveVendorNote = (vendorName, noteText) => {
+    const updatedNotes = { ...vendorNotes, [vendorName]: noteText };
+    setVendorNotes(updatedNotes);
+    localStorage.setItem("vendorNotes", JSON.stringify(updatedNotes));
+    
+    // Track in contact history
+    const contactHistory = JSON.parse(localStorage.getItem("contactHistory") || "[]");
+    const newContact = {
+      vendorName,
+      type: "note",
+      note: noteText,
+      date: new Date().toISOString()
+    };
+    const updatedHistory = [newContact, ...contactHistory].slice(0, 100);
+    localStorage.setItem("contactHistory", JSON.stringify(updatedHistory));
+    setContactHistory(updatedHistory);
+  };
+
+  const openVendorModal = (vendorName) => {
+    const vendor = vendorsData.find(v => v["Company Name"] === vendorName);
+    if (vendor) {
+      setSelectedVendor(vendor);
+      setCurrentNote(vendorNotes[vendorName] || "");
+      setShowModal(true);
+    }
+  };
+
+  const saveSearchToHistory = () => {
+    // Only save if there's actual search content
+    if (!searchQuery.trim() && selectedCategory === "all" && selectedProduct === "all") return;
+    
+    const newSearch = {
+      query: searchQuery,
+      category: selectedCategory,
+      product: selectedProduct,
+      date: new Date().toISOString()
+    };
+    
+    // Remove duplicates based on query, category, and product
+    const updatedHistory = [
+      newSearch,
+      ...searchHistory.filter(s => 
+        !(s.query.toLowerCase() === searchQuery.toLowerCase() && 
+          s.category === selectedCategory && 
+          s.product === selectedProduct)
+      )
+    ].slice(0, 10); // Keep only last 10 searches
+    
+    setSearchHistory(updatedHistory);
+    localStorage.setItem("vendorSearchHistory", JSON.stringify(updatedHistory));
+  };
+
+  const loadSearchFromHistory = (search) => {
+    setSearchQuery(search.query);
+    setSelectedCategory(search.category);
+    setSelectedProduct(search.product);
+    setShowSearchHistory(false);
+  };
+
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem("vendorSearchHistory");
   };
 
   const getFavoriteVendors = () => {
@@ -249,11 +325,14 @@ export default function Dashboard() {
                 <input
                   data-testid="search-input"
                   type="text"
-                  placeholder="Search vendors..."
+                  placeholder={searchHistory.length > 0 ? "Search vendors... (view history below)" : "Search vendors..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setShowSearchHistory(true)}
+                  onBlur={() => setTimeout(() => setShowSearchHistory(false), 200)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
+                      saveSearchToHistory();
                       let url = '/vendors';
                       const params = new URLSearchParams();
                       if (searchQuery) params.append('q', searchQuery);
@@ -265,6 +344,55 @@ export default function Dashboard() {
                   }}
                   className="w-full pl-12 pr-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent bg-slate-200 text-slate-800"
                 />
+                
+                {/* Search History Dropdown */}
+                {showSearchHistory && searchHistory.length > 0 && (
+                  <div className="absolute top-full mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-20 max-h-80 overflow-y-auto">
+                    <div className="p-2 border-b border-slate-200 flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-600 uppercase">Recent Searches</span>
+                      <button
+                        onClick={clearSearchHistory}
+                        className="text-xs text-red-600 hover:text-red-700"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                    {searchHistory.map((search, index) => (
+                      <button
+                        key={index}
+                        onClick={() => loadSearchFromHistory(search)}
+                        className="w-full text-left p-3 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-slate-900 truncate">{search.query || "All vendors"}</p>
+                            <div className="flex gap-2 mt-1 flex-wrap">
+                              {search.category !== "all" && (
+                                <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                                  {search.category}
+                                </span>
+                              )}
+                              {search.product !== "all" && (
+                                <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded truncate max-w-[150px]">
+                                  {search.product}
+                                </span>
+                              )}
+                              {search.resultCount !== undefined && (
+                                <span className="text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded font-medium">
+                                  {search.resultCount} result{search.resultCount !== 1 ? 's' : ''}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-xs text-slate-400 flex-shrink-0">
+                            {new Date(search.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Clear Button */}
@@ -272,6 +400,7 @@ export default function Dashboard() {
                 <Button
                   data-testid="clear-search-button"
                   onClick={() => {
+                    saveSearchToHistory();
                     setSearchQuery("");
                     setSelectedCategory("all");
                     setSelectedProduct("all");
@@ -546,48 +675,6 @@ export default function Dashboard() {
                       </Button>
                     </Link>
                   )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Contact History */}
-          <Card id="contacts-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Phone className="w-5 h-5 text-green-600" />
-                Recent Contacts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {contactHistory.length === 0 ? (
-                <p className="text-slate-600 text-sm">No contact history yet</p>
-              ) : (
-                <div className="space-y-3">
-                  {getContactedVendors().map((contact, index) => (
-                    <div
-                      key={index}
-                      className="p-3 bg-slate-50 rounded-lg border border-slate-200"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-medium text-slate-900">{contact.vendorName}</p>
-                          <p className="text-xs text-slate-600 mt-1">
-                            {contact.type === "phone" && "📞 Phone"}
-                            {contact.type === "email" && "📧 Email"}
-                            {contact.type === "website" && "🌐 Website"}
-                            {contact.type === "note" && "📝 Note"}
-                          </p>
-                          {contact.note && (
-                            <p className="text-xs text-slate-700 mt-2 italic">"{contact.note}"</p>
-                          )}
-                        </div>
-                        <span className="text-xs text-slate-500">
-                          {new Date(contact.date).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               )}
             </CardContent>
@@ -914,6 +1001,47 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Notes Section */}
+              <div className="border-t border-slate-300 pt-6">
+                <h3 className="text-sm font-semibold text-slate-600 uppercase mb-3">My Notes</h3>
+                <textarea
+                  value={currentNote}
+                  onChange={(e) => setCurrentNote(e.target.value)}
+                  placeholder="Add a note about this vendor..."
+                  className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white text-slate-800 text-sm"
+                  rows="4"
+                />
+                <div className="flex gap-2 mt-2">
+                  <Button
+                    onClick={() => {
+                      if (currentNote.trim()) {
+                        saveVendorNote(selectedVendor["Company Name"], currentNote);
+                        alert("Note saved!");
+                      }
+                    }}
+                    className="bg-teal-600 hover:bg-teal-700 text-white"
+                  >
+                    {vendorNotes[selectedVendor["Company Name"]] ? "Update Note" : "Save Note"}
+                  </Button>
+                  {vendorNotes[selectedVendor["Company Name"]] && (
+                    <Button
+                      onClick={() => {
+                        setCurrentNote("");
+                        const updatedNotes = { ...vendorNotes };
+                        delete updatedNotes[selectedVendor["Company Name"]];
+                        setVendorNotes(updatedNotes);
+                        localStorage.setItem("vendorNotes", JSON.stringify(updatedNotes));
+                        alert("Note deleted!");
+                      }}
+                      variant="outline"
+                      className="border-red-500 text-red-500 hover:bg-red-50"
+                    >
+                      Delete Note
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
