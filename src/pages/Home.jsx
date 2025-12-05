@@ -18,7 +18,7 @@ const features = [
   {
     icon: <Layers className="w-6 h-6" />,
     title: "Verified vendor profiles",
-    desc: "Company info, specialties, territories, and contact details in one place."
+    desc: "Company info, specialties, and contact details in one place."
   },
   {
     icon: <Shield className="w-6 h-6" />,
@@ -33,7 +33,7 @@ const features = [
   {
     icon: <Zap className="w-6 h-6" />,
     title: "Quotes & inquiries",
-    desc: "Start RFPs, request quotes, or connect directly with reps—no cold outreach."
+    desc: "Request quotes & demos with one click"
   }
 ];
 
@@ -78,6 +78,7 @@ const testimonials = [
 export default function Home() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -239,14 +240,64 @@ export default function Home() {
       {/* CTA */}
       <section className="py-24">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h3 className="text-3xl font-bold">Ready to validate your platform?</h3>
-          <p className="mt-3 text-neutral-600">Join the waitlist to get early access, templates, and migration help.</p>
-          <form className="mt-6 max-w-md mx-auto flex gap-2">
-            <input type="email" placeholder="you@company.com" className="flex-1 rounded-2xl border border-slate-300 bg-slate-200 px-4 h-11 text-slate-800" />
-            <Button className="rounded-2xl h-11">
-              <Mail className="w-4 h-4 mr-2" /> Notify me
-            </Button>
-          </form>
+          <h3 className="text-3xl font-bold">Have Comments or Feedback?</h3>
+          <p className="mt-3 text-neutral-600">We'd love to hear from you. Share your thoughts to help us improve.</p>
+          <Button 
+            onClick={() => setShowFeedbackForm(!showFeedbackForm)}
+            className="rounded-2xl h-11 mt-6"
+          >
+            <Mail className="w-4 h-4 mr-2" /> {showFeedbackForm ? 'Close Form' : 'Share Feedback'}
+          </Button>
+          
+          {showFeedbackForm && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 max-w-md mx-auto bg-white p-6 rounded-2xl border border-slate-300 shadow-lg"
+            >
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const email = formData.get('email');
+                const comments = formData.get('comments');
+                // Here you would typically send this to your backend
+                alert('Thank you for your feedback!');
+                setShowFeedbackForm(false);
+                e.target.reset();
+              }} className="space-y-4 text-left">
+                <div>
+                  <label htmlFor="feedback-email" className="block text-sm font-medium text-slate-700 mb-2">
+                    Email Address
+                  </label>
+                  <input 
+                    type="email" 
+                    id="feedback-email"
+                    name="email"
+                    placeholder="you@company.com" 
+                    required
+                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400" 
+                  />
+                </div>
+                <div>
+                  <label htmlFor="feedback-comments" className="block text-sm font-medium text-slate-700 mb-2">
+                    Comments
+                  </label>
+                  <textarea 
+                    id="feedback-comments"
+                    name="comments"
+                    placeholder="Share your thoughts..."
+                    required
+                    rows="4"
+                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  />
+                </div>
+                <Button type="submit" className="w-full rounded-xl h-11">
+                  Submit Feedback
+                </Button>
+              </form>
+            </motion.div>
+          )}
+          
           <p className="mt-3 text-xs text-neutral-500">We'll never share your email.</p>
         </div>
       </section>
@@ -279,14 +330,13 @@ export default function Home() {
               <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-16 w-auto" />
               <span className="text-lg">{BRAND_NAME}</span>
             </div>
-            <p className="mt-3">{BRAND_NAME} helps teams ship platforms customers love.</p>
+            <p className="mt-3">Connects you with products easily.</p>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
               <div className="font-semibold text-neutral-900">Product</div>
               <ul className="mt-2 space-y-1">
                 <li><a href="#features">Features</a></li>
-                <li><a href="#pricing">Pricing</a></li>
                 <li><a href="#faq">FAQ</a></li>
               </ul>
             </div>
@@ -295,7 +345,6 @@ export default function Home() {
               <ul className="mt-2 space-y-1">
                 <li>About</li>
                 <li>Careers</li>
-                <li>Press</li>
               </ul>
             </div>
             <div>
@@ -303,7 +352,6 @@ export default function Home() {
               <ul className="mt-2 space-y-1">
                 <li>Privacy</li>
                 <li>Terms</li>
-                <li>Security</li>
               </ul>
             </div>
           </div>
