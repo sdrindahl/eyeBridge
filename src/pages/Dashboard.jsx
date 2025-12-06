@@ -31,6 +31,7 @@ export default function Dashboard() {
   const [hoveredStar, setHoveredStar] = useState(0);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showNoteForm, setShowNoteForm] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
 
   const categoryOptions = [
     "All Categories",
@@ -137,6 +138,7 @@ export default function Dashboard() {
       setShowModal(true);
       setShowReviewForm(false);
       setShowNoteForm(false);
+      setShowReviews(false);
       // Load existing review for this vendor
       const reviews = vendorReviews[vendorName] || [];
       const userReview = reviews.find(r => r.userEmail === userEmail);
@@ -1251,6 +1253,59 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
+
+              {/* Display Reviews */}
+              {vendorReviews[selectedVendor["Company Name"]] && 
+               vendorReviews[selectedVendor["Company Name"]].filter(r => r.rating && r.rating > 0).length > 0 && (
+                <div className="border-t border-slate-300 pt-6">
+                  <button
+                    onClick={() => setShowReviews(!showReviews)}
+                    className="w-full flex items-center justify-between text-left mb-4 hover:opacity-70 transition-opacity"
+                  >
+                    <h3 className="text-sm font-semibold text-slate-600 uppercase">
+                      Reviews ({vendorReviews[selectedVendor["Company Name"]].filter(r => r.rating && r.rating > 0).length})
+                    </h3>
+                    <span className="text-slate-600 text-xl">{showReviews ? "−" : "+"}</span>
+                  </button>
+                  {showReviews && (
+                  <div className="space-y-4">
+                    {vendorReviews[selectedVendor["Company Name"]]
+                      .filter(r => r.rating && r.rating > 0)
+                      .sort((a, b) => new Date(b.date) - new Date(a.date))
+                      .map((review, index) => (
+                        <div key={index} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`w-4 h-4 ${
+                                      star <= review.rating
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "text-slate-300"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-sm font-semibold text-slate-700">{review.rating}.0</span>
+                            </div>
+                            <span className="text-xs text-slate-500">
+                              {new Date(review.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {review.comment && (
+                            <p className="text-sm text-slate-700 whitespace-pre-wrap">{review.comment}</p>
+                          )}
+                          <p className="text-xs text-slate-500 mt-2">
+                            by {review.userEmail}
+                          </p>
+                        </div>
+                      ))}
+                  </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
