@@ -492,7 +492,7 @@ export default function Vendors() {
           {/* Search Controls */}
           <div className="mt-6 space-y-4">
             {/* Back Button */}
-            <div>
+            <div className="hidden sm:block">
               {isLoggedIn ? (
                 <Button 
                   variant="outline" 
@@ -512,8 +512,89 @@ export default function Vendors() {
               )}
             </div>
 
-            {/* Filters and Search Row */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            {/* Mobile Compact Search */}
+            <div className="sm:hidden">
+              {/* Mobile Back Button */}
+              <div className="mb-3">
+                {isLoggedIn ? (
+                  <Button 
+                    variant="outline" 
+                    className="border-white text-white hover:bg-slate-800 text-sm w-full" 
+                    onClick={() => navigate("/dashboard")}
+                  >
+                    ← Back to Dashboard
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="border-white text-white hover:bg-slate-800 text-sm w-full" 
+                    onClick={() => window.location.href = "/"}
+                  >
+                    ← Back to Home
+                  </Button>
+                )}
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Search vendors..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const resultCount = calculateResultCount(searchQuery, selectedCategory, selectedProduct);
+                      setAppliedSearchQuery(searchQuery);
+                      setAppliedCategory(selectedCategory);
+                      setAppliedProduct(selectedProduct);
+                      saveSearchToHistory(resultCount);
+                      setAnimationKey(prev => prev + 1);
+                    }
+                  }}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-200 text-slate-800 text-sm"
+                />
+              </div>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => {
+                    setShowCategoryDropdown(!showCategoryDropdown);
+                    setShowProductDropdown(false);
+                  }}
+                  className="flex-1 flex items-center justify-between gap-2 px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-medium"
+                >
+                  <span className="truncate">{selectedCategory === "all" ? "Category" : selectedCategory}</span>
+                  <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                </button>
+                {selectedCategory !== "all" && (
+                  <button
+                    onClick={() => {
+                      setShowProductDropdown(!showProductDropdown);
+                      setShowCategoryDropdown(false);
+                    }}
+                    className="flex-1 flex items-center justify-between gap-2 px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                  >
+                    <span className="truncate">{selectedProduct === "all" ? "Product" : selectedProduct}</span>
+                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                  </button>
+                )}
+                <Button 
+                  onClick={() => {
+                    const resultCount = calculateResultCount(searchQuery, selectedCategory, selectedProduct);
+                    setAppliedSearchQuery(searchQuery);
+                    setAppliedCategory(selectedCategory);
+                    setAppliedProduct(selectedProduct);
+                    saveSearchToHistory(resultCount);
+                    setAnimationKey(prev => prev + 1);
+                  }}
+                  className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs"
+                >
+                  Go
+                </Button>
+              </div>
+            </div>
+
+            {/* Desktop Filters and Search Row */}
+            <div className="hidden sm:flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               {/* Category Dropdown */}
               <div className="relative">
                 <button
