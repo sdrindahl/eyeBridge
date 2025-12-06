@@ -8,6 +8,20 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 
 export default function Vendors() {
   const navigate = useNavigate();
+
+  // Highlight matching text
+  const highlightText = (text, query) => {
+    if (!text || !query) return text;
+    
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return parts.map((part, index) => 
+      part.toLowerCase() === query.toLowerCase() ? (
+        <mark key={index} className="bg-blue-400 text-white px-0.5 rounded">{part}</mark>
+      ) : (
+        part
+      )
+    );
+  };
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
@@ -118,6 +132,66 @@ export default function Vendors() {
 
     return results;
   }, [appliedSearchQuery, appliedCategory, appliedProduct, showFavoritesOnly, favorites]);
+
+  // Group vendors by category
+  const vendorsByCategory = useMemo(() => {
+    const grouped = {};
+    
+    filteredVendors.forEach(vendor => {
+      if (!vendor.Category) {
+        if (!grouped["Other"]) grouped["Other"] = [];
+        grouped["Other"].push(vendor);
+        return;
+      }
+      
+      // Get the primary category (first one before semicolon)
+      const primaryCategory = vendor.Category.split(';')[0].trim();
+      
+      if (!grouped[primaryCategory]) {
+        grouped[primaryCategory] = [];
+      }
+      grouped[primaryCategory].push(vendor);
+    });
+    
+    // Define the exact order
+    const categoryOrder = [
+      "Equipment",
+      "Equipment Distributor",
+      "Contact Lens",
+      "Pharmaceuticals",
+      "Optical Lab",
+      "Software",
+      "Practice Management"
+    ];
+    
+    // Sort categories based on the defined order
+    return Object.keys(grouped)
+      .sort((a, b) => {
+        let indexA = categoryOrder.indexOf(a);
+        let indexB = categoryOrder.indexOf(b);
+        
+        // If not exact match, try to find partial match
+        if (indexA === -1) {
+          indexA = categoryOrder.findIndex(cat => a.includes(cat) || cat.includes(a));
+        }
+        if (indexB === -1) {
+          indexB = categoryOrder.findIndex(cat => b.includes(cat) || cat.includes(b));
+        }
+        
+        // If both are in the order list, sort by their position
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        // If only A is in the list, it comes first
+        if (indexA !== -1) return -1;
+        // If only B is in the list, it comes first
+        if (indexB !== -1) return 1;
+        // If neither is in the list, sort alphabetically
+        return a.localeCompare(b);
+      })
+      .reduce((acc, key) => {
+        acc[key] = grouped[key];
+        return acc;
+      }, {});
+  }, [filteredVendors]);
 
   // Load favorites and login state
   useEffect(() => {
@@ -654,14 +728,31 @@ export default function Vendors() {
               <p className="text-slate-500">No vendors found matching your search.</p>
             </motion.div>
           ) : (
-            <motion.div 
-              key={`results-${animationKey}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-              {filteredVendors.map((vendor, index) => {
+            <div className="space-y-12">
+              {Object.entries(vendorsByCategory).map(([category, vendors], categoryIndex) => (
+                <motion.div
+                  key={category}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: categoryIndex * 0.1, duration: 0.4 }}
+                >
+                  {/* Category Header */}
+                  <div className="flex items-center gap-4 mb-6">
+                    <h2 className="text-2xl font-bold text-slate-900">{category}</h2>
+                    <span className="text-sm text-slate-500 bg-slate-200 px-3 py-1 rounded-full">
+                      {vendors.length} vendor{vendors.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  {/* Vendors Grid for this Category */}
+                  <motion.div 
+                    key={`results-${animationKey}-${category}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  >
+                    {vendors.map((vendor, index) => {
                 const colorClass = getCategoryColor(vendor.Category);
                 return (
                 <motion.div
@@ -706,7 +797,7 @@ export default function Vendors() {
                       )}
                     </div>
                     <h3 className="text-base font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-50 transition-colors pr-20">
-                      {vendor["Company Name"]}
+                      {appliedSearchQuery ? highlightText(vendor["Company Name"], appliedSearchQuery) : vendor["Company Name"]}
                     </h3>
                     <div className="flex flex-wrap gap-1">
                       {vendor.Category ? (
@@ -715,7 +806,7 @@ export default function Vendors() {
                             key={i}
                             className="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white font-medium backdrop-blur-sm"
                           >
-                            {cat.trim()}
+                            {appliedSearchQuery ? highlightText(cat.trim(), appliedSearchQuery) : cat.trim()}
                           </span>
                         ))
                       ) : (
@@ -735,7 +826,7 @@ export default function Vendors() {
                   <div className="p-3">
                     {vendor["Products Offered"] && (
                       <p className="text-xs text-slate-600 line-clamp-2 mb-2">
-                        {vendor["Products Offered"]}
+                        {appliedSearchQuery ? highlightText(vendor["Products Offered"], appliedSearchQuery) : vendor["Products Offered"]}
                       </p>
                     )}
 
@@ -764,7 +855,10 @@ export default function Vendors() {
                 </motion.div>
               );
               })}
-            </motion.div>
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
           )}
         </main>
       </div>
