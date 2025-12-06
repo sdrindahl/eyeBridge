@@ -30,6 +30,7 @@ export default function Dashboard() {
   const [userComment, setUserComment] = useState("");
   const [hoveredStar, setHoveredStar] = useState(0);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showNoteForm, setShowNoteForm] = useState(false);
 
   const categoryOptions = [
     "All Categories",
@@ -135,6 +136,7 @@ export default function Dashboard() {
       setCurrentNote(vendorNotes[vendorName] || "");
       setShowModal(true);
       setShowReviewForm(false);
+      setShowNoteForm(false);
       // Load existing review for this vendor
       const reviews = vendorReviews[vendorName] || [];
       const userReview = reviews.find(r => r.userEmail === userEmail);
@@ -1020,17 +1022,34 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                {/* Leave a Review Button */}
-                <Button
-                  onClick={() => setShowReviewForm(!showReviewForm)}
-                  className="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                >
-                  {showReviewForm ? "Hide Review Form" : (
-                    vendorReviews[selectedVendor["Company Name"]]?.some(r => r.userEmail === userEmail && r.rating > 0)
-                      ? "Edit Review"
-                      : "Leave a Review"
-                  )}
-                </Button>
+                {/* Leave a Review and Add Note Buttons */}
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    onClick={() => setShowReviewForm(!showReviewForm)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                  >
+                    {showReviewForm ? "Hide Review Form" : (
+                      vendorReviews[selectedVendor["Company Name"]]?.some(r => r.userEmail === userEmail && r.rating > 0)
+                        ? "Edit Review"
+                        : "Leave a Review"
+                    )}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowNoteForm(!showNoteForm);
+                      if (!showNoteForm) {
+                        setCurrentNote(vendorNotes[selectedVendor["Company Name"]] || "");
+                      }
+                    }}
+                    className="bg-slate-600 hover:bg-slate-700 text-white text-sm"
+                  >
+                    {showNoteForm ? "Hide Note" : (
+                      vendorNotes[selectedVendor["Company Name"]]
+                        ? "Edit Note"
+                        : "Add Note"
+                    )}
+                  </Button>
+                </div>
               </div>
               <button
                 onClick={() => setShowModal(false)}
@@ -1089,6 +1108,53 @@ export default function Dashboard() {
                   >
                     Submit Review
                   </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Note Form Section */}
+            {showNoteForm && (
+              <div className="px-6 py-4 bg-slate-100 border-b border-slate-300">
+                <h3 className="text-sm font-semibold text-slate-700 uppercase mb-4">My Note</h3>
+                <div className="space-y-4">
+                  <textarea
+                    value={currentNote}
+                    onChange={(e) => setCurrentNote(e.target.value)}
+                    placeholder="Add a note about this vendor..."
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white text-slate-800 text-sm"
+                    rows="4"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        if (currentNote.trim()) {
+                          saveVendorNote(selectedVendor["Company Name"], currentNote);
+                          alert("Note saved!");
+                          setShowNoteForm(false);
+                        }
+                      }}
+                      className="flex-1 bg-slate-600 hover:bg-slate-700 text-white"
+                    >
+                      {vendorNotes[selectedVendor["Company Name"]] ? "Update Note" : "Save Note"}
+                    </Button>
+                    {vendorNotes[selectedVendor["Company Name"]] && (
+                      <Button
+                        onClick={() => {
+                          setCurrentNote("");
+                          const updatedNotes = { ...vendorNotes };
+                          delete updatedNotes[selectedVendor["Company Name"]];
+                          setVendorNotes(updatedNotes);
+                          localStorage.setItem("vendorNotes", JSON.stringify(updatedNotes));
+                          alert("Note deleted!");
+                          setShowNoteForm(false);
+                        }}
+                        variant="outline"
+                        className="border-red-500 text-red-500 hover:bg-red-50"
+                      >
+                        Delete Note
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -1174,47 +1240,6 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
-              </div>
-
-              {/* Notes Section */}
-              <div className="border-t border-slate-300 pt-6">
-                <h3 className="text-sm font-semibold text-slate-600 uppercase mb-3">My Notes</h3>
-                <textarea
-                  value={currentNote}
-                  onChange={(e) => setCurrentNote(e.target.value)}
-                  placeholder="Add a note about this vendor..."
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white text-slate-800 text-sm"
-                  rows="4"
-                />
-                <div className="flex gap-2 mt-2">
-                  <Button
-                    onClick={() => {
-                      if (currentNote.trim()) {
-                        saveVendorNote(selectedVendor["Company Name"], currentNote);
-                        alert("Note saved!");
-                      }
-                    }}
-                    className="bg-teal-600 hover:bg-teal-700 text-white"
-                  >
-                    {vendorNotes[selectedVendor["Company Name"]] ? "Update Note" : "Save Note"}
-                  </Button>
-                  {vendorNotes[selectedVendor["Company Name"]] && (
-                    <Button
-                      onClick={() => {
-                        setCurrentNote("");
-                        const updatedNotes = { ...vendorNotes };
-                        delete updatedNotes[selectedVendor["Company Name"]];
-                        setVendorNotes(updatedNotes);
-                        localStorage.setItem("vendorNotes", JSON.stringify(updatedNotes));
-                        alert("Note deleted!");
-                      }}
-                      variant="outline"
-                      className="border-red-500 text-red-500 hover:bg-red-50"
-                    >
-                      Delete Note
-                    </Button>
-                  )}
-                </div>
               </div>
             </div>
           </div>

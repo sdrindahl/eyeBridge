@@ -46,6 +46,9 @@ export default function Vendors() {
   const [userComment, setUserComment] = useState("");
   const [hoveredStar, setHoveredStar] = useState(0);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [vendorNotes, setVendorNotes] = useState({});
+  const [currentNote, setCurrentNote] = useState("");
+  const [showNoteForm, setShowNoteForm] = useState(false);
 
   const categoryOptions = [
     "All Categories",
@@ -214,6 +217,10 @@ export default function Vendors() {
       // Load vendor reviews
       const storedReviews = JSON.parse(localStorage.getItem("vendorReviews") || "{}");
       setVendorReviews(storedReviews);
+      
+      // Load vendor notes
+      const storedNotes = JSON.parse(localStorage.getItem("vendorNotes") || "{}");
+      setVendorNotes(storedNotes);
     }
   }, []);
 
@@ -317,6 +324,12 @@ export default function Vendors() {
     localStorage.setItem("vendorReviews", JSON.stringify(updatedReviews));
     
     alert("Review submitted successfully!");
+  };
+
+  const saveVendorNote = (vendorName, noteText) => {
+    const updatedNotes = { ...vendorNotes, [vendorName]: noteText };
+    setVendorNotes(updatedNotes);
+    localStorage.setItem("vendorNotes", JSON.stringify(updatedNotes));
   };
 
   const calculateAverageRating = (vendorName) => {
@@ -820,6 +833,7 @@ export default function Vendors() {
                     setSelectedVendor(vendor);
                     setShowModal(true);
                     setShowReviewForm(false);
+                    setShowNoteForm(false);
                     // Load existing review for this vendor
                     const vendorName = vendor["Company Name"];
                     const userEmail = localStorage.getItem("userEmail");
@@ -832,6 +846,8 @@ export default function Vendors() {
                       setUserRating(0);
                       setUserComment("");
                     }
+                    // Load existing note
+                    setCurrentNote(vendorNotes[vendorName] || "");
                   }}
                   className="bg-slate-50 rounded-xl shadow-md border border-slate-200 hover:shadow-xl hover:border-blue-400 transition-all cursor-pointer overflow-hidden group"
                 >
@@ -1005,18 +1021,35 @@ export default function Vendors() {
                   </div>
                 )}
 
-                {/* Leave a Review Button */}
+                {/* Leave a Review and Add Note Buttons */}
                 {isLoggedIn && (
-                  <Button
-                    onClick={() => setShowReviewForm(!showReviewForm)}
-                    className="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                  >
-                    {showReviewForm ? "Hide Review Form" : (
-                      vendorReviews[selectedVendor["Company Name"]]?.some(r => r.userEmail === localStorage.getItem("userEmail") && r.rating > 0)
-                        ? "Edit Review"
-                        : "Leave a Review"
-                    )}
-                  </Button>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      onClick={() => setShowReviewForm(!showReviewForm)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                    >
+                      {showReviewForm ? "Hide Review Form" : (
+                        vendorReviews[selectedVendor["Company Name"]]?.some(r => r.userEmail === localStorage.getItem("userEmail") && r.rating > 0)
+                          ? "Edit Review"
+                          : "Leave a Review"
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowNoteForm(!showNoteForm);
+                        if (!showNoteForm) {
+                          setCurrentNote(vendorNotes[selectedVendor["Company Name"]] || "");
+                        }
+                      }}
+                      className="bg-slate-600 hover:bg-slate-700 text-white text-sm"
+                    >
+                      {showNoteForm ? "Hide Note" : (
+                        vendorNotes[selectedVendor["Company Name"]]
+                          ? "Edit Note"
+                          : "Add Note"
+                      )}
+                    </Button>
+                  </div>
                 )}
               </div>
               <button
@@ -1076,6 +1109,53 @@ export default function Vendors() {
                   >
                     Submit Review
                   </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Note Form Section */}
+            {showNoteForm && isLoggedIn && (
+              <div className="px-6 py-4 bg-slate-100 border-b border-slate-300">
+                <h3 className="text-sm font-semibold text-slate-700 uppercase mb-4">My Note</h3>
+                <div className="space-y-4">
+                  <textarea
+                    value={currentNote}
+                    onChange={(e) => setCurrentNote(e.target.value)}
+                    placeholder="Add a note about this vendor..."
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white text-slate-800 text-sm"
+                    rows="4"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        if (currentNote.trim()) {
+                          saveVendorNote(selectedVendor["Company Name"], currentNote);
+                          alert("Note saved!");
+                          setShowNoteForm(false);
+                        }
+                      }}
+                      className="flex-1 bg-slate-600 hover:bg-slate-700 text-white"
+                    >
+                      {vendorNotes[selectedVendor["Company Name"]] ? "Update Note" : "Save Note"}
+                    </Button>
+                    {vendorNotes[selectedVendor["Company Name"]] && (
+                      <Button
+                        onClick={() => {
+                          setCurrentNote("");
+                          const updatedNotes = { ...vendorNotes };
+                          delete updatedNotes[selectedVendor["Company Name"]];
+                          setVendorNotes(updatedNotes);
+                          localStorage.setItem("vendorNotes", JSON.stringify(updatedNotes));
+                          alert("Note deleted!");
+                          setShowNoteForm(false);
+                        }}
+                        variant="outline"
+                        className="border-red-500 text-red-500 hover:bg-red-50"
+                      >
+                        Delete Note
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -1165,32 +1245,6 @@ export default function Vendors() {
                   </div>
                 )}
               </div>
-
-              {/* Add Note Section */}
-              {isLoggedIn && (
-                <div className="border-t border-slate-300 pt-6">
-                  <h3 className="text-sm font-semibold text-slate-600 uppercase mb-3">Add Note</h3>
-                  <textarea
-                    id={`note-${selectedVendor["Company Name"]}`}
-                    placeholder="Add a note about this vendor..."
-                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white text-slate-800 text-sm"
-                    rows="3"
-                  />
-                  <Button
-                    onClick={() => {
-                      const noteText = document.getElementById(`note-${selectedVendor["Company Name"]}`).value;
-                      if (noteText.trim()) {
-                        trackContact(selectedVendor["Company Name"], "note", noteText);
-                        document.getElementById(`note-${selectedVendor["Company Name"]}`).value = "";
-                        alert("Note saved!");
-                      }
-                    }}
-                    className="mt-2 bg-slate-600 hover:bg-slate-700 text-white"
-                  >
-                    Save Note
-                  </Button>
-                </div>
-              )}
             </div>
           </div>
         </div>
