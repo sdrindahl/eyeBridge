@@ -1161,6 +1161,16 @@ export default function Vendors() {
             )}
 
             <div className="p-6 space-y-6">
+              {/* Display existing note */}
+              {vendorNotes[selectedVendor["Company Name"]] && !showNoteForm && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h3 className="text-sm font-semibold text-slate-700 uppercase mb-2 flex items-center gap-2">
+                    <span>📝</span> My Note
+                  </h3>
+                  <p className="text-slate-700 whitespace-pre-wrap">{vendorNotes[selectedVendor["Company Name"]]}</p>
+                </div>
+              )}
+
               {selectedVendor.Notes && (
                 <div>
                   <h3 className="text-sm font-semibold text-slate-600 uppercase mb-2">About</h3>
