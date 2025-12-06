@@ -855,9 +855,9 @@ export default function Vendors() {
                 </motion.div>
               );
               })}
-                  </motion.div>
                 </motion.div>
-              ))}
+              </motion.div>
+            ))}
             </div>
           )}
         </main>
