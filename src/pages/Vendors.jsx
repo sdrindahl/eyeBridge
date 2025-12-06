@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Search, MapPin, Phone, Mail, Globe, ChevronDown, Heart, X } from "lucide-react";
+import { Search, MapPin, Phone, Mail, Globe, ChevronDown, Heart, X, Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
@@ -41,6 +41,11 @@ export default function Vendors() {
   const [appliedSearchQuery, setAppliedSearchQuery] = useState(searchParams.get("q") || "");
   const [appliedCategory, setAppliedCategory] = useState(searchParams.get("category") || "all");
   const [appliedProduct, setAppliedProduct] = useState(searchParams.get("product") || "all");
+  const [vendorReviews, setVendorReviews] = useState({});
+  const [userRating, setUserRating] = useState(0);
+  const [userComment, setUserComment] = useState("");
+  const [hoveredStar, setHoveredStar] = useState(0);
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   const categoryOptions = [
     "All Categories",
@@ -205,6 +210,10 @@ export default function Vendors() {
       // Load search history
       const storedHistory = JSON.parse(localStorage.getItem("vendorSearchHistory") || "[]");
       setSearchHistory(storedHistory);
+      
+      // Load vendor reviews
+      const storedReviews = JSON.parse(localStorage.getItem("vendorReviews") || "{}");
+      setVendorReviews(storedReviews);
     }
   }, []);
 
@@ -271,6 +280,52 @@ export default function Vendors() {
     
     const updatedHistory = [newContact, ...contactHistory].slice(0, 100);
     localStorage.setItem("contactHistory", JSON.stringify(updatedHistory));
+  };
+
+  const submitReview = () => {
+    if (!isLoggedIn) {
+      alert("Please log in to submit a review");
+      return;
+    }
+
+    if (userRating === 0) {
+      alert("Please select a star rating");
+      return;
+    }
+
+    const vendorName = selectedVendor["Company Name"];
+    const userEmail = localStorage.getItem("userEmail");
+    
+    const newReview = {
+      userEmail,
+      rating: userRating,
+      comment: userComment,
+      date: new Date().toISOString()
+    };
+
+    const updatedReviews = { ...vendorReviews };
+    if (!updatedReviews[vendorName]) {
+      updatedReviews[vendorName] = [];
+    }
+
+    // Remove any existing review from this user
+    updatedReviews[vendorName] = updatedReviews[vendorName].filter(r => r.userEmail !== userEmail);
+    // Add new review
+    updatedReviews[vendorName].push(newReview);
+
+    setVendorReviews(updatedReviews);
+    localStorage.setItem("vendorReviews", JSON.stringify(updatedReviews));
+    
+    alert("Review submitted successfully!");
+  };
+
+  const calculateAverageRating = (vendorName) => {
+    const reviews = vendorReviews[vendorName] || [];
+    // Filter out invalid reviews (no rating or rating is 0)
+    const validReviews = reviews.filter(r => r.rating && r.rating > 0);
+    if (validReviews.length === 0) return 0;
+    const sum = validReviews.reduce((acc, review) => acc + review.rating, 0);
+    return (sum / validReviews.length).toFixed(1);
   };
 
   const calculateResultCount = (query, category, product) => {
@@ -764,6 +819,19 @@ export default function Vendors() {
                   onClick={() => {
                     setSelectedVendor(vendor);
                     setShowModal(true);
+                    setShowReviewForm(false);
+                    // Load existing review for this vendor
+                    const vendorName = vendor["Company Name"];
+                    const userEmail = localStorage.getItem("userEmail");
+                    const reviews = vendorReviews[vendorName] || [];
+                    const userReview = reviews.find(r => r.userEmail === userEmail);
+                    if (userReview) {
+                      setUserRating(userReview.rating);
+                      setUserComment(userReview.comment || "");
+                    } else {
+                      setUserRating(0);
+                      setUserComment("");
+                    }
                   }}
                   className="bg-slate-50 rounded-xl shadow-md border border-slate-200 hover:shadow-xl hover:border-blue-400 transition-all cursor-pointer overflow-hidden group"
                 >
@@ -796,9 +864,31 @@ export default function Vendors() {
                         </>
                       )}
                     </div>
-                    <h3 className="text-base font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-50 transition-colors pr-20">
-                      {appliedSearchQuery ? highlightText(vendor["Company Name"], appliedSearchQuery) : vendor["Company Name"]}
-                    </h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-base font-bold text-white line-clamp-1 group-hover:text-blue-50 transition-colors">
+                        {appliedSearchQuery ? highlightText(vendor["Company Name"], appliedSearchQuery) : vendor["Company Name"]}
+                      </h3>
+                      {vendorReviews[vendor["Company Name"]] && 
+                       vendorReviews[vendor["Company Name"]].filter(r => r.rating && r.rating > 0).length > 0 && (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-3 h-3 ${
+                                  star <= Math.round(calculateAverageRating(vendor["Company Name"]))
+                                    ? "fill-yellow-300 text-yellow-300"
+                                    : "text-white/30"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-white/90 font-medium">
+                            {calculateAverageRating(vendor["Company Name"])}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-1">
                       {vendor.Category ? (
                         vendor.Category.split(';').slice(0, 2).map((cat, i) => (
@@ -876,6 +966,32 @@ export default function Vendors() {
             <div className="sticky top-0 bg-slate-200 border-b border-slate-300 p-6 flex items-start justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">{selectedVendor["Company Name"]}</h2>
+                
+                {/* Star Rating Display */}
+                {vendorReviews[selectedVendor["Company Name"]] && 
+                 vendorReviews[selectedVendor["Company Name"]].filter(r => r.rating && r.rating > 0).length > 0 && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-5 h-5 ${
+                            star <= Math.round(calculateAverageRating(selectedVendor["Company Name"]))
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-slate-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-lg font-bold text-slate-900">
+                      {calculateAverageRating(selectedVendor["Company Name"])}
+                    </span>
+                    <span className="text-sm text-slate-500">
+                      ({vendorReviews[selectedVendor["Company Name"]].filter(r => r.rating && r.rating > 0).length} review{vendorReviews[selectedVendor["Company Name"]].filter(r => r.rating && r.rating > 0).length !== 1 ? 's' : ''})
+                    </span>
+                  </div>
+                )}
+
                 {selectedVendor.Category && (
                   <div className="flex flex-wrap gap-2 mt-3">
                     {selectedVendor.Category.split(';').map((cat, i) => (
@@ -888,6 +1004,20 @@ export default function Vendors() {
                     ))}
                   </div>
                 )}
+
+                {/* Leave a Review Button */}
+                {isLoggedIn && (
+                  <Button
+                    onClick={() => setShowReviewForm(!showReviewForm)}
+                    className="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                  >
+                    {showReviewForm ? "Hide Review Form" : (
+                      vendorReviews[selectedVendor["Company Name"]]?.some(r => r.userEmail === localStorage.getItem("userEmail") && r.rating > 0)
+                        ? "Edit Review"
+                        : "Leave a Review"
+                    )}
+                  </Button>
+                )}
               </div>
               <button
                 onClick={() => setShowModal(false)}
@@ -896,6 +1026,59 @@ export default function Vendors() {
                 ×
               </button>
             </div>
+
+            {/* Review Form Section */}
+            {showReviewForm && isLoggedIn && (
+              <div className="px-6 py-4 bg-slate-100 border-b border-slate-300">
+                <h3 className="text-sm font-semibold text-slate-700 uppercase mb-4">Your Review</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-slate-600 mb-2">Your Rating:</p>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onMouseEnter={() => setHoveredStar(star)}
+                          onMouseLeave={() => setHoveredStar(0)}
+                          onClick={() => setUserRating(star)}
+                          className="focus:outline-none transition-transform hover:scale-110"
+                        >
+                          <Star
+                            className={`w-8 h-8 cursor-pointer ${
+                              star <= (hoveredStar || userRating)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-slate-300"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-slate-600 mb-2">Your Comment (optional):</p>
+                    <textarea
+                      value={userComment}
+                      onChange={(e) => setUserComment(e.target.value)}
+                      placeholder="Share your experience with this vendor..."
+                      className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white text-slate-800 text-sm"
+                      rows="4"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={() => {
+                      submitReview();
+                      setShowReviewForm(false);
+                    }}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Submit Review
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <div className="p-6 space-y-6">
               {selectedVendor.Notes && (
