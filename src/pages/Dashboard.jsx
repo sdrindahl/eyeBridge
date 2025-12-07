@@ -83,42 +83,34 @@ export default function Dashboard() {
       try {
         const userData = await api.syncUserData();
         
-        // Set favorites (convert from backend format)
-        const favoritesArray = userData.favorites.map(fav => fav.vendor_name);
-        setFavorites(favoritesArray);
+        // Set favorites - backend returns array of vendor names
+        setFavorites(userData.favorites || []);
         
-        // Set search history (convert from backend format)
-        const recentSearchesArray = userData.searchHistory.slice(0, 10).map(search => search.search_term);
+        // Set search history - backend returns array of objects with searchTerm
+        const recentSearchesArray = (userData.searchHistory || [])
+          .slice(0, 10)
+          .map(search => search.searchTerm);
         setRecentSearches(recentSearchesArray);
-        setSearchHistory(userData.searchHistory);
+        setSearchHistory(userData.searchHistory || []);
         
-        // Set vendor notes (convert to object keyed by vendor name)
-        const notesObject = {};
-        userData.notes.forEach(note => {
-          notesObject[note.vendor_name] = note.note_text;
-        });
-        setVendorNotes(notesObject);
+        // Set vendor notes - backend returns object keyed by vendor name
+        setVendorNotes(userData.notes || {});
         
-        // Set vendor reviews (convert to object keyed by vendor name)
+        // Set vendor reviews - backend returns object with rating and comment per vendor
+        // Convert to array format expected by UI
         const reviewsObject = {};
-        userData.reviews.forEach(review => {
-          if (!reviewsObject[review.vendor_name]) {
-            reviewsObject[review.vendor_name] = [];
-          }
-          reviewsObject[review.vendor_name].push({
+        Object.entries(userData.reviews || {}).forEach(([vendorName, review]) => {
+          reviewsObject[vendorName] = [{
             rating: review.rating,
             comment: review.comment,
-            date: review.created_at
-          });
+            date: new Date().toISOString()
+          }];
         });
         setVendorReviews(reviewsObject);
         
-        // Load contact history and comparisons from localStorage (not yet in backend)
-        const storedContacts = JSON.parse(localStorage.getItem("contactHistory") || "[]");
-        setContactHistory(storedContacts);
-        
-        const storedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
-        setSavedComparisons(storedComparisons);
+        // Contact history and comparisons will be empty for now (backend feature not yet implemented)
+        setContactHistory([]);
+        setSavedComparisons([]);
         
       } catch (error) {
         console.error("Error loading user data:", error);
@@ -141,14 +133,6 @@ export default function Dashboard() {
     };
     
     loadUserData();
-
-    // Load search history
-    const storedHistory = JSON.parse(localStorage.getItem("vendorSearchHistory") || "[]");
-    setSearchHistory(storedHistory);
-
-    // Load vendor reviews
-    const storedReviews = JSON.parse(localStorage.getItem("vendorReviews") || "{}");
-    setVendorReviews(storedReviews);
   }, [navigate]);
 
   const handleLogout = () => {
@@ -157,22 +141,26 @@ export default function Dashboard() {
     navigate("/");
   };
 
-  const saveVendorNote = (vendorName, noteText) => {
-    const updatedNotes = { ...vendorNotes, [vendorName]: noteText };
-    setVendorNotes(updatedNotes);
-    localStorage.setItem("vendorNotes", JSON.stringify(updatedNotes));
-    
-    // Track in contact history
-    const contactHistory = JSON.parse(localStorage.getItem("contactHistory") || "[]");
-    const newContact = {
-      vendorName,
-      type: "note",
-      note: noteText,
-      date: new Date().toISOString()
-    };
-    const updatedHistory = [newContact, ...contactHistory].slice(0, 100);
-    localStorage.setItem("contactHistory", JSON.stringify(updatedHistory));
-    setContactHistory(updatedHistory);
+  const saveVendorNote = async (vendorName, noteText) => {
+    try {
+      await api.saveNote(vendorName, noteText);
+      const updatedNotes = { ...vendorNotes, [vendorName]: noteText };
+      setVendorNotes(updatedNotes);
+      
+      // Track in contact history (still using localStorage for now)
+      const contactHistory = JSON.parse(localStorage.getItem("contactHistory") || "[]");
+      const newContact = {
+        vendorName,
+        type: "note",
+        note: noteText,
+        date: new Date().toISOString()
+      };
+      const updatedHistory = [newContact, ...contactHistory].slice(0, 100);
+      localStorage.setItem("contactHistory", JSON.stringify(updatedHistory));
+      setContactHistory(updatedHistory);
+    } catch (error) {
+      console.error("Error saving note:", error);
+    }
   };
 
   const openVendorModal = (vendorName) => {
@@ -206,7 +194,7 @@ export default function Dashboard() {
     return (sum / validReviews.length).toFixed(1);
   };
 
-  const submitReview = () => {
+  const submitReview = async () => {
     if (userRating === 0) {
       alert("Please select a star rating");
       return;
@@ -214,27 +202,33 @@ export default function Dashboard() {
 
     const vendorName = selectedVendor["Company Name"];
     
-    const newReview = {
-      userEmail,
-      rating: userRating,
-      comment: userComment,
-      date: new Date().toISOString()
-    };
+    try {
+      await api.saveReview(vendorName, userRating, userComment);
 
-    const updatedReviews = { ...vendorReviews };
-    if (!updatedReviews[vendorName]) {
-      updatedReviews[vendorName] = [];
+      const newReview = {
+        userEmail,
+        rating: userRating,
+        comment: userComment,
+        date: new Date().toISOString()
+      };
+
+      const updatedReviews = { ...vendorReviews };
+      if (!updatedReviews[vendorName]) {
+        updatedReviews[vendorName] = [];
+      }
+
+      // Remove any existing review from this user
+      updatedReviews[vendorName] = updatedReviews[vendorName].filter(r => r.userEmail !== userEmail);
+      // Add new review
+      updatedReviews[vendorName].push(newReview);
+
+      setVendorReviews(updatedReviews);
+      
+      alert("Review submitted successfully!");
+    } catch (error) {
+      console.error("Error saving review:", error);
+      alert("Failed to save review");
     }
-
-    // Remove any existing review from this user
-    updatedReviews[vendorName] = updatedReviews[vendorName].filter(r => r.userEmail !== userEmail);
-    // Add new review
-    updatedReviews[vendorName].push(newReview);
-
-    setVendorReviews(updatedReviews);
-    localStorage.setItem("vendorReviews", JSON.stringify(updatedReviews));
-    
-    alert("Review submitted successfully!");
   };
 
   const saveSearchToHistory = () => {
@@ -781,14 +775,18 @@ export default function Dashboard() {
                           {compareList.includes(vendor["Company Name"]) ? "✓ Compare" : "Compare"}
                         </button>
                         <button
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            const newFavorites = favorites.filter(f => f !== vendor["Company Name"]);
-                            setFavorites(newFavorites);
-                            localStorage.setItem("favorites", JSON.stringify(newFavorites));
-                            // Also remove from compare list if it's there
-                            if (compareList.includes(vendor["Company Name"])) {
-                              setCompareList(compareList.filter(v => v !== vendor["Company Name"]));
+                            try {
+                              await api.removeFavorite(vendor["Company Name"]);
+                              const newFavorites = favorites.filter(f => f !== vendor["Company Name"]);
+                              setFavorites(newFavorites);
+                              // Also remove from compare list if it's there
+                              if (compareList.includes(vendor["Company Name"])) {
+                                setCompareList(compareList.filter(v => v !== vendor["Company Name"]));
+                              }
+                            } catch (error) {
+                              console.error("Error removing favorite:", error);
                             }
                           }}
                           className="rounded-full p-1.5 transition-all bg-red-100 hover:bg-red-200 text-red-600"
@@ -1186,14 +1184,19 @@ export default function Dashboard() {
                     </Button>
                     {vendorNotes[selectedVendor["Company Name"]] && (
                       <Button
-                        onClick={() => {
-                          setCurrentNote("");
-                          const updatedNotes = { ...vendorNotes };
-                          delete updatedNotes[selectedVendor["Company Name"]];
-                          setVendorNotes(updatedNotes);
-                          localStorage.setItem("vendorNotes", JSON.stringify(updatedNotes));
-                          alert("Note deleted!");
-                          setShowNoteForm(false);
+                        onClick={async () => {
+                          try {
+                            await api.deleteNote(selectedVendor["Company Name"]);
+                            setCurrentNote("");
+                            const updatedNotes = { ...vendorNotes };
+                            delete updatedNotes[selectedVendor["Company Name"]];
+                            setVendorNotes(updatedNotes);
+                            alert("Note deleted!");
+                            setShowNoteForm(false);
+                          } catch (error) {
+                            console.error("Error deleting note:", error);
+                            alert("Failed to delete note");
+                          }
                         }}
                         variant="outline"
                         className="border-red-500 text-red-500 hover:bg-red-50"

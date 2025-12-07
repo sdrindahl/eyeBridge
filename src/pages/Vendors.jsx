@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import api from "@/services/api";
 
 export default function Vendors() {
   const navigate = useNavigate();
@@ -208,20 +209,37 @@ export default function Vendors() {
     setIsLoggedIn(loggedIn);
     
     if (loggedIn) {
-      const storedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-      setFavorites(storedFavorites);
+      // Load all user data from backend
+      const loadUserData = async () => {
+        try {
+          const userData = await api.syncUserData();
+          
+          // Set favorites
+          setFavorites(userData.favorites || []);
+          
+          // Set search history
+          setSearchHistory(userData.searchHistory || []);
+          
+          // Set vendor notes
+          setVendorNotes(userData.notes || {});
+          
+          // Set vendor reviews - convert to UI format
+          const reviewsObject = {};
+          Object.entries(userData.reviews || {}).forEach(([vendorName, review]) => {
+            reviewsObject[vendorName] = [{
+              rating: review.rating,
+              comment: review.comment,
+              userEmail: localStorage.getItem("userEmail"),
+              date: new Date().toISOString()
+            }];
+          });
+          setVendorReviews(reviewsObject);
+        } catch (error) {
+          console.error("Error loading user data:", error);
+        }
+      };
       
-      // Load search history
-      const storedHistory = JSON.parse(localStorage.getItem("vendorSearchHistory") || "[]");
-      setSearchHistory(storedHistory);
-      
-      // Load vendor reviews
-      const storedReviews = JSON.parse(localStorage.getItem("vendorReviews") || "{}");
-      setVendorReviews(storedReviews);
-      
-      // Load vendor notes
-      const storedNotes = JSON.parse(localStorage.getItem("vendorNotes") || "{}");
-      setVendorNotes(storedNotes);
+      loadUserData();
     }
   }, []);
 
@@ -251,18 +269,26 @@ export default function Vendors() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery, selectedCategory, selectedProduct, isLoggedIn]);
 
-  const toggleFavorite = (vendorName) => {
+  const toggleFavorite = async (vendorName) => {
     if (!isLoggedIn) {
       alert("Please log in to save favorites");
       return;
     }
 
-    const newFavorites = favorites.includes(vendorName)
-      ? favorites.filter(f => f !== vendorName)
-      : [...favorites, vendorName];
-    
-    setFavorites(newFavorites);
-    localStorage.setItem("favorites", JSON.stringify(newFavorites));
+    try {
+      const isFavorite = favorites.includes(vendorName);
+      
+      if (isFavorite) {
+        await api.removeFavorite(vendorName);
+        setFavorites(favorites.filter(f => f !== vendorName));
+      } else {
+        await api.addFavorite(vendorName);
+        setFavorites([...favorites, vendorName]);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      alert("Failed to update favorite");
+    }
   };
 
   const toggleCompare = (vendorName) => {
@@ -290,7 +316,7 @@ export default function Vendors() {
     localStorage.setItem("contactHistory", JSON.stringify(updatedHistory));
   };
 
-  const submitReview = () => {
+  const submitReview = async () => {
     if (!isLoggedIn) {
       alert("Please log in to submit a review");
       return;
@@ -304,33 +330,44 @@ export default function Vendors() {
     const vendorName = selectedVendor["Company Name"];
     const userEmail = localStorage.getItem("userEmail");
     
-    const newReview = {
-      userEmail,
-      rating: userRating,
-      comment: userComment,
-      date: new Date().toISOString()
-    };
+    try {
+      await api.saveReview(vendorName, userRating, userComment);
 
-    const updatedReviews = { ...vendorReviews };
-    if (!updatedReviews[vendorName]) {
-      updatedReviews[vendorName] = [];
+      const newReview = {
+        userEmail,
+        rating: userRating,
+        comment: userComment,
+        date: new Date().toISOString()
+      };
+
+      const updatedReviews = { ...vendorReviews };
+      if (!updatedReviews[vendorName]) {
+        updatedReviews[vendorName] = [];
+      }
+
+      // Remove any existing review from this user
+      updatedReviews[vendorName] = updatedReviews[vendorName].filter(r => r.userEmail !== userEmail);
+      // Add new review
+      updatedReviews[vendorName].push(newReview);
+
+      setVendorReviews(updatedReviews);
+      
+      alert("Review submitted successfully!");
+    } catch (error) {
+      console.error("Error saving review:", error);
+      alert("Failed to save review");
     }
-
-    // Remove any existing review from this user
-    updatedReviews[vendorName] = updatedReviews[vendorName].filter(r => r.userEmail !== userEmail);
-    // Add new review
-    updatedReviews[vendorName].push(newReview);
-
-    setVendorReviews(updatedReviews);
-    localStorage.setItem("vendorReviews", JSON.stringify(updatedReviews));
-    
-    alert("Review submitted successfully!");
   };
 
-  const saveVendorNote = (vendorName, noteText) => {
-    const updatedNotes = { ...vendorNotes, [vendorName]: noteText };
-    setVendorNotes(updatedNotes);
-    localStorage.setItem("vendorNotes", JSON.stringify(updatedNotes));
+  const saveVendorNote = async (vendorName, noteText) => {
+    try {
+      await api.saveNote(vendorName, noteText);
+      const updatedNotes = { ...vendorNotes, [vendorName]: noteText };
+      setVendorNotes(updatedNotes);
+    } catch (error) {
+      console.error("Error saving note:", error);
+      alert("Failed to save note");
+    }
   };
 
   const calculateAverageRating = (vendorName) => {
