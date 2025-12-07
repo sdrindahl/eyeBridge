@@ -2,20 +2,24 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import api from "@/services/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     // Basic validation
     if (!email || !password) {
       setError("Please enter both email and password");
+      setLoading(false);
       return;
     }
 
@@ -23,45 +27,24 @@ export default function Login() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address");
+      setLoading(false);
       return;
     }
 
-    // Password validation
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
-      return;
+    try {
+      const response = await api.login(email, password);
+      
+      if (response.token) {
+        api.setToken(response.token);
+        // Keep email in localStorage for UI display
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("isLoggedIn", "true");
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      setError(err.message || "Invalid email or password");
+      setLoading(false);
     }
-
-    if (!/[A-Z]/.test(password)) {
-      setError("Password must contain at least one uppercase letter");
-      return;
-    }
-
-    if (!/[a-z]/.test(password)) {
-      setError("Password must contain at least one lowercase letter");
-      return;
-    }
-
-    if (!/[0-9]/.test(password)) {
-      setError("Password must contain at least one number");
-      return;
-    }
-
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      setError("Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>)");
-      return;
-    }
-
-    // For demo purposes, accept any login that meets requirements
-    // In production, this would make an API call to authenticate
-    console.log("Login attempt:", { email, password });
-    
-    // Store login state (in production, you'd use proper auth tokens)
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("userEmail", email);
-    
-    // Redirect to dashboard page
-    navigate("/dashboard");
   };
 
   return (
@@ -143,16 +126,17 @@ export default function Login() {
 
               <Button 
                 type="submit"
-                className="w-full rounded-lg py-3 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-medium"
+                disabled={loading}
+                className="w-full rounded-lg py-3 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign In
+                {loading ? "Signing In..." : "Sign In"}
               </Button>
 
               <div className="text-center text-sm text-slate-600 mt-4">
                 Don't have an account?{" "}
-                <a href="#" className="text-slate-700 font-medium hover:text-slate-900">
+                <Link to="/register" className="text-slate-700 font-medium hover:text-slate-900">
                   Sign up
-                </a>
+                </Link>
               </div>
             </form>
           </CardContent>

@@ -4,6 +4,7 @@ import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
+import api from "@/services/api";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -77,25 +78,69 @@ export default function Dashboard() {
     // Load user data
     setUserEmail(localStorage.getItem("userEmail") || "");
     
-    // Load favorites
-    const storedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-    setFavorites(storedFavorites);
-
-    // Load recent searches
-    const storedSearches = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-    setRecentSearches(storedSearches);
-
-    // Load contact history
-    const storedContacts = JSON.parse(localStorage.getItem("contactHistory") || "[]");
-    setContactHistory(storedContacts);
-
-    // Load saved comparisons
-    const storedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
-    setSavedComparisons(storedComparisons);
-
-    // Load vendor notes
-    const storedNotes = JSON.parse(localStorage.getItem("vendorNotes") || "{}");
-    setVendorNotes(storedNotes);
+    // Load user data from backend
+    const loadUserData = async () => {
+      try {
+        const userData = await api.syncUserData();
+        
+        // Set favorites (convert from backend format)
+        const favoritesArray = userData.favorites.map(fav => fav.vendor_name);
+        setFavorites(favoritesArray);
+        
+        // Set search history (convert from backend format)
+        const recentSearchesArray = userData.searchHistory.slice(0, 10).map(search => search.search_term);
+        setRecentSearches(recentSearchesArray);
+        setSearchHistory(userData.searchHistory);
+        
+        // Set vendor notes (convert to object keyed by vendor name)
+        const notesObject = {};
+        userData.notes.forEach(note => {
+          notesObject[note.vendor_name] = note.note_text;
+        });
+        setVendorNotes(notesObject);
+        
+        // Set vendor reviews (convert to object keyed by vendor name)
+        const reviewsObject = {};
+        userData.reviews.forEach(review => {
+          if (!reviewsObject[review.vendor_name]) {
+            reviewsObject[review.vendor_name] = [];
+          }
+          reviewsObject[review.vendor_name].push({
+            rating: review.rating,
+            comment: review.comment,
+            date: review.created_at
+          });
+        });
+        setVendorReviews(reviewsObject);
+        
+        // Load contact history and comparisons from localStorage (not yet in backend)
+        const storedContacts = JSON.parse(localStorage.getItem("contactHistory") || "[]");
+        setContactHistory(storedContacts);
+        
+        const storedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
+        setSavedComparisons(storedComparisons);
+        
+      } catch (error) {
+        console.error("Error loading user data:", error);
+        // Fallback to localStorage if API fails
+        const storedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+        setFavorites(storedFavorites);
+        
+        const storedSearches = JSON.parse(localStorage.getItem("recentSearches") || "[]");
+        setRecentSearches(storedSearches);
+        
+        const storedContacts = JSON.parse(localStorage.getItem("contactHistory") || "[]");
+        setContactHistory(storedContacts);
+        
+        const storedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
+        setSavedComparisons(storedComparisons);
+        
+        const storedNotes = JSON.parse(localStorage.getItem("vendorNotes") || "{}");
+        setVendorNotes(storedNotes);
+      }
+    };
+    
+    loadUserData();
 
     // Load search history
     const storedHistory = JSON.parse(localStorage.getItem("vendorSearchHistory") || "[]");
