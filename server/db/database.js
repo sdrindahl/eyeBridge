@@ -6,7 +6,8 @@ import { promisify } from 'util';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = process.env.DB_PATH || path.join(__dirname, 'eyebridge.db');
+//const dbPath = process.env.DB_PATH || path.join(__dirname, 'eyebridge.db');
+const dbPath = process.env.DB_PATH || path.join(__dirname, '..', 'eyebridge.db');
 
 // Create database connection
 const db = new sqlite3.Database(dbPath);
