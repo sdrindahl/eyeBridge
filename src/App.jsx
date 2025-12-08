@@ -7,6 +7,8 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import PasswordGate from "./components/PasswordGate";
 
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+
 export default function App() {
   return (
     <PasswordGate>
