@@ -18,6 +18,10 @@ playwright-report/
 playwright/.cache/
 playwright/.auth/user.json
 
+# Database files
+server/db/*.db
+server/db/*.db-journal
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
