@@ -83,10 +83,9 @@ export default function Register() {
       });
       
       if (response.token) {
-        api.setToken(response.token);
+        // Token is automatically stored by api.register
         // Store user info for UI display
         localStorage.setItem("userEmail", email);
-        localStorage.setItem("isLoggedIn", "true");
         navigate("/dashboard");
       }
     } catch (err) {

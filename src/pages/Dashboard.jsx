@@ -33,6 +33,8 @@ export default function Dashboard() {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const categoryOptions = [
     "All Categories",
@@ -68,19 +70,17 @@ export default function Dashboard() {
   }, [selectedCategory]);
 
   useEffect(() => {
-    // Check if user is logged in
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (!isLoggedIn) {
-      navigate("/login");
-      return;
-    }
-
-    // Load user data
-    setUserEmail(localStorage.getItem("userEmail") || "");
-    
-    // Load user data from backend
-    const loadUserData = async () => {
+    // Check if user is logged in and load data
+    const initializeDashboard = async () => {
+      setLoading(true);
+      setError(null);
+      
       try {
+        // Verify token first
+        const user = await api.verifyToken();
+        setUserEmail(user.user?.email || "");
+        
+        // Load user data from backend
         const userData = await api.syncUserData();
         
         // Set favorites - backend returns array of vendor names
@@ -112,9 +112,21 @@ export default function Dashboard() {
         setContactHistory([]);
         setSavedComparisons([]);
         
+        setLoading(false);
+        
       } catch (error) {
         console.error("Error loading user data:", error);
-        // Fallback to localStorage if API fails
+        // If token is invalid, redirect to login
+        if (error.message?.includes('Unauthorized') || error.message?.includes('Invalid token')) {
+          api.logout();
+          navigate("/login");
+          return;
+        }
+        
+        // For network or other errors, show error message and fallback to localStorage
+        setError(error.message || 'Failed to load user data');
+        
+        // Fallback to localStorage if API fails for other reasons
         const storedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
         setFavorites(storedFavorites);
         
@@ -129,15 +141,16 @@ export default function Dashboard() {
         
         const storedNotes = JSON.parse(localStorage.getItem("vendorNotes") || "{}");
         setVendorNotes(storedNotes);
+        
+        setLoading(false);
       }
     };
     
-    loadUserData();
+    initializeDashboard();
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userEmail");
+    api.logout();
     navigate("/");
   };
 
@@ -160,6 +173,7 @@ export default function Dashboard() {
       setContactHistory(updatedHistory);
     } catch (error) {
       console.error("Error saving note:", error);
+      alert(`Failed to save note: ${error.message}`);
     }
   };
 
@@ -227,7 +241,7 @@ export default function Dashboard() {
       alert("Review submitted successfully!");
     } catch (error) {
       console.error("Error saving review:", error);
-      alert("Failed to save review");
+      alert(`Failed to save review: ${error.message}`);
     }
   };
 
@@ -318,6 +332,18 @@ export default function Dashboard() {
     navigate(`/vendors?${params.toString()}`);
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-300 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-slate-900 mx-auto mb-4"></div>
+          <p className="text-slate-700 text-lg">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-300">
       {/* Header */}
@@ -350,6 +376,20 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-yellow-50 border-b border-yellow-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-yellow-800">⚠️</span>
+              <p className="text-sm text-yellow-800">
+                {error} - Showing cached data.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main data-testid="dashboard-main" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -787,6 +827,7 @@ export default function Dashboard() {
                               }
                             } catch (error) {
                               console.error("Error removing favorite:", error);
+                              alert(`Failed to remove favorite: ${error.message}`);
                             }
                           }}
                           className="rounded-full p-1.5 transition-all bg-red-100 hover:bg-red-200 text-red-600"

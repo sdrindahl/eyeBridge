@@ -35,14 +35,41 @@ class APIService {
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
+      
+      // Handle non-JSON responses
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        data = { error: text || 'Server error' };
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || 'Request failed');
+        // Handle specific HTTP error codes
+        if (response.status === 401) {
+          throw new Error('Unauthorized - Invalid credentials or token expired');
+        } else if (response.status === 403) {
+          throw new Error('Forbidden - Access denied');
+        } else if (response.status === 404) {
+          throw new Error('Not found');
+        } else if (response.status === 500) {
+          throw new Error('Server error - Please try again later');
+        }
+        
+        throw new Error(data.error || `Request failed with status ${response.status}`);
       }
 
       return data;
     } catch (error) {
+      // Handle network errors
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        console.error('Network error - Unable to connect to server:', error);
+        throw new Error('Unable to connect to server. Please check your internet connection.');
+      }
+      
       console.error('API request error:', error);
       throw error;
     }

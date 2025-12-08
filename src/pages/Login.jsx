@@ -35,10 +35,9 @@ export default function Login() {
       const response = await api.login(email, password);
       
       if (response.token) {
-        api.setToken(response.token);
+        // Token is automatically stored by api.login
         // Keep email in localStorage for UI display
         localStorage.setItem("userEmail", email);
-        localStorage.setItem("isLoggedIn", "true");
         navigate("/dashboard");
       }
     } catch (err) {

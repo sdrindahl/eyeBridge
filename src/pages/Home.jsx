@@ -4,6 +4,7 @@ import { ArrowRight, Check, Rocket, Layers, Shield, Users, Zap, Mail } from "luc
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import api from "@/services/api";
 
 // 🔧 Quick edit guide:
 // - Replace BRAND_NAME, TAGLINE, and all placeholder copy.
@@ -81,13 +82,21 @@ export default function Home() {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    setIsLoggedIn(loggedIn);
+    // Check if user has valid token
+    const checkAuth = async () => {
+      try {
+        await api.verifyToken();
+        setIsLoggedIn(true);
+      } catch (error) {
+        setIsLoggedIn(false);
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userEmail");
+    api.logout();
     setIsLoggedIn(false);
     navigate("/");
   };

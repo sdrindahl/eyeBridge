@@ -59,10 +59,10 @@ router.get('/favorites', async (req, res) => {
       [req.userId]
     );
 
-    res.json(favorites.map(f => ({
-      vendorName: f.vendor_name,
-      createdAt: f.created_at
-    })));
+    // Return array of vendor names for consistency with /sync endpoint
+    res.json({
+      favorites: favorites.map(f => f.vendor_name)
+    });
   } catch (error) {
     console.error('Get favorites error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -157,12 +157,13 @@ router.get('/notes', async (req, res) => {
       [req.userId]
     );
 
-    res.json(notes.map(n => ({
-      vendorName: n.vendor_name,
-      note: n.note,
-      createdAt: n.created_at,
-      updatedAt: n.updated_at
-    })));
+    // Return as object keyed by vendor name for consistency with /sync endpoint
+    const notesObject = notes.reduce((acc, n) => {
+      acc[n.vendor_name] = n.note;
+      return acc;
+    }, {});
+
+    res.json({ notes: notesObject });
   } catch (error) {
     console.error('Get notes error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -218,13 +219,16 @@ router.get('/reviews', async (req, res) => {
       [req.userId]
     );
 
-    res.json(reviews.map(r => ({
-      vendorName: r.vendor_name,
-      rating: r.rating,
-      comment: r.comment,
-      createdAt: r.created_at,
-      updatedAt: r.updated_at
-    })));
+    // Return as object keyed by vendor name for consistency with /sync endpoint
+    const reviewsObject = reviews.reduce((acc, r) => {
+      acc[r.vendor_name] = {
+        rating: r.rating,
+        comment: r.comment
+      };
+      return acc;
+    }, {});
+
+    res.json({ reviews: reviewsObject });
   } catch (error) {
     console.error('Get reviews error:', error);
     res.status(500).json({ error: 'Internal server error' });
