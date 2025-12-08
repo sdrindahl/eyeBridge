@@ -208,6 +208,8 @@ npm run test
 
 ## 📝 Environment Variables
 
+### Development
+
 Create a `.env` file in the `server` directory:
 
 ```env
@@ -222,6 +224,71 @@ Create a `.env` file in the root directory:
 ```env
 VITE_API_URL=http://localhost:3001/api
 ```
+
+### Production
+
+**Backend Environment Variables:**
+```env
+PORT=3001
+JWT_SECRET=your-production-secret-key-here
+JWT_EXPIRES_IN=7d
+CLIENT_URL=https://your-frontend-domain.com
+NODE_ENV=production
+```
+
+**Frontend Environment Variables:**
+```env
+VITE_API_URL=https://your-backend-domain.com/api
+```
+
+---
+
+## 🌐 Production Deployment
+
+### Deploy Backend (Choose one):
+
+#### **Railway**
+1. Connect your GitHub repository
+2. Set environment variables in Railway dashboard
+3. Deploy automatically on push
+
+#### **Render**
+1. Create new Web Service
+2. Connect repository (select `server` folder as root)
+3. Set environment variables
+4. Deploy
+
+#### **Heroku**
+```bash
+cd server
+heroku create your-app-backend
+heroku config:set JWT_SECRET=your-secret CLIENT_URL=https://your-frontend.com
+git push heroku main
+```
+
+### Deploy Frontend (Choose one):
+
+#### **Vercel** (Recommended)
+1. Import project from GitHub
+2. Framework Preset: Vite
+3. Add environment variable: `VITE_API_URL=https://your-backend.com/api`
+4. Deploy
+
+#### **Netlify**
+1. Connect repository
+2. Build command: `npm run build`
+3. Publish directory: `dist`
+4. Add environment variable: `VITE_API_URL=https://your-backend.com/api`
+5. Deploy
+
+### Important Production Checklist:
+- [ ] Set strong `JWT_SECRET` (use random 32+ character string)
+- [ ] Update `CLIENT_URL` to your production frontend URL
+- [ ] Update `VITE_API_URL` to your production backend URL
+- [ ] Ensure CORS is properly configured
+- [ ] Use HTTPS for both frontend and backend
+- [ ] Test authentication flow in production
+- [ ] Monitor backend logs for errors
 
 ---
 
@@ -266,6 +333,59 @@ This project is private and proprietary.
 - Inspired by Nicole's idea to connect eye care professionals with vendors
 - Built with modern web technologies for optimal performance
 - Designed with user experience in mind
+
+---
+
+## 🔧 Troubleshooting
+
+### "Unable to connect to server" in Production
+
+**Problem:** Frontend cannot reach backend API
+
+**Solutions:**
+1. **Check `VITE_API_URL`**: Ensure it points to your production backend URL
+   - In Vercel/Netlify: Go to Settings → Environment Variables
+   - Must include `/api` at the end (e.g., `https://your-backend.com/api`)
+   - After updating, redeploy the frontend
+
+2. **Check Backend CORS**: Ensure `CLIENT_URL` in backend matches your frontend domain
+   - Update environment variable: `CLIENT_URL=https://your-frontend.com`
+   - Redeploy backend
+
+3. **Verify Backend is Running**: 
+   - Visit `https://your-backend.com/api/health`
+   - Should return: `{"status":"ok","timestamp":"..."}`
+
+4. **Check HTTPS**: Both frontend and backend should use HTTPS in production
+
+### Login/Register Not Working
+
+**Problem:** Authentication fails silently
+
+**Check:**
+- Browser console for error messages (F12 → Console)
+- Network tab to see API requests (F12 → Network)
+- Backend logs for authentication errors
+- JWT_SECRET is set in production backend
+- Passwords meet requirements (6+ chars, uppercase, lowercase, number, special char)
+
+### Database Not Persisting
+
+**Problem:** User data disappears after backend restart
+
+**Solution:**
+- Ensure `server/db/` directory exists on your hosting platform
+- Use persistent storage (Railway, Render, Heroku offer this)
+- Consider migrating to PostgreSQL for production
+
+### CORS Errors
+
+**Problem:** Browser blocks requests due to CORS policy
+
+**Solution:**
+- Set `CLIENT_URL` environment variable in backend to your frontend URL
+- Ensure both domains use HTTPS
+- Check that your hosting platform isn't adding additional CORS restrictions
 
 ---
 
