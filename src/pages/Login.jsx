@@ -1,15 +1,16 @@
 import React, { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "@/services/api";
 
-export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,8 +37,7 @@ export default function Login() {
       
       if (response.token) {
         // Token is automatically stored by api.login
-        // Keep email in localStorage for UI display
-        localStorage.setItem("userEmail", email);
+        login(email); // Update global auth state
         navigate("/dashboard");
       }
     } catch (err) {
