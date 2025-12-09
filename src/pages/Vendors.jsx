@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Search, MapPin, Phone, Mail, Globe, ChevronDown, Heart, X, Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import api from "@/services/api";
 
-export default function Vendors() {
   const navigate = useNavigate();
+  const { isLoggedIn, userEmail } = useAuth();
 
   // Highlight matching text
   const highlightText = (text, query) => {
@@ -33,7 +34,7 @@ export default function Vendors() {
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [favorites, setFavorites] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Remove local isLoggedIn state, use context instead
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [compareList, setCompareList] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
@@ -205,31 +206,20 @@ export default function Vendors() {
 
   // Load favorites and login state
   useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    setIsLoggedIn(loggedIn);
-    
-    if (loggedIn) {
+    if (isLoggedIn) {
       // Load all user data from backend
       const loadUserData = async () => {
         try {
           const userData = await api.syncUserData();
-          
-          // Set favorites
           setFavorites(userData.favorites || []);
-          
-          // Set search history
           setSearchHistory(userData.searchHistory || []);
-          
-          // Set vendor notes
           setVendorNotes(userData.notes || {});
-          
-          // Set vendor reviews - convert to UI format
           const reviewsObject = {};
           Object.entries(userData.reviews || {}).forEach(([vendorName, review]) => {
             reviewsObject[vendorName] = [{
               rating: review.rating,
               comment: review.comment,
-              userEmail: localStorage.getItem("userEmail"),
+              userEmail: userEmail,
               date: new Date().toISOString()
             }];
           });
@@ -238,10 +228,9 @@ export default function Vendors() {
           console.error("Error loading user data:", error);
         }
       };
-      
       loadUserData();
     }
-  }, []);
+  }, [isLoggedIn, userEmail]);
 
   // Track searches with debounce - only save after user stops typing for 2 seconds
   useEffect(() => {
