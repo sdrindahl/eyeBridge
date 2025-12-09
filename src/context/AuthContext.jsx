@@ -7,10 +7,20 @@ export function AuthProvider({ children }) {
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    const email = localStorage.getItem("userEmail") || "";
-    setIsLoggedIn(loggedIn);
-    setUserEmail(email);
+    const syncAuthState = () => {
+      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const email = localStorage.getItem("userEmail") || "";
+      setIsLoggedIn(loggedIn);
+      setUserEmail(email);
+    };
+    syncAuthState();
+
+    // Listen for localStorage changes (cross-tab and navigation)
+    window.addEventListener("storage", syncAuthState);
+
+    return () => {
+      window.removeEventListener("storage", syncAuthState);
+    };
   }, []);
 
   const login = (email) => {
