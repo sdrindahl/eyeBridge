@@ -8,13 +8,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import api from "@/services/api";
 
+function Vendors() {
   const navigate = useNavigate();
   const { isLoggedIn, userEmail } = useAuth();
 
   // Highlight matching text
   const highlightText = (text, query) => {
     if (!text || !query) return text;
-    
     const parts = text.split(new RegExp(`(${query})`, 'gi'));
     return parts.map((part, index) => 
       part.toLowerCase() === query.toLowerCase() ? (

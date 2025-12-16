@@ -1,10 +1,5 @@
-import React, { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import api from "@/services/api";
 
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -144,3 +139,5 @@ import api from "@/services/api";
     </div>
   );
 }
+
+export default Login;
