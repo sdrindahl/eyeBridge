@@ -1537,4 +1537,4 @@ import api from "@/services/api";
       )}
     </div>
   );
-}
+export default Vendors;

@@ -143,4 +143,4 @@ import api from "@/services/api";
       </div>
     </div>
   );
-}
+export default Login;
