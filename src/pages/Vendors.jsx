@@ -617,6 +617,81 @@ function Vendors() {
                   Go
                 </Button>
               </div>
+
+              {/* Mobile Category Dropdown */}
+              {showCategoryDropdown && (
+                <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20">
+                  {categoryOptions.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => {
+                        setSelectedCategory(category === "All Categories" ? "all" : category);
+                        setSelectedProduct("all");
+                        setShowCategoryDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Mobile Product Dropdown */}
+              {showProductDropdown && selectedCategory !== "all" && (
+                <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 max-h-48 overflow-y-auto">
+                  {productOptions.map((product) => (
+                    <button
+                      key={product}
+                      onClick={() => {
+                        setSelectedProduct(product === "All Products" ? "all" : product);
+                        setShowProductDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
+                    >
+                      {product}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Mobile Clear Button */}
+              {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all") && (
+                <div className="mt-2">
+                  <Button 
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedCategory("all");
+                      setSelectedProduct("all");
+                      setAppliedSearchQuery("");
+                      setAppliedCategory("all");
+                      setAppliedProduct("all");
+                      setAnimationKey(prev => prev + 1);
+                    }}
+                    variant="outline"
+                    className="w-full border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-sm"
+                  >
+                    Clear Search
+                  </Button>
+                </div>
+              )}
+
+              {/* Mobile Favorites Filter */}
+              {isLoggedIn && favorites.length > 0 && (
+                <div className="mt-2">
+                  <Button 
+                    onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                    variant={showFavoritesOnly ? "default" : "outline"}
+                    className={showFavoritesOnly 
+                      ? "w-full bg-red-500 hover:bg-red-600 text-white text-sm" 
+                      : "w-full border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-sm"
+                    }
+                  >
+                    <Heart className={`w-4 h-4 mr-2 ${showFavoritesOnly ? "fill-white" : ""}`} />
+                    {showFavoritesOnly ? "Show All" : `Favorites (${favorites.length})`}
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Desktop Filters and Search Row */}
