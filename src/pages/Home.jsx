@@ -83,17 +83,28 @@ export default function Home() {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     // Check if user has valid token
     const checkAuth = async () => {
       try {
         await api.verifyToken();
-        setIsLoggedIn(true);
+        if (isMounted) {
+          setIsLoggedIn(true);
+        }
       } catch (error) {
-        setIsLoggedIn(false);
+        // Silently handle auth check failure - user remains logged out
+        if (isMounted) {
+          setIsLoggedIn(false);
+        }
       }
     };
-    
+
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleLogout = () => {
