@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "@/services/api";
+import vendorsData from "@/data/vendors.json";
 
 // 🔧 Quick edit guide:
 // - Replace BRAND_NAME, TAGLINE, and all placeholder copy.
@@ -146,7 +147,7 @@ export default function Home() {
                 Find Your Eye Care Vendors
               </h1>
               <p className="text-xl sm:text-2xl text-slate-700 mb-12 max-w-3xl mx-auto">
-                Search through 312 verified vendors and suppliers in one place
+                Search through {vendorsData.length} verified vendors and suppliers in one place
               </p>
               
               {/* Large CTA Button */}
@@ -163,21 +164,21 @@ export default function Home() {
               </Link>
               
               <p className="mt-8 text-base text-slate-600">
-                312 vendors • Equipment, Contact Lenses, Pharmaceuticals & More
+                {vendorsData.length} vendors • Equipment, Contact Lenses, Pharmaceuticals & More
               </p>
               
               {/* Quick Stats */}
               <div className="mt-16 grid grid-cols-3 gap-6 max-w-3xl mx-auto">
                 <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-slate-600">312</div>
+                  <div className="text-3xl font-bold text-slate-600">{vendorsData.length}</div>
                   <div className="text-sm text-slate-600 mt-1">Vendors</div>
                 </div>
                 <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-slate-600">153</div>
+                  <div className="text-3xl font-bold text-slate-600">184</div>
                   <div className="text-sm text-slate-600 mt-1">Categories</div>
                 </div>
                 <div className="bg-slate-50 rounded-2xl p-6 shadow-lg border border-slate-200">
-                  <div className="text-3xl font-bold text-slate-600">236</div>
+                  <div className="text-3xl font-bold text-slate-600">201</div>
                   <div className="text-sm text-slate-600 mt-1">Products</div>
                 </div>
               </div>
