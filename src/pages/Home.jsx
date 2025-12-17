@@ -123,7 +123,7 @@ export default function Home() {
             <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-16 sm:h-20 w-auto" />
             <span className="text-lg sm:text-xl">{BRAND_NAME}</span>
           </Link>
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <div className="hidden sm:flex items-center gap-2 sm:gap-3 flex-wrap">
             {isLoggedIn ? (
               <>
                 <Link to="/dashboard">
