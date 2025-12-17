@@ -355,7 +355,7 @@ export default function Dashboard() {
               <img src="/logo.jpg" alt="Eye Bridges Logo" className="h-16 sm:h-20 w-auto cursor-pointer" />
               <span className="text-xl sm:text-2xl font-bold text-white">Eye Bridges</span>
             </Link>
-            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+            <div className="hidden sm:flex items-center gap-2 sm:gap-4 flex-wrap">
               <Link to="/">
                 <Button data-testid="home-button" variant="ghost" className="text-white hover:bg-slate-800 text-xs sm:text-sm px-2 sm:px-4">
                   Home

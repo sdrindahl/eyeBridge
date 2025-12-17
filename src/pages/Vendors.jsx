@@ -469,7 +469,7 @@ function Vendors() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <div className="hidden sm:flex items-center gap-2 sm:gap-3 flex-wrap">
               <Button 
                 data-testid="home-button"
                 onClick={() => navigate("/")}
@@ -540,26 +540,7 @@ function Vendors() {
 
             {/* Mobile Compact Search */}
             <div className="sm:hidden">
-              {/* Mobile Back Button */}
-              <div className="mb-3">
-                {isLoggedIn ? (
-                  <Button 
-                    variant="outline" 
-                    className="border-white text-white hover:bg-slate-800 text-sm w-full" 
-                    onClick={() => navigate("/dashboard")}
-                  >
-                    ← Back to Dashboard
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="border-white text-white hover:bg-slate-800 text-sm w-full" 
-                    onClick={() => window.location.href = "/"}
-                  >
-                    ← Back to Home
-                  </Button>
-                )}
-              </div>
+              {/* Mobile search controls - no back button needed since bottom nav exists */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <input
