@@ -249,7 +249,7 @@ router.post('/reviews', async (req, res) => {
     }
 
     await dbRun(
-      `INSERT INTO vendor_reviews (user_id, vendor_name, rating, comment, updated_at) 
+      `INSERT OR REPLACE INTO vendor_reviews (user_id, vendor_name, rating, comment, updated_at) 
        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
       [req.userId, vendorName, rating, comment || null]
     );

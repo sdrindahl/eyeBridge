@@ -1,22 +1,22 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { Search, MapPin, Phone, Mail, Globe, ChevronDown, Heart, X, Star } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import vendorsData from "@/data/vendors.json";
-import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import vendorsData from "@/data/vendors.json";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { Heart, X, Star, Phone, Mail, Globe, Search, ChevronDown, MapPin } from "lucide-react";
 import api from "@/services/api";
-
+// Add any other imports your component uses (e.g., icons, framer-motion, etc.)
+function Vendors() {
   const navigate = useNavigate();
   const { isLoggedIn, userEmail } = useAuth();
 
   // Highlight matching text
   const highlightText = (text, query) => {
     if (!text || !query) return text;
-    
     const parts = text.split(new RegExp(`(${query})`, 'gi'));
-    return parts.map((part, index) => 
+    return parts.map((part, index) =>
       part.toLowerCase() === query.toLowerCase() ? (
         <mark key={index} className="bg-blue-400 text-white px-0.5 rounded">{part}</mark>
       ) : (
@@ -1538,3 +1538,4 @@ import api from "@/services/api";
     </div>
   );
 }
+export default Vendors;

@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import api from "@/services/api";
 
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { Button } from "../components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
+import api from "../services/api";
+
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -34,7 +36,6 @@ import api from "@/services/api";
 
     try {
       const response = await api.login(email, password);
-      
       if (response.token) {
         // Token is automatically stored by api.login
         login(email); // Update global auth state
@@ -78,7 +79,6 @@ import api from "@/services/api";
                   {error}
                 </div>
               )}
-              
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                   Email Address
@@ -94,7 +94,6 @@ import api from "@/services/api";
                   noValidate
                 />
               </div>
-
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
                   Password
@@ -112,7 +111,6 @@ import api from "@/services/api";
                   Min 6 characters, with uppercase, lowercase, number, and special character
                 </p>
               </div>
-
               <div className="flex items-center justify-between">
                 <label className="flex items-center">
                   <input type="checkbox" className="rounded border-slate-300 text-slate-600 focus:ring-slate-400" />
@@ -122,7 +120,6 @@ import api from "@/services/api";
                   Forgot password?
                 </a>
               </div>
-
               <Button 
                 type="submit"
                 disabled={loading}
@@ -130,7 +127,6 @@ import api from "@/services/api";
               >
                 {loading ? "Signing In..." : "Sign In"}
               </Button>
-
               <div className="text-center text-sm text-slate-600 mt-4">
                 Don't have an account?{" "}
                 <Link to="/register" className="text-slate-700 font-medium hover:text-slate-900">
@@ -144,3 +140,5 @@ import api from "@/services/api";
     </div>
   );
 }
+
+export default Login;
