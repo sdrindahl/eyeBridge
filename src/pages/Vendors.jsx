@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Heart, X, Star, Phone, Mail, Globe, Search, ChevronDown, MapPin } from "lucide-react";
+import api from "@/services/api";
 // Add any other imports your component uses (e.g., icons, framer-motion, etc.)
 function Vendors() {
   const navigate = useNavigate();
