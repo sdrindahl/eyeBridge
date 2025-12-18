@@ -36,13 +36,14 @@ function Vendors() {
   const [favorites, setFavorites] = useState([]);
   // Remove local isLoggedIn state, use context instead
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [viewAll, setViewAll] = useState(false);
   const [compareList, setCompareList] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
   const [showSearchHistory, setShowSearchHistory] = useState(false);
-  const [appliedSearchQuery, setAppliedSearchQuery] = useState(searchParams.get("q") || "");
-  const [appliedCategory, setAppliedCategory] = useState(searchParams.get("category") || "all");
-  const [appliedProduct, setAppliedProduct] = useState(searchParams.get("product") || "all");
+  const [appliedSearchQuery, setAppliedSearchQuery] = useState("");
+  const [appliedCategory, setAppliedCategory] = useState("all");
+  const [appliedProduct, setAppliedProduct] = useState("all");
   const [vendorReviews, setVendorReviews] = useState({});
   const [userRating, setUserRating] = useState(0);
   const [userComment, setUserComment] = useState("");
@@ -105,6 +106,16 @@ function Vendors() {
 
   // Filter vendors based on applied search query, category, and product
   const filteredVendors = useMemo(() => {
+    // If view all is active, return all vendors
+    if (viewAll) {
+      return vendorsData;
+    }
+
+    // If no search criteria applied, return empty array
+    if (appliedSearchQuery === "" && appliedCategory === "all" && appliedProduct === "all" && !showFavoritesOnly) {
+      return [];
+    }
+
     let results = vendorsData;
 
     // First filter by category
@@ -142,7 +153,7 @@ function Vendors() {
     }
 
     return results;
-  }, [appliedSearchQuery, appliedCategory, appliedProduct, showFavoritesOnly, favorites]);
+  }, [appliedSearchQuery, appliedCategory, appliedProduct, showFavoritesOnly, favorites, viewAll]);
 
   // Group vendors by category
   const vendorsByCategory = useMemo(() => {
@@ -257,6 +268,25 @@ function Vendors() {
     
     return () => clearTimeout(timeoutId);
   }, [searchQuery, selectedCategory, selectedProduct, isLoggedIn]);
+
+  // Handle clicks outside dropdowns to close them
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if click is outside category dropdown
+      if (showCategoryDropdown && !event.target.closest('.category-dropdown')) {
+        setShowCategoryDropdown(false);
+      }
+      // Check if click is outside product dropdown
+      if (showProductDropdown && !event.target.closest('.product-dropdown')) {
+        setShowProductDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCategoryDropdown, showProductDropdown]);
 
   const toggleFavorite = async (vendorName) => {
     if (!isLoggedIn) {
@@ -562,27 +592,66 @@ function Vendors() {
                 />
               </div>
               <div className="flex gap-2 mt-2">
-                <button
-                  onClick={() => {
-                    setShowCategoryDropdown(!showCategoryDropdown);
-                    setShowProductDropdown(false);
-                  }}
-                  className="flex-1 flex items-center justify-between gap-2 px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-medium"
-                >
-                  <span className="truncate">{selectedCategory === "all" ? "Category" : selectedCategory}</span>
-                  <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                </button>
-                {selectedCategory !== "all" && (
+                <div className="flex-1 relative category-dropdown">
                   <button
                     onClick={() => {
-                      setShowProductDropdown(!showProductDropdown);
-                      setShowCategoryDropdown(false);
+                      setShowCategoryDropdown(!showCategoryDropdown);
+                      setShowProductDropdown(false);
                     }}
-                    className="flex-1 flex items-center justify-between gap-2 px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                    className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-medium"
                   >
-                    <span className="truncate">{selectedProduct === "all" ? "Product" : selectedProduct}</span>
+                    <span className="truncate">{selectedCategory === "all" ? "Category" : selectedCategory}</span>
                     <ChevronDown className="w-3 h-3 flex-shrink-0" />
                   </button>
+                  {/* Mobile Category Dropdown */}
+                  {showCategoryDropdown && (
+                    <div className="absolute top-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 w-full">
+                      {categoryOptions.map((category) => (
+                        <button
+                          key={category}
+                          onClick={() => {
+                            setSelectedCategory(category === "All Categories" ? "all" : category);
+                            setSelectedProduct("all");
+                            setShowCategoryDropdown(false);
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {selectedCategory !== "all" && (
+                  <div className="flex-1 relative product-dropdown">
+                    <button
+                      onClick={() => {
+                        setShowProductDropdown(!showProductDropdown);
+                        setShowCategoryDropdown(false);
+                      }}
+                      className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                    >
+                      <span className="truncate">{selectedProduct === "all" ? "Product" : selectedProduct}</span>
+                      <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                    </button>
+                    {/* Mobile Product Dropdown */}
+                    {showProductDropdown && (
+                      <div className="absolute top-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 w-full max-h-48 overflow-y-auto">
+                        {productOptions.map((product) => (
+                          <button
+                            key={product}
+                            onClick={() => {
+                              setSelectedProduct(product === "All Products" ? "all" : product);
+                              setShowProductDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
+                          >
+                            {product}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
                 <Button 
                   onClick={() => {
@@ -592,52 +661,33 @@ function Vendors() {
                     setAppliedProduct(selectedProduct);
                     saveSearchToHistory(resultCount);
                     setAnimationKey(prev => prev + 1);
+                    setViewAll(false); // Turn off view all when searching
                   }}
                   className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs"
                 >
                   Go
                 </Button>
+                <Button 
+                  onClick={() => {
+                    setViewAll(true);
+                    setAppliedSearchQuery("");
+                    setAppliedCategory("all");
+                    setAppliedProduct("all");
+                    setShowFavoritesOnly(false);
+                    setAnimationKey(prev => prev + 1);
+                  }}
+                  variant={viewAll ? "default" : "outline"}
+                  className={viewAll 
+                    ? "px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs" 
+                    : "px-3 py-1.5 border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-xs"
+                  }
+                >
+                  All
+                </Button>
               </div>
 
-              {/* Mobile Category Dropdown */}
-              {showCategoryDropdown && (
-                <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20">
-                  {categoryOptions.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => {
-                        setSelectedCategory(category === "All Categories" ? "all" : category);
-                        setSelectedProduct("all");
-                        setShowCategoryDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Mobile Product Dropdown */}
-              {showProductDropdown && selectedCategory !== "all" && (
-                <div className="mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 max-h-48 overflow-y-auto">
-                  {productOptions.map((product) => (
-                    <button
-                      key={product}
-                      onClick={() => {
-                        setSelectedProduct(product === "All Products" ? "all" : product);
-                        setShowProductDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
-                    >
-                      {product}
-                    </button>
-                  ))}
-                </div>
-              )}
-
               {/* Mobile Clear Button */}
-              {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all") && (
+              {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all" || viewAll) && (
                 <div className="mt-2">
                   <Button 
                     onClick={() => {
@@ -647,6 +697,7 @@ function Vendors() {
                       setAppliedSearchQuery("");
                       setAppliedCategory("all");
                       setAppliedProduct("all");
+                      setViewAll(false);
                       setAnimationKey(prev => prev + 1);
                     }}
                     variant="outline"
@@ -661,7 +712,10 @@ function Vendors() {
               {isLoggedIn && favorites.length > 0 && (
                 <div className="mt-2">
                   <Button 
-                    onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                    onClick={() => {
+                      setShowFavoritesOnly(!showFavoritesOnly);
+                      setViewAll(false); // Turn off view all when toggling favorites
+                    }}
                     variant={showFavoritesOnly ? "default" : "outline"}
                     className={showFavoritesOnly 
                       ? "w-full bg-red-500 hover:bg-red-600 text-white text-sm" 
@@ -678,7 +732,7 @@ function Vendors() {
             {/* Desktop Filters and Search Row */}
             <div className="hidden sm:flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               {/* Category Dropdown */}
-              <div className="relative">
+              <div className="relative category-dropdown">
                 <button
                   onClick={() => {
                     setShowCategoryDropdown(!showCategoryDropdown);
@@ -712,7 +766,7 @@ function Vendors() {
 
               {/* Product Dropdown */}
               {selectedCategory !== "all" && (
-                <div className="relative">
+                <div className="relative product-dropdown">
                   <button
                     onClick={() => {
                       setShowProductDropdown(!showProductDropdown);
@@ -830,14 +884,34 @@ function Vendors() {
                   saveSearchToHistory(resultCount);
                   setShowSearchHistory(false);
                   setAnimationKey(prev => prev + 1);
+                  setViewAll(false); // Turn off view all when searching
                 }}
                 className="bg-slate-600 hover:bg-slate-700 text-white whitespace-nowrap"
               >
                 Search Vendors
               </Button>
 
+              {/* View All Button */}
+              <Button 
+                onClick={() => {
+                  setViewAll(true);
+                  setAppliedSearchQuery("");
+                  setAppliedCategory("all");
+                  setAppliedProduct("all");
+                  setShowFavoritesOnly(false);
+                  setAnimationKey(prev => prev + 1);
+                }}
+                variant={viewAll ? "default" : "outline"}
+                className={viewAll 
+                  ? "bg-green-600 hover:bg-green-700 text-white whitespace-nowrap" 
+                  : "border-slate-400 text-slate-900 hover:bg-slate-100 bg-white whitespace-nowrap"
+                }
+              >
+                View All Vendors
+              </Button>
+
               {/* Clear Button */}
-              {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all") && (
+              {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all" || viewAll) && (
                 <Button 
                   onClick={() => {
                     setSearchQuery("");
@@ -846,6 +920,7 @@ function Vendors() {
                     setAppliedSearchQuery("");
                     setAppliedCategory("all");
                     setAppliedProduct("all");
+                    setViewAll(false);
                     setAnimationKey(prev => prev + 1);
                   }}
                   variant="outline"
@@ -858,7 +933,10 @@ function Vendors() {
               {/* Favorites Filter */}
               {isLoggedIn && favorites.length > 0 && (
                 <Button 
-                  onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                  onClick={() => {
+                    setShowFavoritesOnly(!showFavoritesOnly);
+                    setViewAll(false); // Turn off view all when toggling favorites
+                  }}
                   variant={showFavoritesOnly ? "default" : "outline"}
                   className={showFavoritesOnly 
                     ? "bg-red-500 hover:bg-red-600 text-white whitespace-nowrap" 
@@ -926,11 +1004,16 @@ function Vendors() {
             className="mb-6"
           >
             <div className="text-2xl font-bold text-neutral-900">
-              Showing {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''}
+              {viewAll ? `All ${filteredVendors.length} vendor${filteredVendors.length !== 1 ? 's' : ''}` : `Showing ${filteredVendors.length} vendor${filteredVendors.length !== 1 ? 's' : ''}`}
             </div>
-            {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all") && (
+            {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all" || viewAll) && (
               <div className="mt-2 text-base text-slate-600 flex flex-wrap items-center gap-2">
                 <span>for:</span>
+                {viewAll && (
+                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+                    All Vendors
+                  </span>
+                )}
                 {searchQuery && (
                   <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
                     "{searchQuery}"
