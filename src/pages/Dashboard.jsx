@@ -781,34 +781,34 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Recent Searches */}
-          <Card id="searches-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
-            <CardHeader className="pb-3 sm:pb-6">
-              <div className="flex items-center justify-between">
-                <CardTitle 
-                  className="flex items-center gap-2 text-base sm:text-lg cursor-pointer hover:text-slate-600 transition-colors"
-                  onClick={() => setRecentSearchesCollapsed(!recentSearchesCollapsed)}
-                >
-                  <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Recent Searches
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${recentSearchesCollapsed ? 'rotate-180' : ''}`} />
-                </CardTitle>
-                {recentSearches.length > 0 && (
-                  <Button
-                    onClick={() => {
-                      if (confirm("Are you sure you want to clear all recent searches?")) {
-                        localStorage.setItem("recentSearches", "[]");
-                        setRecentSearches([]);
-                      }
-                    }}
-                    variant="ghost"
-                    className="text-xs text-slate-600 hover:text-red-600 h-auto py-1 px-2"
+          {!recentSearchesCollapsed && (
+            <Card id="searches-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
+              <CardHeader className="pb-3 sm:pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle 
+                    className="flex items-center gap-2 text-base sm:text-lg cursor-pointer hover:text-slate-600 transition-colors"
+                    onClick={() => setRecentSearchesCollapsed(!recentSearchesCollapsed)}
                   >
-                    Clear All
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            {!recentSearchesCollapsed && (
+                    <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Recent Searches
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${recentSearchesCollapsed ? 'rotate-180' : ''}`} />
+                  </CardTitle>
+                  {recentSearches.length > 0 && (
+                    <Button
+                      onClick={() => {
+                        if (confirm("Are you sure you want to clear all recent searches?")) {
+                          localStorage.setItem("recentSearches", "[]");
+                          setRecentSearches([]);
+                        }
+                      }}
+                      variant="ghost"
+                      className="text-xs text-slate-600 hover:text-red-600 h-auto py-1 px-2"
+                    >
+                      Clear All
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
               <CardContent className="pt-0">
                 {recentSearches.length === 0 ? (
                   <p className="text-slate-600 text-sm">No recent searches yet</p>
@@ -863,42 +863,53 @@ export default function Dashboard() {
                   </div>
                 )}
               </CardContent>
-            )}
-          </Card>
+            </Card>
+          )}
+
+          {/* Collapsed Recent Searches Button */}
+          {recentSearchesCollapsed && (
+            <div className="bg-white border-slate-300 rounded-xl p-1 cursor-pointer hover:bg-slate-50 transition-colors self-start" onClick={() => setRecentSearchesCollapsed(false)}>
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                <span className="font-medium text-slate-900 text-xs">Recent Searches</span>
+                <ChevronDown className="w-3 h-3 rotate-180" />
+              </div>
+            </div>
+          )}
 
           {/* Favorite Vendors */}
-          <Card id="favorites-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
-            <CardHeader className="pb-3 sm:pb-6">
-              <div className="flex items-center justify-between">
-                <CardTitle 
-                  className="flex items-center gap-2 text-base sm:text-lg cursor-pointer hover:text-slate-600 transition-colors"
-                  onClick={() => setFavoriteVendorsCollapsed(!favoriteVendorsCollapsed)}
-                >
-                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
-                  Favorite Vendors
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${favoriteVendorsCollapsed ? 'rotate-180' : ''}`} />
-                </CardTitle>
-                {compareList.length > 0 && (
-                  <div className="flex gap-1 sm:gap-2">
-                    <Button
-                      onClick={() => setShowComparison(true)}
-                      disabled={compareList.length < 2}
-                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white h-auto py-1 px-2 sm:px-3"
-                    >
-                      Compare ({compareList.length})
-                    </Button>
-                    <Button
-                      onClick={() => setCompareList([])}
-                      variant="ghost"
-                      className="text-xs text-slate-600 hover:text-red-600 h-auto py-1 px-2"
-                    >
-                      Clear
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
-            {!favoriteVendorsCollapsed && (
+          {!favoriteVendorsCollapsed && (
+            <Card id="favorites-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
+              <CardHeader className="pb-3 sm:pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle 
+                    className="flex items-center gap-2 text-base sm:text-lg cursor-pointer hover:text-slate-600 transition-colors"
+                    onClick={() => setFavoriteVendorsCollapsed(!favoriteVendorsCollapsed)}
+                  >
+                    <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
+                    Favorite Vendors
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${favoriteVendorsCollapsed ? 'rotate-180' : ''}`} />
+                  </CardTitle>
+                  {compareList.length > 0 && (
+                    <div className="flex gap-1 sm:gap-2">
+                      <Button
+                        onClick={() => setShowComparison(true)}
+                        disabled={compareList.length < 2}
+                        className="text-xs bg-blue-600 hover:bg-blue-700 text-white h-auto py-1 px-2 sm:px-3"
+                      >
+                        Compare ({compareList.length})
+                      </Button>
+                      <Button
+                        onClick={() => setCompareList([])}
+                        variant="ghost"
+                        className="text-xs text-slate-600 hover:text-red-600 h-auto py-1 px-2"
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
               <CardContent className="pt-0">
                 {favorites.length === 0 ? (
                   <p className="text-slate-600 text-sm">No favorites yet. Start adding vendors from the browse page!</p>
@@ -996,8 +1007,19 @@ export default function Dashboard() {
                   </div>
                 )}
               </CardContent>
-            )}
-          </Card>
+            </Card>
+          )}
+
+          {/* Collapsed Favorite Vendors Button */}
+          {favoriteVendorsCollapsed && (
+            <div className="bg-white border-slate-300 rounded-xl p-1 cursor-pointer hover:bg-slate-50 transition-colors self-start" onClick={() => setFavoriteVendorsCollapsed(false)}>
+              <div className="flex items-center gap-1">
+                <Heart className="w-3 h-3 text-red-500" />
+                <span className="font-medium text-slate-900 text-xs">Favorite Vendors</span>
+                <ChevronDown className="w-3 h-3 rotate-180" />
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
