@@ -591,7 +591,7 @@ function Vendors() {
                   className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-200 text-slate-800 text-sm"
                 />
               </div>
-              <div className="flex gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 mt-2">
                 <div className="flex-1 relative category-dropdown">
                   <button
                     onClick={() => {
@@ -670,10 +670,15 @@ function Vendors() {
                 <Button 
                   onClick={() => {
                     setViewAll(true);
+                    setSearchQuery("");
+                    setSelectedCategory("all");
+                    setSelectedProduct("all");
                     setAppliedSearchQuery("");
                     setAppliedCategory("all");
                     setAppliedProduct("all");
                     setShowFavoritesOnly(false);
+                    setShowCategoryDropdown(false);
+                    setShowProductDropdown(false);
                     setAnimationKey(prev => prev + 1);
                   }}
                   variant={viewAll ? "default" : "outline"}
@@ -685,6 +690,24 @@ function Vendors() {
                   All
                 </Button>
               </div>
+
+              {/* Mobile Clear Filters Button */}
+              {(selectedCategory !== "all" || selectedProduct !== "all") && (
+                <div className="mt-2">
+                  <Button 
+                    onClick={() => {
+                      setSelectedCategory("all");
+                      setSelectedProduct("all");
+                      setShowCategoryDropdown(false);
+                      setShowProductDropdown(false);
+                    }}
+                    variant="outline"
+                    className="w-full border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-sm"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
 
               {/* Mobile Clear Button */}
               {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all" || viewAll) && (
@@ -798,6 +821,22 @@ function Vendors() {
                 </div>
               )}
 
+              {/* Clear Filters Button */}
+              {(selectedCategory !== "all" || selectedProduct !== "all") && (
+                <Button 
+                  onClick={() => {
+                    setSelectedCategory("all");
+                    setSelectedProduct("all");
+                    setShowCategoryDropdown(false);
+                    setShowProductDropdown(false);
+                  }}
+                  variant="outline"
+                  className="border-slate-400 text-slate-900 hover:bg-slate-100 bg-white whitespace-nowrap"
+                >
+                  Clear Filters
+                </Button>
+              )}
+
               {/* Search Input */}
               <div className="relative flex-1 max-w-xl">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -819,6 +858,7 @@ function Vendors() {
                       saveSearchToHistory(resultCount);
                       setShowSearchHistory(false);
                       setAnimationKey(prev => prev + 1);
+                      setViewAll(false); // Turn off view all when searching
                     }
                   }}
                   className="w-full pl-12 pr-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent bg-slate-200 text-slate-800"
@@ -895,10 +935,15 @@ function Vendors() {
               <Button 
                 onClick={() => {
                   setViewAll(true);
+                  setSearchQuery("");
+                  setSelectedCategory("all");
+                  setSelectedProduct("all");
                   setAppliedSearchQuery("");
                   setAppliedCategory("all");
                   setAppliedProduct("all");
                   setShowFavoritesOnly(false);
+                  setShowCategoryDropdown(false);
+                  setShowProductDropdown(false);
                   setAnimationKey(prev => prev + 1);
                 }}
                 variant={viewAll ? "default" : "outline"}
