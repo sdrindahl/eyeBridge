@@ -12,7 +12,6 @@ export default function Dashboard() {
   const [favorites, setFavorites] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
   const [contactHistory, setContactHistory] = useState([]);
-  const [savedComparisons, setSavedComparisons] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [compareList, setCompareList] = useState([]);
@@ -110,7 +109,6 @@ export default function Dashboard() {
         
         // Contact history and comparisons will be empty for now (backend feature not yet implemented)
         setContactHistory([]);
-        setSavedComparisons([]);
         
         setLoading(false);
         
@@ -135,9 +133,6 @@ export default function Dashboard() {
         
         const storedContacts = JSON.parse(localStorage.getItem("contactHistory") || "[]");
         setContactHistory(storedContacts);
-        
-        const storedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
-        setSavedComparisons(storedComparisons);
         
         const storedNotes = JSON.parse(localStorage.getItem("vendorNotes") || "{}");
         setVendorNotes(storedNotes);
@@ -733,19 +728,19 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div data-testid="quick-stats" className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div data-testid="quick-stats" className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-6 mb-4 sm:mb-8">
           <Card 
             data-testid="favorites-stat-card"
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('favorites-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-2 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p data-testid="favorites-label" className="text-sm text-slate-600">Favorites</p>
-                  <p data-testid="favorites-count" className="text-3xl font-bold text-slate-900">{favorites.length}</p>
+                  <p data-testid="favorites-label" className="text-xs sm:text-sm text-slate-600">Favorites</p>
+                  <p data-testid="favorites-count" className="text-xl sm:text-3xl font-bold text-slate-900">{favorites.length}</p>
                 </div>
-                <Heart className="w-8 h-8 text-red-500 fill-red-500" />
+                <Heart className="w-5 h-5 sm:w-8 sm:h-8 text-red-500 fill-red-500" />
               </div>
             </CardContent>
           </Card>
@@ -755,13 +750,13 @@ export default function Dashboard() {
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('searches-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-2 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p data-testid="searches-label" className="text-sm text-slate-600">Recent Searches</p>
-                  <p data-testid="searches-count" className="text-3xl font-bold text-slate-900">{recentSearches.length}</p>
+                  <p data-testid="searches-label" className="text-xs sm:text-sm text-slate-600">Recent Searches</p>
+                  <p data-testid="searches-count" className="text-xl sm:text-3xl font-bold text-slate-900">{recentSearches.length}</p>
                 </div>
-                <Search className="w-8 h-8 text-slate-600" />
+                <Search className="w-5 h-5 sm:w-8 sm:h-8 text-slate-600" />
               </div>
             </CardContent>
           </Card>
@@ -771,41 +766,25 @@ export default function Dashboard() {
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('contacts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-2 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p data-testid="contacted-label" className="text-sm text-slate-600">Contacted</p>
-                  <p data-testid="contacted-count" className="text-3xl font-bold text-slate-900">{contactHistory.length}</p>
+                  <p data-testid="contacted-label" className="text-xs sm:text-sm text-slate-600">Contacted</p>
+                  <p data-testid="contacted-count" className="text-xl sm:text-3xl font-bold text-slate-900">{contactHistory.length}</p>
                 </div>
-                <Phone className="w-8 h-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            data-testid="comparisons-stat-card"
-            className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => document.getElementById('comparisons-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p data-testid="comparisons-label" className="text-sm text-slate-600">Comparisons</p>
-                  <p data-testid="comparisons-count" className="text-3xl font-bold text-slate-900">{savedComparisons.length}</p>
-                </div>
-                <TrendingUp className="w-8 h-8 text-blue-600" />
+                <Phone className="w-5 h-5 sm:w-8 sm:h-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Recent Searches */}
           <Card id="searches-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
-            <CardHeader>
+            <CardHeader className="pb-3 sm:pb-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                   Recent Searches
                 </CardTitle>
                 {recentSearches.length > 0 && (
@@ -817,44 +796,44 @@ export default function Dashboard() {
                       }
                     }}
                     variant="ghost"
-                    className="text-xs text-slate-600 hover:text-red-600 h-auto py-1"
+                    className="text-xs text-slate-600 hover:text-red-600 h-auto py-1 px-2"
                   >
                     Clear All
                   </Button>
                 )}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {recentSearches.length === 0 ? (
                 <p className="text-slate-600 text-sm">No recent searches yet</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {recentSearches.slice(0, 5).map((search, index) => (
                     <div
                       key={index}
-                      className="p-3 bg-slate-50 rounded-lg border border-slate-200 group relative"
+                      className="p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-200 group relative"
                     >
                       <div 
                         onClick={() => executeSearch(search)}
-                        className="flex items-center justify-between cursor-pointer hover:bg-slate-100 -m-3 p-3 rounded-lg pr-10"
+                        className="flex items-center justify-between cursor-pointer hover:bg-slate-100 -m-2 sm:-m-3 p-2 sm:p-3 rounded-lg pr-8 sm:pr-10"
                       >
                         <div>
                           {search.name && (
-                            <p className="font-medium text-slate-900">{search.name}</p>
+                            <p className="font-medium text-slate-900 text-sm sm:text-base">{search.name}</p>
                           )}
-                          <div className="flex flex-wrap gap-2 mt-1">
+                          <div className="flex flex-wrap gap-1 sm:gap-2 mt-1">
                             {search.query && (
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                              <span className="text-xs bg-blue-100 text-blue-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
                                 "{search.query}"
                               </span>
                             )}
                             {search.category && search.category !== "all" && (
-                              <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded">
+                              <span className="text-xs bg-teal-100 text-teal-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
                                 {search.category}
                               </span>
                             )}
                             {search.product && search.product !== "all" && (
-                              <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">
+                              <span className="text-xs bg-indigo-100 text-indigo-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
                                 {search.product}
                               </span>
                             )}
@@ -868,7 +847,7 @@ export default function Dashboard() {
                           setRecentSearches(updatedSearches);
                           localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
                         }}
-                        className="absolute top-2 right-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-1 transition-colors"
+                        className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-0.5 sm:p-1 transition-colors"
                         title="Remove this search"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -882,18 +861,18 @@ export default function Dashboard() {
 
           {/* Favorite Vendors */}
           <Card id="favorites-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
-            <CardHeader>
+            <CardHeader className="pb-3 sm:pb-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-red-500" />
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                   Favorite Vendors
                 </CardTitle>
                 {compareList.length > 0 && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-1 sm:gap-2">
                     <Button
                       onClick={() => setShowComparison(true)}
                       disabled={compareList.length < 2}
-                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white h-auto py-1 px-3"
+                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white h-auto py-1 px-2 sm:px-3"
                     >
                       Compare ({compareList.length})
                     </Button>
@@ -908,15 +887,15 @@ export default function Dashboard() {
                 )}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {favorites.length === 0 ? (
                 <p className="text-slate-600 text-sm">No favorites yet. Start adding vendors from the browse page!</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {getFavoriteVendors().map((vendor, index) => (
                     <div
                       key={index}
-                      className="p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all relative group"
+                      className="p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all relative group"
                     >
                       <div
                         onClick={() => {
@@ -925,8 +904,8 @@ export default function Dashboard() {
                         }}
                         className="cursor-pointer"
                       >
-                        <div className="pr-28">
-                          <p className="font-medium text-slate-900">{vendor["Company Name"]}</p>
+                        <div className="pr-20 sm:pr-28">
+                          <p className="font-medium text-slate-900 text-sm sm:text-base">{vendor["Company Name"]}</p>
                           {vendorReviews[vendor["Company Name"]] && 
                            vendorReviews[vendor["Company Name"]].filter(r => r.rating && r.rating > 0).length > 0 && (
                             <div className="flex items-center gap-1 mt-1">
@@ -950,7 +929,7 @@ export default function Dashboard() {
                           <p className="text-xs text-slate-600 mt-1">{vendor.Category}</p>
                         </div>
                       </div>
-                      <div className="absolute top-2 right-2 flex gap-1">
+                      <div className="absolute top-1 sm:top-2 right-1 sm:right-2 flex gap-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -962,7 +941,7 @@ export default function Dashboard() {
                               alert("You can compare up to 4 vendors at a time");
                             }
                           }}
-                          className={`px-2 py-1 rounded-lg transition-all text-xs font-medium ${
+                          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg transition-all text-xs font-medium ${
                             compareList.includes(vendor["Company Name"]) 
                               ? "bg-blue-500 text-white hover:bg-blue-600" 
                               : "bg-slate-200 hover:bg-slate-300 text-slate-700"
@@ -987,7 +966,7 @@ export default function Dashboard() {
                               alert(`Failed to remove favorite: ${error.message}`);
                             }
                           }}
-                          className="rounded-full p-1.5 transition-all bg-red-100 hover:bg-red-200 text-red-600"
+                          className="rounded-full p-1 sm:p-1.5 transition-all bg-red-100 hover:bg-red-200 text-red-600"
                           title="Remove from favorites"
                         >
                           <Heart className="w-3 h-3 fill-red-600" />
@@ -1002,95 +981,6 @@ export default function Dashboard() {
                       </Button>
                     </Link>
                   )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Recommended Vendors */}
-          <Card className="bg-white border-slate-300 rounded-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-500" />
-                Recommended for You
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {getRecommendedVendors().map((vendor, index) => (
-                  <div
-                    key={index}
-                    className="p-3 bg-slate-50 rounded-lg border border-slate-200"
-                  >
-                    <p className="font-medium text-slate-900">{vendor["Company Name"]}</p>
-                    <p className="text-xs text-slate-600 mt-1">{vendor.Category}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Saved Comparisons */}
-          <Card id="comparisons-section" className="bg-white border-slate-300 rounded-xl lg:col-span-2 scroll-mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-                Saved Comparisons
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {savedComparisons.length === 0 ? (
-                <p className="text-slate-600 text-sm">No saved comparisons yet. Start comparing vendors from the browse page!</p>
-              ) : (
-                <div className="space-y-3">
-                  {savedComparisons.map((comparison, index) => (
-                    <div
-                      key={index}
-                      className="p-4 bg-slate-50 rounded-lg border border-slate-200 relative group hover:bg-slate-100 hover:border-slate-300 transition-all"
-                    >
-                      <div className="pr-20">
-                        <p className="font-medium text-slate-900 mb-2">
-                          {comparison.name || `Comparison ${index + 1}`}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {comparison.vendors.map((vendorName, vIndex) => (
-                            <span key={vIndex} className="text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded">
-                              {vendorName}
-                            </span>
-                          ))}
-                        </div>
-                        <p className="text-xs text-slate-500 mt-2">
-                          Saved {new Date(comparison.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="absolute top-2 right-2 flex gap-1">
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCompareList(comparison.vendors);
-                            setShowComparison(true);
-                          }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-auto py-1 px-3"
-                        >
-                          View
-                        </Button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (confirm(`Remove "${comparison.name || `Comparison ${index + 1}`}"?`)) {
-                              const updatedComparisons = savedComparisons.filter((_, i) => i !== index);
-                              setSavedComparisons(updatedComparisons);
-                              localStorage.setItem("savedComparisons", JSON.stringify(updatedComparisons));
-                            }
-                          }}
-                          className="bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-1"
-                          title="Remove this comparison"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               )}
             </CardContent>
@@ -1114,25 +1004,6 @@ export default function Dashboard() {
                 <p className="text-slate-600 text-sm mt-1">Comparing {compareList.length} vendors</p>
               </div>
               <div className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    const comparisonName = prompt("Enter a name for this comparison:");
-                    if (comparisonName) {
-                      const savedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
-                      const newComparison = {
-                        name: comparisonName,
-                        vendors: compareList,
-                        date: new Date().toISOString()
-                      };
-                      localStorage.setItem("savedComparisons", JSON.stringify([newComparison, ...savedComparisons]));
-                      setSavedComparisons([newComparison, ...savedComparisons]);
-                      alert("Comparison saved!");
-                    }
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Save Comparison
-                </Button>
                 <button
                   onClick={() => setShowComparison(false)}
                   className="text-slate-500 hover:text-slate-900 text-2xl font-bold leading-none px-2"

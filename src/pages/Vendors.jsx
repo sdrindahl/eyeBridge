@@ -1616,24 +1616,6 @@ function Vendors() {
                 <p className="text-slate-600 text-sm mt-1">Comparing {compareList.length} vendors</p>
               </div>
               <div className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    const comparisonName = prompt("Enter a name for this comparison:");
-                    if (comparisonName) {
-                      const savedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
-                      const newComparison = {
-                        name: comparisonName,
-                        vendors: compareList,
-                        date: new Date().toISOString()
-                      };
-                      localStorage.setItem("savedComparisons", JSON.stringify([newComparison, ...savedComparisons]));
-                      alert("Comparison saved!");
-                    }
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Save Comparison
-                </Button>
                 <button
                   onClick={() => setShowComparison(false)}
                   className="text-slate-500 hover:text-slate-900 text-2xl font-bold leading-none px-2"
