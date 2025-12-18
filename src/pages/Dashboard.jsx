@@ -34,6 +34,8 @@ export default function Dashboard() {
   const [showReviews, setShowReviews] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [recentSearchesCollapsed, setRecentSearchesCollapsed] = useState(false);
+  const [favoriteVendorsCollapsed, setFavoriteVendorsCollapsed] = useState(false);
 
   const categoryOptions = [
     "All Categories",
@@ -722,17 +724,6 @@ export default function Dashboard() {
               >
                 Search Vendors
               </Button>
-
-              {/* View All Button */}
-              <Button 
-                onClick={() => {
-                  navigate('/vendors');
-                }}
-                variant="outline"
-                className="border-slate-400 text-slate-900 hover:bg-slate-100 bg-white whitespace-nowrap"
-              >
-                View All Vendors
-              </Button>
             </div>
           </div>
         </div>
@@ -793,9 +784,13 @@ export default function Dashboard() {
           <Card id="searches-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
             <CardHeader className="pb-3 sm:pb-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <CardTitle 
+                  className="flex items-center gap-2 text-base sm:text-lg cursor-pointer hover:text-slate-600 transition-colors"
+                  onClick={() => setRecentSearchesCollapsed(!recentSearchesCollapsed)}
+                >
                   <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                   Recent Searches
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${recentSearchesCollapsed ? 'rotate-180' : ''}`} />
                 </CardTitle>
                 {recentSearches.length > 0 && (
                   <Button
@@ -813,69 +808,75 @@ export default function Dashboard() {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
-              {recentSearches.length === 0 ? (
-                <p className="text-slate-600 text-sm">No recent searches yet</p>
-              ) : (
-                <div className="space-y-2 sm:space-y-3">
-                  {recentSearches.slice(0, 5).map((search, index) => (
-                    <div
-                      key={index}
-                      className="p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-200 group relative"
-                    >
-                      <div 
-                        onClick={() => executeSearch(search)}
-                        className="flex items-center justify-between cursor-pointer hover:bg-slate-100 -m-2 sm:-m-3 p-2 sm:p-3 rounded-lg pr-8 sm:pr-10"
+            {!recentSearchesCollapsed && (
+              <CardContent className="pt-0">
+                {recentSearches.length === 0 ? (
+                  <p className="text-slate-600 text-sm">No recent searches yet</p>
+                ) : (
+                  <div className="space-y-2 sm:space-y-3">
+                    {recentSearches.slice(0, 5).map((search, index) => (
+                      <div
+                        key={index}
+                        className="p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-200 group relative"
                       >
-                        <div>
-                          {search.name && (
-                            <p className="font-medium text-slate-900 text-sm sm:text-base">{search.name}</p>
-                          )}
-                          <div className="flex flex-wrap gap-1 sm:gap-2 mt-1">
-                            {search.query && (
-                              <span className="text-xs bg-blue-100 text-blue-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
-                                "{search.query}"
-                              </span>
+                        <div 
+                          onClick={() => executeSearch(search)}
+                          className="flex items-center justify-between cursor-pointer hover:bg-slate-100 -m-2 sm:-m-3 p-2 sm:p-3 rounded-lg pr-8 sm:pr-10"
+                        >
+                          <div>
+                            {search.name && (
+                              <p className="font-medium text-slate-900 text-sm sm:text-base">{search.name}</p>
                             )}
-                            {search.category && search.category !== "all" && (
-                              <span className="text-xs bg-teal-100 text-teal-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
-                                {search.category}
-                              </span>
-                            )}
-                            {search.product && search.product !== "all" && (
-                              <span className="text-xs bg-indigo-100 text-indigo-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
-                                {search.product}
-                              </span>
-                            )}
+                            <div className="flex flex-wrap gap-1 sm:gap-2 mt-1">
+                              {search.query && (
+                                <span className="text-xs bg-blue-100 text-blue-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+                                  "{search.query}"
+                                </span>
+                              )}
+                              {search.category && search.category !== "all" && (
+                                <span className="text-xs bg-teal-100 text-teal-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+                                  {search.category}
+                                </span>
+                              )}
+                              {search.product && search.product !== "all" && (
+                                <span className="text-xs bg-indigo-100 text-indigo-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+                                  {search.product}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const updatedSearches = recentSearches.filter((_, i) => i !== index);
+                            setRecentSearches(updatedSearches);
+                            localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
+                          }}
+                          className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-0.5 sm:p-1 transition-colors"
+                          title="Remove this search"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const updatedSearches = recentSearches.filter((_, i) => i !== index);
-                          setRecentSearches(updatedSearches);
-                          localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
-                        }}
-                        className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-0.5 sm:p-1 transition-colors"
-                        title="Remove this search"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            )}
           </Card>
 
           {/* Favorite Vendors */}
           <Card id="favorites-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
             <CardHeader className="pb-3 sm:pb-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <CardTitle 
+                  className="flex items-center gap-2 text-base sm:text-lg cursor-pointer hover:text-slate-600 transition-colors"
+                  onClick={() => setFavoriteVendorsCollapsed(!favoriteVendorsCollapsed)}
+                >
                   <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                   Favorite Vendors
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${favoriteVendorsCollapsed ? 'rotate-180' : ''}`} />
                 </CardTitle>
                 {compareList.length > 0 && (
                   <div className="flex gap-1 sm:gap-2">
@@ -897,103 +898,105 @@ export default function Dashboard() {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
-              {favorites.length === 0 ? (
-                <p className="text-slate-600 text-sm">No favorites yet. Start adding vendors from the browse page!</p>
-              ) : (
-                <div className="space-y-2 sm:space-y-3">
-                  {getFavoriteVendors().map((vendor, index) => (
-                    <div
-                      key={index}
-                      className="p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all relative group"
-                    >
+            {!favoriteVendorsCollapsed && (
+              <CardContent className="pt-0">
+                {favorites.length === 0 ? (
+                  <p className="text-slate-600 text-sm">No favorites yet. Start adding vendors from the browse page!</p>
+                ) : (
+                  <div className="space-y-2 sm:space-y-3">
+                    {getFavoriteVendors().map((vendor, index) => (
                       <div
-                        onClick={() => {
-                          setSelectedVendor(vendor);
-                          setShowModal(true);
-                        }}
-                        className="cursor-pointer"
+                        key={index}
+                        className="p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all relative group"
                       >
-                        <div className="pr-20 sm:pr-28">
-                          <p className="font-medium text-slate-900 text-sm sm:text-base">{vendor["Company Name"]}</p>
-                          {vendorReviews[vendor["Company Name"]] && 
-                           vendorReviews[vendor["Company Name"]].filter(r => r.rating && r.rating > 0).length > 0 && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <div className="flex items-center gap-0.5">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <Star
-                                    key={star}
-                                    className={`w-3 h-3 ${
-                                      star <= Math.round(calculateAverageRating(vendor["Company Name"]))
-                                        ? "fill-yellow-400 text-yellow-400"
-                                        : "text-slate-300"
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-xs text-slate-600 font-medium">
-                                {calculateAverageRating(vendor["Company Name"])}
-                              </span>
-                            </div>
-                          )}
-                          <p className="text-xs text-slate-600 mt-1">{vendor.Category}</p>
-                        </div>
-                      </div>
-                      <div className="absolute top-1 sm:top-2 right-1 sm:right-2 flex gap-1">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (compareList.includes(vendor["Company Name"])) {
-                              setCompareList(compareList.filter(v => v !== vendor["Company Name"]));
-                            } else if (compareList.length < 4) {
-                              setCompareList([...compareList, vendor["Company Name"]]);
-                            } else {
-                              alert("You can compare up to 4 vendors at a time");
-                            }
+                        <div
+                          onClick={() => {
+                            setSelectedVendor(vendor);
+                            setShowModal(true);
                           }}
-                          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg transition-all text-xs font-medium ${
-                            compareList.includes(vendor["Company Name"]) 
-                              ? "bg-blue-500 text-white hover:bg-blue-600" 
-                              : "bg-slate-200 hover:bg-slate-300 text-slate-700"
-                          }`}
-                          title={compareList.includes(vendor["Company Name"]) ? "Remove from comparison" : "Add to comparison"}
+                          className="cursor-pointer"
                         >
-                          {compareList.includes(vendor["Company Name"]) ? "✓ Compare" : "Compare"}
-                        </button>
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            try {
-                              await api.removeFavorite(vendor["Company Name"]);
-                              const newFavorites = favorites.filter(f => f !== vendor["Company Name"]);
-                              setFavorites(newFavorites);
-                              // Also remove from compare list if it's there
+                          <div className="pr-20 sm:pr-28">
+                            <p className="font-medium text-slate-900 text-sm sm:text-base">{vendor["Company Name"]}</p>
+                            {vendorReviews[vendor["Company Name"]] && 
+                             vendorReviews[vendor["Company Name"]].filter(r => r.rating && r.rating > 0).length > 0 && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <div className="flex items-center gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                      key={star}
+                                      className={`w-3 h-3 ${
+                                        star <= Math.round(calculateAverageRating(vendor["Company Name"]))
+                                          ? "fill-yellow-400 text-yellow-400"
+                                          : "text-slate-300"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-xs text-slate-600 font-medium">
+                                  {calculateAverageRating(vendor["Company Name"])}
+                                </span>
+                              </div>
+                            )}
+                            <p className="text-xs text-slate-600 mt-1">{vendor.Category}</p>
+                          </div>
+                        </div>
+                        <div className="absolute top-1 sm:top-2 right-1 sm:right-2 flex gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
                               if (compareList.includes(vendor["Company Name"])) {
                                 setCompareList(compareList.filter(v => v !== vendor["Company Name"]));
+                              } else if (compareList.length < 4) {
+                                setCompareList([...compareList, vendor["Company Name"]]);
+                              } else {
+                                alert("You can compare up to 4 vendors at a time");
                               }
-                            } catch (error) {
-                              console.error("Error removing favorite:", error);
-                              alert(`Failed to remove favorite: ${error.message}`);
-                            }
-                          }}
-                          className="rounded-full p-1 sm:p-1.5 transition-all bg-red-100 hover:bg-red-200 text-red-600"
-                          title="Remove from favorites"
-                        >
-                          <Heart className="w-3 h-3 fill-red-600" />
-                        </button>
+                            }}
+                            className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg transition-all text-xs font-medium ${
+                              compareList.includes(vendor["Company Name"]) 
+                                ? "bg-blue-500 text-white hover:bg-blue-600" 
+                                : "bg-slate-200 hover:bg-slate-300 text-slate-700"
+                            }`}
+                            title={compareList.includes(vendor["Company Name"]) ? "Remove from comparison" : "Add to comparison"}
+                          >
+                            {compareList.includes(vendor["Company Name"]) ? "✓ Compare" : "Compare"}
+                          </button>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              try {
+                                await api.removeFavorite(vendor["Company Name"]);
+                                const newFavorites = favorites.filter(f => f !== vendor["Company Name"]);
+                                setFavorites(newFavorites);
+                                // Also remove from compare list if it's there
+                                if (compareList.includes(vendor["Company Name"])) {
+                                  setCompareList(compareList.filter(v => v !== vendor["Company Name"]));
+                                }
+                              } catch (error) {
+                                console.error("Error removing favorite:", error);
+                                alert(`Failed to remove favorite: ${error.message}`);
+                              }
+                            }}
+                            className="rounded-full p-1 sm:p-1.5 transition-all bg-red-100 hover:bg-red-200 text-red-600"
+                            title="Remove from favorites"
+                          >
+                            <Heart className="w-3 h-3 fill-red-600" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                  {favorites.length > 6 && (
-                    <Link to="/vendors">
-                      <Button variant="ghost" className="w-full text-sm">
-                        View all {favorites.length} favorites →
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              )}
-            </CardContent>
+                    ))}
+                    {favorites.length > 6 && (
+                      <Link to="/vendors">
+                        <Button variant="ghost" className="w-full text-sm">
+                          View all {favorites.length} favorites →
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            )}
           </Card>
         </div>
       </main>
