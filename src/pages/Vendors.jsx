@@ -288,6 +288,21 @@ function Vendors() {
     };
   }, [showCategoryDropdown, showProductDropdown]);
 
+  // Auto-apply search parameters from URL on component mount
+  useEffect(() => {
+    const urlQuery = searchParams.get("q");
+    const urlCategory = searchParams.get("category");
+    const urlProduct = searchParams.get("product");
+
+    // If any URL parameters exist, apply them to trigger search
+    if (urlQuery || urlCategory || urlProduct) {
+      setAppliedSearchQuery(urlQuery || "");
+      setAppliedCategory(urlCategory || "all");
+      setAppliedProduct(urlProduct || "all");
+      setAnimationKey(prev => prev + 1);
+    }
+  }, []); // Empty dependency array - only run on mount
+
   const toggleFavorite = async (vendorName) => {
     if (!isLoggedIn) {
       alert("Please log in to save favorites");
@@ -547,27 +562,6 @@ function Vendors() {
 
           {/* Search Controls */}
           <div className="mt-6 space-y-4">
-            {/* Back Button */}
-            <div className="hidden sm:block">
-              {isLoggedIn ? (
-                <Button 
-                  variant="outline" 
-                  className="border-white text-white hover:bg-slate-800" 
-                  onClick={() => navigate("/dashboard")}
-                >
-                  ← Back to Dashboard
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="border-white text-white hover:bg-slate-800" 
-                  onClick={() => window.location.href = "/"}
-                >
-                  ← Back to Home
-                </Button>
-              )}
-            </div>
-
             {/* Mobile Compact Search */}
             <div className="sm:hidden">
               {/* Mobile search controls - no back button needed since bottom nav exists */}

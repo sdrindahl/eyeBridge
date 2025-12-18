@@ -394,12 +394,142 @@ export default function Dashboard() {
       {/* Main Content */}
       <main data-testid="dashboard-main" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 data-testid="dashboard-title" className="text-4xl font-bold text-slate-900">My Dashboard</h1>
-          <p className="text-slate-700 mt-2">Welcome back! Here's your personalized overview.</p>
           
-          {/* Quick Search with Filters */}
-          <div className="mt-6">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          {/* Search Controls */}
+          <div className="mt-6 space-y-4">
+            {/* Mobile Compact Search */}
+            <div className="sm:hidden">
+              {/* Mobile search controls */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  data-testid="search-input"
+                  type="text"
+                  placeholder="Search vendors..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      saveSearchToHistory();
+                      let url = '/vendors';
+                      const params = new URLSearchParams();
+                      if (searchQuery) params.append('q', searchQuery);
+                      if (selectedCategory !== 'all') params.append('category', selectedCategory);
+                      if (selectedProduct !== 'all') params.append('product', selectedProduct);
+                      if (params.toString()) url += '?' + params.toString();
+                      navigate(url);
+                    }
+                  }}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-200 text-slate-800 text-sm"
+                />
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex-1 relative category-dropdown">
+                  <button
+                    data-testid="category-dropdown"
+                    onClick={() => {
+                      setShowCategoryDropdown(!showCategoryDropdown);
+                      setShowProductDropdown(false);
+                    }}
+                    className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-medium"
+                  >
+                    <span className="truncate">{selectedCategory === "all" ? "Category" : selectedCategory}</span>
+                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                  </button>
+                  {/* Mobile Category Dropdown */}
+                  {showCategoryDropdown && (
+                    <div className="absolute top-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 w-full">
+                      {categoryOptions.map((category) => (
+                        <button
+                          key={category}
+                          onClick={() => {
+                            setSelectedCategory(category === "All Categories" ? "all" : category);
+                            setSelectedProduct("all");
+                            setShowCategoryDropdown(false);
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {selectedCategory !== "all" && (
+                  <div className="flex-1 relative product-dropdown">
+                    <button
+                      onClick={() => {
+                        setShowProductDropdown(!showProductDropdown);
+                        setShowCategoryDropdown(false);
+                      }}
+                      className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-xs font-medium"
+                    >
+                      <span className="truncate">{selectedProduct === "all" ? "Product" : selectedProduct}</span>
+                      <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                    </button>
+                    {/* Mobile Product Dropdown */}
+                    {showProductDropdown && (
+                      <div className="absolute top-full mt-1 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 w-full max-h-48 overflow-y-auto">
+                        {productOptions.map((product) => (
+                          <button
+                            key={product}
+                            onClick={() => {
+                              setSelectedProduct(product === "All Products" ? "all" : product);
+                              setShowProductDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
+                          >
+                            {product}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Clear Button */}
+              {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all") && (
+                <div className="mt-2">
+                  <Button 
+                    data-testid="clear-search-button"
+                    onClick={() => {
+                      saveSearchToHistory();
+                      setSearchQuery("");
+                      setSelectedCategory("all");
+                      setSelectedProduct("all");
+                    }}
+                    variant="outline"
+                    className="w-full border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-sm"
+                  >
+                    Clear Search
+                  </Button>
+                </div>
+              )}
+
+              {/* Mobile Go Button */}
+              <div className="mt-2">
+                <Button 
+                  data-testid="search-button"
+                  onClick={() => {
+                    saveSearchToHistory();
+                    let url = '/vendors';
+                    const params = new URLSearchParams();
+                    if (searchQuery) params.append('q', searchQuery);
+                    if (selectedCategory !== 'all') params.append('category', selectedCategory);
+                    if (selectedProduct !== 'all') params.append('product', selectedProduct);
+                    if (params.toString()) url += '?' + params.toString();
+                    navigate(url);
+                  }}
+                  className="w-full bg-slate-600 hover:bg-slate-700 text-white text-sm"
+                >
+                  Go
+                </Button>
+              </div>
+            </div>
+
+            {/* Desktop Search Controls */}
+            <div className="hidden sm:flex flex-col lg:flex-row gap-4 items-start lg:items-center bg-white rounded-xl shadow-sm border border-slate-200 p-6">
               {/* Category Dropdown */}
               <div className="relative">
                 <button
@@ -460,6 +590,22 @@ export default function Dashboard() {
                     </div>
                   )}
                 </div>
+              )}
+
+              {/* Clear Filters Button */}
+              {(selectedCategory !== "all" || selectedProduct !== "all") && (
+                <Button 
+                  onClick={() => {
+                    setSelectedCategory("all");
+                    setSelectedProduct("all");
+                    setShowCategoryDropdown(false);
+                    setShowProductDropdown(false);
+                  }}
+                  variant="outline"
+                  className="border-slate-400 text-slate-900 hover:bg-slate-100 bg-white whitespace-nowrap"
+                >
+                  Clear Filters
+                </Button>
               )}
 
               {/* Search Input */}
@@ -570,6 +716,17 @@ export default function Dashboard() {
                 className="bg-slate-600 hover:bg-slate-700 text-white whitespace-nowrap"
               >
                 Search Vendors
+              </Button>
+
+              {/* View All Button */}
+              <Button 
+                onClick={() => {
+                  navigate('/vendors');
+                }}
+                variant="outline"
+                className="border-slate-400 text-slate-900 hover:bg-slate-100 bg-white whitespace-nowrap"
+              >
+                View All Vendors
               </Button>
             </div>
           </div>
