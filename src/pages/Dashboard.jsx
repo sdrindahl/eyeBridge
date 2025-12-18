@@ -795,7 +795,8 @@ export default function Dashboard() {
                   </CardTitle>
                   {recentSearches.length > 0 && (
                     <Button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (confirm("Are you sure you want to clear all recent searches?")) {
                           localStorage.setItem("recentSearches", "[]");
                           setRecentSearches([]);
@@ -893,14 +894,20 @@ export default function Dashboard() {
                   {compareList.length > 0 && (
                     <div className="flex gap-1 sm:gap-2">
                       <Button
-                        onClick={() => setShowComparison(true)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowComparison(true);
+                        }}
                         disabled={compareList.length < 2}
                         className="text-xs bg-blue-600 hover:bg-blue-700 text-white h-auto py-1 px-2 sm:px-3"
                       >
                         Compare ({compareList.length})
                       </Button>
                       <Button
-                        onClick={() => setCompareList([])}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCompareList([]);
+                        }}
                         variant="ghost"
                         className="text-xs text-slate-600 hover:text-red-600 h-auto py-1 px-2"
                       >
