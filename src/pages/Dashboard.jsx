@@ -86,11 +86,21 @@ export default function Dashboard() {
         setFavorites(userData.favorites || []);
         
         // Set search history - backend returns array of objects with searchTerm
-        const recentSearchesArray = (userData.searchHistory || [])
-          .slice(0, 10)
-          .map(search => search.searchTerm);
+        const backendSearchHistory = userData.searchHistory || [];
+        let recentSearchesArray;
+        
+        if (backendSearchHistory.length > 0) {
+          // Use backend data if available
+          recentSearchesArray = backendSearchHistory
+            .slice(0, 10)
+            .map(search => search.searchTerm);
+        } else {
+          // Fall back to localStorage if backend has no search history
+          recentSearchesArray = JSON.parse(localStorage.getItem("recentSearches") || "[]");
+        }
+        
         setRecentSearches(recentSearchesArray);
-        setSearchHistory(userData.searchHistory || []);
+        setSearchHistory(backendSearchHistory);
         
         // Set vendor notes - backend returns object keyed by vendor name
         setVendorNotes(userData.notes || {});
@@ -243,26 +253,26 @@ export default function Dashboard() {
   const saveSearchToHistory = () => {
     // Only save if there's actual search content
     if (!searchQuery.trim() && selectedCategory === "all" && selectedProduct === "all") return;
-    
+
     const newSearch = {
       query: searchQuery,
       category: selectedCategory,
       product: selectedProduct,
       date: new Date().toISOString()
     };
-    
+
     // Remove duplicates based on query, category, and product
     const updatedHistory = [
       newSearch,
-      ...searchHistory.filter(s => 
-        !(s.query.toLowerCase() === searchQuery.toLowerCase() && 
-          s.category === selectedCategory && 
+      ...recentSearches.filter(s =>
+        !(s.query.toLowerCase() === searchQuery.toLowerCase() &&
+          s.category === selectedCategory &&
           s.product === selectedProduct)
       )
     ].slice(0, 10); // Keep only last 10 searches
-    
-    setSearchHistory(updatedHistory);
-    localStorage.setItem("vendorSearchHistory", JSON.stringify(updatedHistory));
+
+    setRecentSearches(updatedHistory);
+    localStorage.setItem("recentSearches", JSON.stringify(updatedHistory));
   };
 
   const loadSearchFromHistory = (search) => {
@@ -728,19 +738,19 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div data-testid="quick-stats" className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-6 mb-4 sm:mb-8">
+        <div data-testid="quick-stats" className="grid grid-cols-3 gap-1 sm:gap-6 mb-4 sm:mb-8">
           <Card 
             data-testid="favorites-stat-card"
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('favorites-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            <CardContent className="p-2 sm:p-6">
+            <CardContent className="p-1.5 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p data-testid="favorites-label" className="text-xs sm:text-sm text-slate-600">Favorites</p>
-                  <p data-testid="favorites-count" className="text-xl sm:text-3xl font-bold text-slate-900">{favorites.length}</p>
+                  <p data-testid="favorites-label" className="text-xs text-slate-600">Favorites</p>
+                  <p data-testid="favorites-count" className="text-lg sm:text-3xl font-bold text-slate-900">{favorites.length}</p>
                 </div>
-                <Heart className="w-5 h-5 sm:w-8 sm:h-8 text-red-500 fill-red-500" />
+                <Heart className="w-4 h-4 sm:w-8 sm:h-8 text-red-500 fill-red-500" />
               </div>
             </CardContent>
           </Card>
@@ -750,13 +760,13 @@ export default function Dashboard() {
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('searches-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            <CardContent className="p-2 sm:p-6">
+            <CardContent className="p-1.5 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p data-testid="searches-label" className="text-xs sm:text-sm text-slate-600">Recent Searches</p>
-                  <p data-testid="searches-count" className="text-xl sm:text-3xl font-bold text-slate-900">{recentSearches.length}</p>
+                  <p data-testid="searches-label" className="text-xs text-slate-600">Recent Searches</p>
+                  <p data-testid="searches-count" className="text-lg sm:text-3xl font-bold text-slate-900">{recentSearches.length}</p>
                 </div>
-                <Search className="w-5 h-5 sm:w-8 sm:h-8 text-slate-600" />
+                <Search className="w-4 h-4 sm:w-8 sm:h-8 text-slate-600" />
               </div>
             </CardContent>
           </Card>
@@ -766,13 +776,13 @@ export default function Dashboard() {
             className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => document.getElementById('contacts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            <CardContent className="p-2 sm:p-6">
+            <CardContent className="p-1.5 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p data-testid="contacted-label" className="text-xs sm:text-sm text-slate-600">Contacted</p>
-                  <p data-testid="contacted-count" className="text-xl sm:text-3xl font-bold text-slate-900">{contactHistory.length}</p>
+                  <p data-testid="contacted-label" className="text-xs text-slate-600">Contacted</p>
+                  <p data-testid="contacted-count" className="text-lg sm:text-3xl font-bold text-slate-900">{contactHistory.length}</p>
                 </div>
-                <Phone className="w-5 h-5 sm:w-8 sm:h-8 text-green-600" />
+                <Phone className="w-4 h-4 sm:w-8 sm:h-8 text-green-600" />
               </div>
             </CardContent>
           </Card>

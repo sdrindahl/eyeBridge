@@ -243,10 +243,8 @@ function Vendors() {
     }
   }, [isLoggedIn, userEmail]);
 
-  // Track searches with debounce - only save after user stops typing for 2 seconds
+  // Track searches with debounce - save after user stops typing for 2 seconds
   useEffect(() => {
-    if (!isLoggedIn) return;
-    
     const timeoutId = setTimeout(() => {
       if (searchQuery || selectedCategory !== "all" || selectedProduct !== "all") {
         const recentSearches = JSON.parse(localStorage.getItem("recentSearches") || "[]");
@@ -267,7 +265,7 @@ function Vendors() {
     }, 2000); // Wait 2 seconds after last keystroke
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedCategory, selectedProduct, isLoggedIn]);
+  }, [searchQuery, selectedCategory, selectedProduct]);
 
   // Handle clicks outside dropdowns to close them
   useEffect(() => {
