@@ -243,10 +243,8 @@ function Vendors() {
     }
   }, [isLoggedIn, userEmail]);
 
-  // Track searches with debounce - only save after user stops typing for 2 seconds
+  // Track searches with debounce - save after user stops typing for 2 seconds
   useEffect(() => {
-    if (!isLoggedIn) return;
-    
     const timeoutId = setTimeout(() => {
       if (searchQuery || selectedCategory !== "all" || selectedProduct !== "all") {
         const recentSearches = JSON.parse(localStorage.getItem("recentSearches") || "[]");
@@ -267,7 +265,7 @@ function Vendors() {
     }, 2000); // Wait 2 seconds after last keystroke
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedCategory, selectedProduct, isLoggedIn]);
+  }, [searchQuery, selectedCategory, selectedProduct]);
 
   // Handle clicks outside dropdowns to close them
   useEffect(() => {
@@ -1616,24 +1614,6 @@ function Vendors() {
                 <p className="text-slate-600 text-sm mt-1">Comparing {compareList.length} vendors</p>
               </div>
               <div className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    const comparisonName = prompt("Enter a name for this comparison:");
-                    if (comparisonName) {
-                      const savedComparisons = JSON.parse(localStorage.getItem("savedComparisons") || "[]");
-                      const newComparison = {
-                        name: comparisonName,
-                        vendors: compareList,
-                        date: new Date().toISOString()
-                      };
-                      localStorage.setItem("savedComparisons", JSON.stringify([newComparison, ...savedComparisons]));
-                      alert("Comparison saved!");
-                    }
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Save Comparison
-                </Button>
                 <button
                   onClick={() => setShowComparison(false)}
                   className="text-slate-500 hover:text-slate-900 text-2xl font-bold leading-none px-2"
