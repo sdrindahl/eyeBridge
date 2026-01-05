@@ -12,7 +12,11 @@
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
     "test:report": "playwright show-report",
-    "test:prod": "BASE_URL=https://eye-bridge.vercel.app playwright test"
+    "test:prod": "BASE_URL=https://eye-bridge.vercel.app playwright test",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:headed": "cypress run --headed",
+    "cypress:run:debug": "cypress run --debug"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -25,12 +29,15 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.3",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
+    "cypress": "^15.8.1",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
+    "typescript": "^5.9.3",
     "vite": "^5.4.8"
   }
 }
