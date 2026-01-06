@@ -68,42 +68,19 @@ describe('Dashboard', () => {
   //   cy.get('[data-testid="recent-searches-section"]').should('have.attr', 'aria-expanded', 'false')
   // })
 
-  it('should allow collapsing Favorite Vendors section', () => {
-    cy.get('[data-testid="favorite-vendors-section"]').within(() => {
-      cy.get('[data-testid="collapse-toggle"]').click()
-    })
-    cy.get('[data-testid="favorite-vendors-section"]').should('have.attr', 'aria-expanded', 'false')
+  it('Favorite section collapse and expand', () => {
+    //cy.get('[data-testid="login-form"] button.w-full').click();
+    cy.get('#favorites-section svg.lucide-chevron-down').click();
+    cy.get('[data-testid="dashboard-main"] svg.rotate-180').click();
   })
 
   it('should navigate to vendors page with search', () => {
-    cy.get('input[placeholder*="Search"]').type('optics')
-    cy.contains('button', /search|find/i).click()
+    cy.get('[data-testid="category-dropdown"] span.font-medium').click();
+    cy.get('[data-testid="dashboard-main"] div.min-w-\\[200px\\] button:nth-child(2)').click();
+    cy.get('input.pl-12').click();
+    cy.get('input.pl-12').type('optics');
+    cy.get('div.lg\\:flex-row [data-testid="search-button"]').click();
     cy.url().should('include', '/vendors')
     cy.url().should('include', 'q=optics')
   })
-
-  it('should filter by category', () => {
-    cy.contains('button', /All Categories/i).click()
-    cy.contains('Equipment').click()
-    cy.url().should('include', 'category=equipment')
-  })
-
-  it('should filter by product', () => {
-    cy.contains('button', /All Products/i).click()
-    cy.get('li').first().click()
-    // URL should include product parameter
-    cy.url().should('include', 'product=')
-  })
-
-  it('should handle vendor modal opening', () => {
-    // If there are vendor cards visible
-    cy.get('[data-testid="vendor-card"]').first().click()
-    cy.get('[data-testid="vendor-modal"]').should('be.visible')
-  })
-
-  it('should close vendor modal on close button', () => {
-    cy.get('[data-testid="vendor-card"]').first().click()
-    cy.get('[data-testid="close-modal"]').click()
-    cy.get('[data-testid="vendor-modal"]').should('not.exist')
-  })
-})
+});

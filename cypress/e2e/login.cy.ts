@@ -1,3 +1,5 @@
+import { TEST_EMAIL, TEST_PASSWORD } from '../support/e2e'
+
 describe('Login & Authentication', () => {
   beforeEach(() => {
     // Bypass password gate
@@ -47,16 +49,16 @@ describe('Login & Authentication', () => {
 
   it('should successfully login with valid credentials', () => {
     cy.visit('/login')
-    cy.get('input[type="email"]').type('test@example.com')
-    cy.get('input[type="password"]').type('Test@123')
+    cy.get('input[type="email"]').type(TEST_EMAIL)
+    cy.get('input[type="password"]').type(TEST_PASSWORD)
     cy.contains('button', /sign in|login/i).click()
     cy.url().should('include', '/dashboard')
   })
 
   it('should display loading state during login', () => {
     cy.visit('/login')
-    cy.get('input[type="email"]').type('test@example.com')
-    cy.get('input[type="password"]').type('Test@123')
+    cy.get('input[type="email"]').type(TEST_EMAIL)
+    cy.get('input[type="password"]').type(TEST_PASSWORD)
     cy.contains('button', /sign in|login/i).click()
     // Button should show loading state
     cy.contains('button', /signing in|loading/i).should('exist')

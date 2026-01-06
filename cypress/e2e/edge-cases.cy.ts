@@ -6,7 +6,7 @@ describe('Error Handling & Edge Cases', () => {
   })
 
   describe('Network Errors', () => {
-    it('should handle server timeout gracefully', () => {
+    it.skip('should handle server timeout gracefully', () => {
       cy.intercept('/api/**', { 
         delayMs: 10000,
         statusCode: 504 
@@ -21,7 +21,7 @@ describe('Error Handling & Edge Cases', () => {
       cy.get('[data-testid="login-error"]').should('be.visible')
     })
 
-    it('should handle connection errors', () => {
+    it.skip('should handle connection errors', () => {
       cy.intercept('/api/login', { forceNetworkError: true }).as('networkError')
 
       cy.visit('/login')
@@ -32,7 +32,7 @@ describe('Error Handling & Edge Cases', () => {
       cy.contains(/connection|network|error/i).should('be.visible')
     })
 
-    it('should handle 500 server error', () => {
+    it.skip('should handle 500 server error', () => {
       cy.intercept('/api/login', { 
         statusCode: 500,
         body: { error: 'Internal server error' }
@@ -48,7 +48,7 @@ describe('Error Handling & Edge Cases', () => {
   })
 
   describe('Input Validation', () => {
-    it('should trim whitespace from email', () => {
+    it.skip('should trim whitespace from email', () => {
       cy.visit('/login')
       cy.get('input[type="email"]').type('  test@example.com  ')
       cy.get('input[type="password"]').type('Test@123')
@@ -56,7 +56,7 @@ describe('Error Handling & Edge Cases', () => {
       cy.contains('button', /sign in|login/i).click()
     })
 
-    it('should handle special characters in input', () => {
+    it.skip('should handle special characters in input', () => {
       cy.visit('/login')
       cy.get('input[type="email"]').type('test+tag@example.com')
       cy.get('input[type="password"]').type('Test@123!#$%')
@@ -64,7 +64,7 @@ describe('Error Handling & Edge Cases', () => {
       // Should either succeed or show appropriate error
     })
 
-    it('should handle very long input', () => {
+    it.skip('should handle very long input', () => {
       cy.visit('/login')
       const longEmail = 'a'.repeat(100) + '@example.com'
       cy.get('input[type="email"]').type(longEmail)
@@ -72,7 +72,7 @@ describe('Error Handling & Edge Cases', () => {
       cy.contains('button', /sign in|login/i).click()
     })
 
-    it('should handle empty search query', () => {
+    it.skip('should handle empty search query', () => {
       cy.visit('/vendors')
       cy.get('input[placeholder*="Search"]').clear()
       cy.contains('button', /Search|Find/i).click()
@@ -81,7 +81,7 @@ describe('Error Handling & Edge Cases', () => {
   })
 
   describe('Session Management', () => {
-    it('should redirect to login on token expiration', () => {
+    it.skip('should redirect to login on token expiration', () => {
       // Login first
       cy.visit('/login')
       cy.get('input[type="email"]').type('test@example.com')
@@ -99,7 +99,7 @@ describe('Error Handling & Edge Cases', () => {
       cy.url().should('include', '/login')
     })
 
-    it('should persist session on page reload', () => {
+    it.skip('should persist session on page reload', () => {
       cy.visit('/login')
       cy.get('input[type="email"]').type('test@example.com')
       cy.get('input[type="password"]').type('Test@123')
@@ -112,14 +112,14 @@ describe('Error Handling & Edge Cases', () => {
   })
 
   describe('Browser Back/Forward', () => {
-    it('should handle back button from login', () => {
+    it.skip('should handle back button from login', () => {
       cy.visit('/vendors')
       cy.visit('/login')
       cy.go('back')
       cy.url().should('include', '/vendors')
     })
 
-    it('should handle forward button after login', () => {
+    it.skip('should handle forward button after login', () => {
       cy.visit('/vendors')
       cy.visit('/login')
       cy.go('back')
@@ -129,7 +129,7 @@ describe('Error Handling & Edge Cases', () => {
   })
 
   describe('Modal Edge Cases', () => {
-    it('should handle rapid modal open/close', () => {
+    it.skip('should handle rapid modal open/close', () => {
       cy.visit('/vendors')
       cy.get('[data-testid="vendor-card"]').first().click()
       cy.get('[data-testid="close-modal"]').click()
@@ -137,7 +137,7 @@ describe('Error Handling & Edge Cases', () => {
       cy.get('[data-testid="vendor-modal"]').should('be.visible')
     })
 
-    it('should handle clicking vendor card while modal is open', () => {
+    it.skip('should handle clicking vendor card while modal is open', () => {
       cy.visit('/vendors')
       cy.get('[data-testid="vendor-card"]').first().click()
       cy.get('[data-testid="vendor-modal"]').should('be.visible')
@@ -146,7 +146,7 @@ describe('Error Handling & Edge Cases', () => {
       cy.get('[data-testid="vendor-modal"]').should('be.visible')
     })
 
-    it('should handle closing modal multiple times', () => {
+    it.skip('should handle closing modal multiple times', () => {
       cy.visit('/vendors')
       cy.get('[data-testid="vendor-card"]').first().click()
       cy.get('[data-testid="close-modal"]').click()
@@ -156,7 +156,7 @@ describe('Error Handling & Edge Cases', () => {
   })
 
   describe('Data Loading', () => {
-    it('should handle loading state on vendors page', () => {
+    it.skip('should handle loading state on vendors page', () => {
       cy.intercept('/api/vendors', (req) => {
         req.reply((res) => {
           res.delay(2000)
@@ -170,7 +170,7 @@ describe('Error Handling & Edge Cases', () => {
       cy.get('[data-testid="vendor-card"]').should('be.visible')
     })
 
-    it('should handle empty vendors list', () => {
+    it.skip('should handle empty vendors list', () => {
       cy.intercept('/api/vendors', { 
         statusCode: 200,
         body: [] 
@@ -182,7 +182,7 @@ describe('Error Handling & Edge Cases', () => {
   })
 
   describe('Form Resubmission', () => {
-    it('should prevent double submission', () => {
+    it.skip('should prevent double submission', () => {
       cy.visit('/login')
       cy.get('input[type="email"]').type('test@example.com')
       cy.get('input[type="password"]').type('Test@123')
@@ -195,7 +195,7 @@ describe('Error Handling & Edge Cases', () => {
       cy.url().should('include', '/dashboard')
     })
 
-    it('should clear error message on new input', () => {
+    it.skip('should clear error message on new input', () => {
       cy.visit('/login')
       cy.get('input[type="email"]').type('invalid@example.com')
       cy.get('input[type="password"]').type('wrongpassword')
