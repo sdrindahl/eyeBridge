@@ -144,6 +144,8 @@ describe('Navigation & Routing', () => {
       cy.visit('/invalid-route', { failOnStatusCode: false })
       // Should display an error message for invalid route
       cy.contains(/not found|404|error|invalid|page not found/i).should('be.visible')
+      cy.get('[data-testid="go-home-button"]').click()
+      cy.url().should('include', '/')
     })
   })
 })
