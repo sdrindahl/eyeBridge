@@ -21,3 +21,8 @@ it('compare', function() {
   cy.visit('http://localhost:5173/')
   
 });
+
+it('collapse', function() {
+  cy.visit('localhost:5173')
+  
+});
