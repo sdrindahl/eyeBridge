@@ -18,7 +18,7 @@ const MobileNav = () => {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-50">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-50" data-testid="mobile-nav">
       <div className="flex justify-around items-center py-2">
         <Link 
           to="/" 

@@ -753,6 +753,7 @@ function Vendors() {
                     setShowCategoryDropdown(!showCategoryDropdown);
                     setShowProductDropdown(false);
                   }}
+                  data-testid="category-dropdown-toggle"
                   className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors whitespace-nowrap"
                 >
                   <span className="font-medium">
@@ -787,6 +788,7 @@ function Vendors() {
                       setShowProductDropdown(!showProductDropdown);
                       setShowCategoryDropdown(false);
                     }}
+                    data-testid="product-dropdown-toggle"
                     className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors whitespace-nowrap"
                   >
                     <span className="font-medium">
