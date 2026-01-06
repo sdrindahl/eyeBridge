@@ -26,3 +26,8 @@ it('collapse', function() {
   cy.visit('localhost:5173')
   
 });
+
+it('vendor', function() {
+  cy.visit('localhost:5173')
+  
+});
