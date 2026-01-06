@@ -6,6 +6,7 @@ import Vendors from "./pages/Vendors";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/NotFound";
 import PasswordGate from "./components/PasswordGate";
 import MobileNav from "./components/MobileNav";
 
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
           <MobileNav />
         </Router>
