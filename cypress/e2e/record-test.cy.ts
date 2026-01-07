@@ -14,7 +14,17 @@ describe('My Recorded Test', () => {
   it('records my interactions', () => {
     // Your recorded test code will appear here
     // Start by clicking the record button in Cypress Test Runner!
-  })
+  });
+
+  it('type', function() {
+    cy.visit('localhost:5373')
+    
+  });
+
+  it('test', function() {
+    cy.visit('localhost:5173')
+    
+  });
 });
 
 it('compare', function() {
