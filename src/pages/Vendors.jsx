@@ -348,6 +348,21 @@ function Vendors() {
     localStorage.setItem("contactHistory", JSON.stringify(updatedHistory));
   };
 
+  const recordRecentlyViewed = (vendorName) => {
+    const recentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
+    
+    // Remove if already exists (to avoid duplicates)
+    const filtered = recentlyViewed.filter(v => v.name !== vendorName);
+    
+    // Add to beginning with timestamp
+    const updated = [
+      { name: vendorName, viewedAt: new Date().toISOString() },
+      ...filtered
+    ].slice(0, 10); // Keep only last 10 viewed
+    
+    localStorage.setItem("recentlyViewed", JSON.stringify(updated));
+  };
+
   const submitReview = async () => {
     if (!isLoggedIn) {
       alert("Please log in to submit a review");
@@ -1121,6 +1136,8 @@ function Vendors() {
                     setShowReviewForm(false);
                     setShowNoteForm(false);
                     setShowReviews(false);
+                    // Record this vendor as recently viewed
+                    recordRecentlyViewed(vendor["Company Name"]);
                     // Load existing review for this vendor
                     const vendorName = vendor["Company Name"];
                     const userEmail = localStorage.getItem("userEmail");

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown } from "lucide-react";
+import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown, Eye } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [userEmail, setUserEmail] = useState("");
   const [favorites, setFavorites] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [contactHistory, setContactHistory] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [recentSearchesCollapsed, setRecentSearchesCollapsed] = useState(false);
+  const [recentlyViewedCollapsed, setRecentlyViewedCollapsed] = useState(false);
   const [favoriteVendorsCollapsed, setFavoriteVendorsCollapsed] = useState(false);
 
   const categoryOptions = [
@@ -122,6 +124,10 @@ export default function Dashboard() {
         // Contact history and comparisons will be empty for now (backend feature not yet implemented)
         setContactHistory([]);
         
+        // Load recently viewed vendors from localStorage
+        const storedRecentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
+        setRecentlyViewed(storedRecentlyViewed);
+        
         setLoading(false);
         
       } catch (error) {
@@ -148,6 +154,9 @@ export default function Dashboard() {
         
         const storedNotes = JSON.parse(localStorage.getItem("vendorNotes") || "{}");
         setVendorNotes(storedNotes);
+        
+        const storedRecentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
+        setRecentlyViewed(storedRecentlyViewed);
         
         setLoading(false);
       }
@@ -873,6 +882,77 @@ export default function Dashboard() {
               <div className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 <span className="font-medium text-slate-900 text-xs">Recent Searches</span>
+                <ChevronDown className="w-3 h-3 rotate-180" />
+              </div>
+            </div>
+          )}
+
+          {/* Recently Viewed Vendors */}
+          {!recentlyViewedCollapsed && (
+            <Card className="bg-white border-slate-300 rounded-xl">
+              <CardHeader className="pb-3 sm:pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle 
+                    className="flex items-center gap-2 text-base sm:text-lg cursor-pointer hover:text-slate-600 transition-colors"
+                    onClick={() => setRecentlyViewedCollapsed(!recentlyViewedCollapsed)}
+                  >
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                    Recently Viewed
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${recentlyViewedCollapsed ? 'rotate-180' : ''}`} />
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {recentlyViewed.length === 0 ? (
+                  <p className="text-slate-600 text-sm">No vendors viewed yet</p>
+                ) : (
+                  <div className="space-y-2 sm:space-y-3">
+                    {recentlyViewed.slice(0, 5).map((item, index) => {
+                      const vendor = vendorsData.find(v => v["Company Name"] === item.name);
+                      if (!vendor) return null;
+                      
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => openVendorModal(vendor)}
+                          className="p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors group relative"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="font-medium text-slate-900 text-sm sm:text-base">{vendor["Company Name"]}</p>
+                              <p className="text-xs text-slate-600 mt-1">{vendor.Category}</p>
+                              {vendor["Products Offered"] && (
+                                <p className="text-xs text-slate-600 mt-1 line-clamp-1">{vendor["Products Offered"]}</p>
+                              )}
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const updated = recentlyViewed.filter((_, i) => i !== index);
+                                setRecentlyViewed(updated);
+                                localStorage.setItem("recentlyViewed", JSON.stringify(updated));
+                              }}
+                              className="ml-2 flex-shrink-0 text-blue-400 hover:text-blue-600 transition-colors"
+                              title="Remove from recently viewed"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Collapsed Recently Viewed Button */}
+          {recentlyViewedCollapsed && (
+            <div className="bg-white border-slate-300 rounded-xl p-1 cursor-pointer hover:bg-slate-50 transition-colors self-start" onClick={() => setRecentlyViewedCollapsed(false)}>
+              <div className="flex items-center gap-1">
+                <Eye className="w-3 h-3" />
+                <span className="font-medium text-slate-900 text-xs">Recently Viewed</span>
                 <ChevronDown className="w-3 h-3 rotate-180" />
               </div>
             </div>
