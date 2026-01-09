@@ -36,6 +36,7 @@ function Vendors() {
   const [favorites, setFavorites] = useState([]);
   // Remove local isLoggedIn state, use context instead
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [viewAll, setViewAll] = useState(false);
   const [compareList, setCompareList] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
@@ -749,249 +750,207 @@ function Vendors() {
 
           {/* Search Controls */}
           <div className="mt-6 space-y-4">
-            {/* Mobile Compact Search */}
+            {/* Mobile Compact Search - Collapsible */}
             <div className="sm:hidden">
-              {/* Mobile search controls - no back button needed since bottom nav exists */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search vendors..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      const resultCount = calculateResultCount(searchQuery, selectedCategory, selectedProduct);
-                      setAppliedSearchQuery(searchQuery);
-                      setAppliedCategory(selectedCategory);
-                      setAppliedProduct(selectedProduct);
-                      saveSearchToHistory(resultCount);
-                      setAnimationKey(prev => prev + 1);
-                    }
-                  }}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-200 text-slate-800 text-sm"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                <div className="flex-1 relative category-dropdown">
-                  <button
-                    onClick={() => {
-                      setShowCategoryDropdown(!showCategoryDropdown);
-                      setShowProductDropdown(false);
+              {/* Quick action bar - always visible, compact */}
+              <div className="flex gap-2 items-center mb-2">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const resultCount = calculateResultCount(searchQuery, selectedCategory, selectedProduct);
+                        setAppliedSearchQuery(searchQuery);
+                        setAppliedCategory(selectedCategory);
+                        setAppliedProduct(selectedProduct);
+                        saveSearchToHistory(resultCount);
+                        setAnimationKey(prev => prev + 1);
+                        setShowMobileFilters(false);
+                      }
                     }}
-                    className="w-full flex items-center justify-between gap-2 px-4 py-3 sm:px-3 sm:py-1.5 bg-teal-500 text-white rounded-lg text-sm sm:text-xs font-medium hover:bg-teal-600 transition-colors active:bg-teal-700"
-                  >
-                    <span className="truncate">{selectedCategory === "all" ? "Category" : selectedCategory}</span>
-                    <ChevronDown className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
-                  </button>
-                  {/* Mobile Category Dropdown */}
-                  {showCategoryDropdown && (
-                    <>
-                      {/* Mobile: Full screen overlay dropdown */}
-                      <div className="sm:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setShowCategoryDropdown(false)} />
-                      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-50 max-h-[80vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between">
-                          <h3 className="text-lg font-bold text-slate-900">Select Category</h3>
-                          <button
-                            onClick={() => setShowCategoryDropdown(false)}
-                            className="text-slate-500 hover:text-slate-700"
-                          >
-                            ×
-                          </button>
-                        </div>
-                        <div className="p-4 space-y-2">
-                          {categoryOptions.map((category) => (
-                            <button
-                              key={category}
-                              onClick={() => {
-                                setSelectedCategory(category === "All Categories" ? "all" : category);
-                                setSelectedProduct("all");
-                                setShowCategoryDropdown(false);
-                              }}
-                              className="w-full text-left px-4 py-4 hover:bg-teal-50 active:bg-teal-100 text-slate-700 text-base rounded-lg border border-slate-200 hover:border-teal-300 transition-colors"
-                            >
-                              {category}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      {/* Desktop: Inline dropdown */}
-                      <div className="hidden sm:block absolute top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 min-w-[200px]">
-                        {categoryOptions.map((category) => (
-                          <button
-                            key={category}
-                            onClick={() => {
-                              setSelectedCategory(category === "All Categories" ? "all" : category);
-                              setSelectedProduct("all");
-                              setShowCategoryDropdown(false);
-                            }}
-                            className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
-                          >
-                            {category}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
+                    className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-200 text-slate-800 text-sm"
+                  />
                 </div>
-                {selectedCategory !== "all" && (
-                  <div className="flex-1 relative product-dropdown">
+                <Button 
+                  onClick={() => setShowMobileFilters(!showMobileFilters)}
+                  className={`px-3 py-2 text-sm flex-shrink-0 ${
+                    showMobileFilters 
+                      ? "bg-slate-700 hover:bg-slate-800 text-white" 
+                      : "bg-slate-600 hover:bg-slate-700 text-white"
+                  }`}
+                  title="Toggle filters"
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showMobileFilters ? 'rotate-180' : ''}`} />
+                </Button>
+              </div>
+
+              {/* Expandable filters section */}
+              {showMobileFilters && (
+                <div className="bg-slate-100 p-3 rounded-lg border border-slate-300 space-y-3">
+                  {/* Category Dropdown */}
+                  <div className="relative category-dropdown">
                     <button
                       onClick={() => {
-                        setShowProductDropdown(!showProductDropdown);
-                        setShowCategoryDropdown(false);
+                        setShowCategoryDropdown(!showCategoryDropdown);
+                        setShowProductDropdown(false);
                       }}
-                      className="w-full flex items-center justify-between gap-2 px-4 py-3 sm:px-3 sm:py-1.5 bg-indigo-500 text-white rounded-lg text-sm sm:text-xs font-medium hover:bg-indigo-600 transition-colors active:bg-indigo-700"
+                      className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-teal-500 text-white rounded-lg text-xs font-medium hover:bg-teal-600 transition-colors"
                     >
-                      <span className="truncate">{selectedProduct === "all" ? "Product" : selectedProduct}</span>
-                      <ChevronDown className="w-4 h-4 sm:w-3 sm:h-3 flex-shrink-0" />
+                      <span className="truncate">{selectedCategory === "all" ? "Category" : selectedCategory}</span>
+                      <ChevronDown className="w-3 h-3 flex-shrink-0" />
                     </button>
-                    {/* Mobile Product Dropdown */}
-                    {showProductDropdown && (
+                    {showCategoryDropdown && (
                       <>
-                        {/* Mobile: Full screen overlay dropdown */}
-                        <div className="sm:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setShowProductDropdown(false)} />
-                        <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-50 max-h-[80vh] overflow-y-auto">
+                        <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowCategoryDropdown(false)} />
+                        <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-50 max-h-[80vh] overflow-y-auto">
                           <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between">
-                            <h3 className="text-lg font-bold text-slate-900">Select Product</h3>
-                            <button
-                              onClick={() => setShowProductDropdown(false)}
-                              className="text-slate-500 hover:text-slate-700"
-                            >
-                              ×
-                            </button>
+                            <h3 className="text-lg font-bold text-slate-900">Select Category</h3>
+                            <button onClick={() => setShowCategoryDropdown(false)} className="text-slate-500 hover:text-slate-700">×</button>
                           </div>
                           <div className="p-4 space-y-2">
-                            {productOptions.map((product) => (
+                            {categoryOptions.map((category) => (
                               <button
-                                key={product}
+                                key={category}
                                 onClick={() => {
-                                  setSelectedProduct(product === "All Products" ? "all" : product);
-                                  setShowProductDropdown(false);
+                                  setSelectedCategory(category === "All Categories" ? "all" : category);
+                                  setSelectedProduct("all");
+                                  setShowCategoryDropdown(false);
                                 }}
-                                className="w-full text-left px-4 py-4 hover:bg-indigo-50 active:bg-indigo-100 text-slate-700 text-base rounded-lg border border-slate-200 hover:border-indigo-300 transition-colors"
+                                className="w-full text-left px-4 py-3 hover:bg-teal-50 active:bg-teal-100 text-slate-700 text-sm rounded-lg border border-slate-200 hover:border-teal-300 transition-colors"
                               >
-                                {product}
+                                {category}
                               </button>
                             ))}
                           </div>
                         </div>
-                        
-                        {/* Desktop: Inline dropdown */}
-                        <div className="hidden sm:block absolute top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-20 max-h-[300px] overflow-y-auto min-w-[200px]">
-                          {productOptions.map((product) => (
-                            <button
-                              key={product}
-                              onClick={() => {
-                                setSelectedProduct(product === "All Products" ? "all" : product);
-                                setShowProductDropdown(false);
-                              }}
-                              className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-700 text-sm"
-                            >
-                              {product}
-                            </button>
-                          ))}
-                        </div>
                       </>
                     )}
                   </div>
-                )}
-                <Button 
-                  onClick={() => {
-                    const resultCount = calculateResultCount(searchQuery, selectedCategory, selectedProduct);
-                    setAppliedSearchQuery(searchQuery);
-                    setAppliedCategory(selectedCategory);
-                    setAppliedProduct(selectedProduct);
-                    saveSearchToHistory(resultCount);
-                    setAnimationKey(prev => prev + 1);
-                    setViewAll(false); // Turn off view all when searching
-                  }}
-                  className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs"
-                >
-                  Go
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setViewAll(true);
-                    setSearchQuery("");
-                    setSelectedCategory("all");
-                    setSelectedProduct("all");
-                    setAppliedSearchQuery("");
-                    setAppliedCategory("all");
-                    setAppliedProduct("all");
-                    setShowFavoritesOnly(false);
-                    setShowCategoryDropdown(false);
-                    setShowProductDropdown(false);
-                    setAnimationKey(prev => prev + 1);
-                  }}
-                  variant={viewAll ? "default" : "outline"}
-                  className={viewAll 
-                    ? "px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs" 
-                    : "px-3 py-1.5 border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-xs"
-                  }
-                >
-                  All
-                </Button>
-              </div>
 
-              {/* Mobile Clear Filters Button */}
-              {(selectedCategory !== "all" || selectedProduct !== "all") && (
-                <div className="mt-2">
-                  <Button 
-                    onClick={() => {
-                      setSelectedCategory("all");
-                      setSelectedProduct("all");
-                      setShowCategoryDropdown(false);
-                      setShowProductDropdown(false);
-                    }}
-                    variant="outline"
-                    className="w-full border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-sm"
-                  >
-                    Clear Filters
-                  </Button>
-                </div>
-              )}
+                  {/* Product Dropdown */}
+                  {selectedCategory !== "all" && (
+                    <div className="relative product-dropdown">
+                      <button
+                        onClick={() => {
+                          setShowProductDropdown(!showProductDropdown);
+                          setShowCategoryDropdown(false);
+                        }}
+                        className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-indigo-500 text-white rounded-lg text-xs font-medium hover:bg-indigo-600 transition-colors"
+                      >
+                        <span className="truncate">{selectedProduct === "all" ? "Product" : selectedProduct}</span>
+                        <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                      </button>
+                      {showProductDropdown && (
+                        <>
+                          <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowProductDropdown(false)} />
+                          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-50 max-h-[80vh] overflow-y-auto">
+                            <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between">
+                              <h3 className="text-lg font-bold text-slate-900">Select Product</h3>
+                              <button onClick={() => setShowProductDropdown(false)} className="text-slate-500 hover:text-slate-700">×</button>
+                            </div>
+                            <div className="p-4 space-y-2">
+                              {productOptions.map((product) => (
+                                <button
+                                  key={product}
+                                  onClick={() => {
+                                    setSelectedProduct(product === "All Products" ? "all" : product);
+                                    setShowProductDropdown(false);
+                                  }}
+                                  className="w-full text-left px-4 py-3 hover:bg-indigo-50 active:bg-indigo-100 text-slate-700 text-sm rounded-lg border border-slate-200 hover:border-indigo-300 transition-colors"
+                                >
+                                  {product}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
 
-              {/* Mobile Clear Button */}
-              {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all" || viewAll) && (
-                <div className="mt-2">
-                  <Button 
-                    onClick={() => {
-                      setSearchQuery("");
-                      setSelectedCategory("all");
-                      setSelectedProduct("all");
-                      setAppliedSearchQuery("");
-                      setAppliedCategory("all");
-                      setAppliedProduct("all");
-                      setViewAll(false);
-                      setAnimationKey(prev => prev + 1);
-                    }}
-                    variant="outline"
-                    className="w-full border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-sm"
-                  >
-                    Clear Search
-                  </Button>
-                </div>
-              )}
+                  {/* Action Buttons Row */}
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => {
+                        const resultCount = calculateResultCount(searchQuery, selectedCategory, selectedProduct);
+                        setAppliedSearchQuery(searchQuery);
+                        setAppliedCategory(selectedCategory);
+                        setAppliedProduct(selectedProduct);
+                        saveSearchToHistory(resultCount);
+                        setAnimationKey(prev => prev + 1);
+                        setViewAll(false);
+                        setShowMobileFilters(false);
+                      }}
+                      className="flex-1 px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-xs"
+                    >
+                      Search
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        setViewAll(true);
+                        setSearchQuery("");
+                        setSelectedCategory("all");
+                        setSelectedProduct("all");
+                        setAppliedSearchQuery("");
+                        setAppliedCategory("all");
+                        setAppliedProduct("all");
+                        setShowFavoritesOnly(false);
+                        setShowMobileFilters(false);
+                        setAnimationKey(prev => prev + 1);
+                      }}
+                      variant={viewAll ? "default" : "outline"}
+                      className={viewAll 
+                        ? "flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs" 
+                        : "flex-1 px-3 py-2 border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-xs"
+                      }
+                    >
+                      All
+                    </Button>
+                  </div>
 
-              {/* Mobile Favorites Filter */}
-              {isLoggedIn && favorites.length > 0 && (
-                <div className="mt-2">
-                  <Button 
-                    onClick={() => {
-                      setShowFavoritesOnly(!showFavoritesOnly);
-                      setViewAll(false); // Turn off view all when toggling favorites
-                    }}
-                    variant={showFavoritesOnly ? "default" : "outline"}
-                    className={showFavoritesOnly 
-                      ? "w-full bg-red-500 hover:bg-red-600 text-white text-sm" 
-                      : "w-full border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-sm"
-                    }
-                  >
-                    <Heart className={`w-4 h-4 mr-2 ${showFavoritesOnly ? "fill-white" : ""}`} />
-                    {showFavoritesOnly ? "Show All" : `Favorites (${favorites.length})`}
-                  </Button>
+                  {/* Clear Filters Button */}
+                  {(selectedCategory !== "all" || selectedProduct !== "all" || appliedSearchQuery) && (
+                    <Button 
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedCategory("all");
+                        setSelectedProduct("all");
+                        setAppliedSearchQuery("");
+                        setAppliedCategory("all");
+                        setAppliedProduct("all");
+                        setViewAll(false);
+                        setShowMobileFilters(false);
+                        setAnimationKey(prev => prev + 1);
+                      }}
+                      variant="outline"
+                      className="w-full border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-xs"
+                    >
+                      Clear All
+                    </Button>
+                  )}
+
+                  {/* Favorites Filter */}
+                  {isLoggedIn && favorites.length > 0 && (
+                    <Button 
+                      onClick={() => {
+                        setShowFavoritesOnly(!showFavoritesOnly);
+                        setViewAll(false);
+                        setShowMobileFilters(false);
+                      }}
+                      variant={showFavoritesOnly ? "default" : "outline"}
+                      className={showFavoritesOnly 
+                        ? "w-full bg-red-500 hover:bg-red-600 text-white text-xs" 
+                        : "w-full border-slate-400 text-slate-900 hover:bg-slate-100 bg-white text-xs"
+                      }
+                    >
+                      <Heart className={`w-3 h-3 mr-1 ${showFavoritesOnly ? "fill-white" : ""}`} />
+                      {showFavoritesOnly ? "Show All" : `Favorites (${favorites.length})`}
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -1297,31 +1256,6 @@ function Vendors() {
             <div className="text-2xl font-bold text-neutral-900">
               {viewAll ? `All ${filteredVendors.length} vendor${filteredVendors.length !== 1 ? 's' : ''}` : `Showing ${filteredVendors.length} vendor${filteredVendors.length !== 1 ? 's' : ''}`}
             </div>
-            {(searchQuery || selectedCategory !== "all" || selectedProduct !== "all" || viewAll) && (
-              <div className="mt-2 text-base text-slate-600 flex flex-wrap items-center gap-2">
-                <span>for:</span>
-                {viewAll && (
-                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium">
-                    All Vendors
-                  </span>
-                )}
-                {searchQuery && (
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
-                    "{searchQuery}"
-                  </span>
-                )}
-                {selectedCategory !== "all" && (
-                  <span className="px-3 py-1 bg-teal-100 text-teal-700 rounded-full font-medium">
-                    Category: {selectedCategory}
-                  </span>
-                )}
-                {selectedProduct !== "all" && (
-                  <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full font-medium">
-                    Product: {selectedProduct}
-                  </span>
-                )}
-              </div>
-            )}
           </motion.div>
 
           {filteredVendors.length === 0 ? (
