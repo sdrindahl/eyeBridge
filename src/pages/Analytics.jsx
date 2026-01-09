@@ -46,43 +46,70 @@ export default function Analytics() {
   useEffect(() => {
     const loadAnalytics = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const user = await api.verifyToken();
-        setUserEmail(user.user?.email || "");
+        let userData = null;
+        let userEmail = "";
 
-        const userData = await api.syncUserData();
-
-        const backendSearchHistory = userData.searchHistory || [];
-        let recentSearchesArray = [];
-
-        if (backendSearchHistory.length > 0) {
-          recentSearchesArray = backendSearchHistory
-            .slice(0, 10)
-            .map((search) => search.searchTerm);
-        } else {
-          recentSearchesArray = JSON.parse(
-            localStorage.getItem("recentSearches") || "[]"
-          );
+        // Try to fetch from backend
+        try {
+          const user = await api.verifyToken();
+          userEmail = user.user?.email || "";
+          userData = await api.syncUserData();
+        } catch (err) {
+          console.warn("Backend unavailable, using localStorage:", err.message);
+          // Fall back to localStorage if backend is unavailable
+          userData = null;
         }
 
+        // Prepare search history
+        let backendSearchHistory = [];
+        let recentSearchesArray = [];
+
+        if (userData?.searchHistory && userData.searchHistory.length > 0) {
+          backendSearchHistory = userData.searchHistory;
+          recentSearchesArray = backendSearchHistory
+            .slice(0, 10)
+            .map((search) => search.searchTerm || search);
+        } else {
+          // Fall back to localStorage
+          const stored = JSON.parse(
+            localStorage.getItem("recentSearches") || "[]"
+          );
+          recentSearchesArray = stored;
+          backendSearchHistory = stored.map((term) => ({
+            searchTerm: term,
+            timestamp: new Date().toISOString(),
+          }));
+        }
+
+        // Get recently viewed
         const storedRecentlyViewed = JSON.parse(
           localStorage.getItem("recentlyViewed") || "[]"
         );
 
-        const reviewsObject = {};
-        Object.entries(userData.reviews || {}).forEach(([vendorName, review]) => {
-          reviewsObject[vendorName] = [
-            {
-              rating: review.rating,
-              comment: review.comment,
-              date: new Date().toISOString(),
-            },
-          ];
-        });
+        // Get favorites
+        const storedFavorites = JSON.parse(
+          localStorage.getItem("favorites") || "[]"
+        );
 
-        // Compute analytics
+        // Prepare reviews
+        const reviewsObject = {};
+        if (userData?.reviews) {
+          Object.entries(userData.reviews).forEach(([vendorName, review]) => {
+            reviewsObject[vendorName] = [
+              {
+                rating: review.rating,
+                comment: review.comment,
+                date: new Date().toISOString(),
+              },
+            ];
+          });
+        }
+
+        // Compute analytics with fallback data
         const analyticsData = getOverallAnalytics({
-          favorites: userData.favorites || [],
+          favorites: userData?.favorites || storedFavorites,
           recentlyViewed: storedRecentlyViewed,
           searchHistory: backendSearchHistory,
           vendorReviews: reviewsObject,
@@ -93,21 +120,17 @@ export default function Analytics() {
 
         setAnalytics(analyticsData);
         setTrends(trendsData);
+        setUserEmail(userEmail);
         setLoading(false);
       } catch (err) {
         console.error("Error loading analytics:", err);
-        if (err.message?.includes("Unauthorized") || err.message?.includes("Invalid token")) {
-          api.logout();
-          navigate("/login");
-          return;
-        }
-        setError("Failed to load analytics data");
+        setError("Failed to load analytics data: " + (err.message || "Unknown error"));
         setLoading(false);
       }
     };
 
     loadAnalytics();
-  }, [navigate, timeRange]);
+  }, [timeRange]);
 
   const handleExport = () => {
     if (!analytics) return;
