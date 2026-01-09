@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Comparison from "./pages/Comparison";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 import PasswordGate from "./components/PasswordGate";
 import MobileNav from "./components/MobileNav";
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/vendors" element={<Vendors />} />
             <Route path="/comparison" element={<Comparison />} />
+            <Route path="/analytics" element={<Analytics />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
