@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown, Eye, Bookmark, BookmarkCheck, Sparkles, BarChart3, MessageSquare } from "lucide-react";
+import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown, Eye, Bookmark, BookmarkCheck, Sparkles, BarChart3, MessageSquare, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
 import api from "@/services/api";
 import { getRecommendedVendors, getPopularVendorsByCategory, getSimilarVendors } from "@/lib/recommendations";
+import ExportModal from "@/components/ExportModal";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ export default function Dashboard() {
   const [saveSearchName, setSaveSearchName] = useState("");
   const [recommendedVendors, setRecommendedVendors] = useState([]);
   const [recommendationsCollapsed, setRecommendationsCollapsed] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const categoryOptions = [
     "All Categories",
@@ -477,7 +479,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats Grid */}
-        <div data-testid="quick-stats" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div data-testid="quick-stats" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
           <Card 
             data-testid="favorites-stat-card"
             className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
@@ -570,6 +572,22 @@ export default function Dashboard() {
                   <p className="text-xs sm:text-sm text-cyan-600 mt-2 font-medium">Analytics</p>
                 </div>
                 <MessageSquare className="w-8 h-8 sm:w-12 sm:h-12 text-cyan-400 opacity-50" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            data-testid="export-stat-card"
+            className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
+            onClick={() => setShowExportModal(true)}
+          >
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p data-testid="export-label" className="text-xs sm:text-sm text-green-700 font-medium">Export</p>
+                  <p className="text-xs sm:text-sm text-green-600 mt-2 font-medium">& Share</p>
+                </div>
+                <Download className="w-8 h-8 sm:w-12 sm:h-12 text-green-400 opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -1988,6 +2006,13 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        vendors={compareList.length > 0 ? compareList : favorites.slice(0, 5)}
+      />
     </div>
   );
 }
