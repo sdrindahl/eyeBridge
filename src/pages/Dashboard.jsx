@@ -409,10 +409,73 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main data-testid="dashboard-main" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20 md:pb-8">
+        {/* Welcome Section */}
         <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Welcome back, {userEmail.split('@')[0]}</h2>
+              <p className="text-slate-600 mt-1">Your vendor research dashboard</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Stats Grid */}
+        <div data-testid="quick-stats" className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <Card 
+            data-testid="favorites-stat-card"
+            className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
+            onClick={() => document.getElementById('favorites-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p data-testid="favorites-label" className="text-sm text-red-700 font-medium">Favorite Vendors</p>
+                  <p data-testid="favorites-count" className="text-4xl font-bold text-red-600 mt-2">{favorites.length}</p>
+                </div>
+                <Heart className="w-12 h-12 text-red-400 fill-red-400 opacity-50" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            data-testid="searches-stat-card"
+            className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
+            onClick={() => document.getElementById('searches-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p data-testid="searches-label" className="text-sm text-blue-700 font-medium">Recent Searches</p>
+                  <p data-testid="searches-count" className="text-4xl font-bold text-blue-600 mt-2">{recentSearches.length}</p>
+                </div>
+                <Search className="w-12 h-12 text-blue-400 opacity-50" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            data-testid="contacted-stat-card"
+            className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
+            onClick={() => document.getElementById('contacts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p data-testid="contacted-label" className="text-sm text-green-700 font-medium">Vendors Contacted</p>
+                  <p data-testid="contacted-count" className="text-4xl font-bold text-green-600 mt-2">{contactHistory.length}</p>
+                </div>
+                <Phone className="w-12 h-12 text-green-400 opacity-50" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search Controls Section */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-8">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Search & Filter</h3>
           
           {/* Search Controls */}
-          <div className="mt-6 space-y-4">
+          <div className="mt-4 space-y-4">
             {/* Mobile Compact Search */}
             <div className="sm:hidden">
               {/* Mobile search controls */}
@@ -800,61 +863,13 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div data-testid="quick-stats" className="grid grid-cols-3 gap-1 sm:gap-6 mb-4 sm:mb-8">
-          <Card 
-            data-testid="favorites-stat-card"
-            className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => document.getElementById('favorites-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          >
-            <CardContent className="p-1.5 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p data-testid="favorites-label" className="text-xs text-slate-600">Favorites</p>
-                  <p data-testid="favorites-count" className="text-lg sm:text-3xl font-bold text-slate-900">{favorites.length}</p>
-                </div>
-                <Heart className="w-4 h-4 sm:w-8 sm:h-8 text-red-500 fill-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            data-testid="searches-stat-card"
-            className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => document.getElementById('searches-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          >
-            <CardContent className="p-1.5 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p data-testid="searches-label" className="text-xs text-slate-600">Recent Searches</p>
-                  <p data-testid="searches-count" className="text-lg sm:text-3xl font-bold text-slate-900">{recentSearches.length}</p>
-                </div>
-                <Search className="w-4 h-4 sm:w-8 sm:h-8 text-slate-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            data-testid="contacted-stat-card"
-            className="bg-white border-slate-300 rounded-xl cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => document.getElementById('contacts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          >
-            <CardContent className="p-1.5 sm:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p data-testid="contacted-label" className="text-xs text-slate-600">Contacted</p>
-                  <p data-testid="contacted-count" className="text-lg sm:text-3xl font-bold text-slate-900">{contactHistory.length}</p>
-                </div>
-                <Phone className="w-4 h-4 sm:w-8 sm:h-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          {/* Recent Searches */}
-          {!recentSearchesCollapsed && (
-            <Card id="searches-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Column 1: Recent Searches & Recently Viewed (spans 1 column) */}
+          <div className="lg:col-span-1 space-y-4 sm:space-y-6">
+            {/* Recent Searches */}
+            {!recentSearchesCollapsed && (
+              <Card id="searches-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8 h-full">
               <CardHeader className="pb-3 sm:pb-6">
                 <div className="flex items-center justify-between">
                   <CardTitle 
@@ -1020,10 +1035,12 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+          </div>
 
-          {/* Favorite Vendors */}
-          {!favoriteVendorsCollapsed && (
-            <Card id="favorites-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
+          {/* Column 2-3: Favorite Vendors (spans 2 columns) */}
+          <div className="lg:col-span-2">
+            {!favoriteVendorsCollapsed && (
+              <Card id="favorites-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8">
               <CardHeader className="pb-3 sm:pb-6">
                 <div className="flex items-center justify-between">
                   <CardTitle 
@@ -1169,6 +1186,7 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+          </div>
         </div>
       </main>
 
