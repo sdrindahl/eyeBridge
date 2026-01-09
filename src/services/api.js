@@ -169,10 +169,27 @@ class APIService {
   }
 
   async saveReview(vendorName, rating, comment) {
-    return this.request('/user/reviews', {
+    // Save to backend
+    const result = await this.request('/user/reviews', {
       method: 'POST',
       body: JSON.stringify({ vendorName, rating, comment }),
     });
+
+    // Also save to localStorage as backup
+    try {
+      const reviews = JSON.parse(localStorage.getItem('reviews') || '{}');
+      reviews[vendorName] = {
+        rating,
+        comment,
+        date: new Date().toISOString(),
+        verified: false,
+      };
+      localStorage.setItem('reviews', JSON.stringify(reviews));
+    } catch (err) {
+      console.warn('Failed to save review to localStorage:', err);
+    }
+
+    return result;
   }
 
   async syncUserData() {
