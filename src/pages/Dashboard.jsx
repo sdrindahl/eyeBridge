@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown, Eye, Bookmark, BookmarkCheck } from "lucide-react";
+import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown, Eye, Bookmark, BookmarkCheck, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
 import api from "@/services/api";
+import { getRecommendedVendors, getPopularVendorsByCategory, getSimilarVendors } from "@/lib/recommendations";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -42,6 +43,8 @@ export default function Dashboard() {
   const [savedSearchesCollapsed, setSavedSearchesCollapsed] = useState(false);
   const [showSaveSearchModal, setShowSaveSearchModal] = useState(false);
   const [saveSearchName, setSaveSearchName] = useState("");
+  const [recommendedVendors, setRecommendedVendors] = useState([]);
+  const [recommendationsCollapsed, setRecommendationsCollapsed] = useState(false);
 
   const categoryOptions = [
     "All Categories",
@@ -165,6 +168,16 @@ export default function Dashboard() {
         
         const storedRecentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
         setRecentlyViewed(storedRecentlyViewed);
+
+        // Load recommendations based on user's favorites and recently viewed
+        const favoritesToUse = storedFavorites.length > 0 ? storedFavorites : userData.favorites || [];
+        const recommendations = getRecommendedVendors({
+          favorites: favoritesToUse,
+          recentlyViewed: storedRecentlyViewed,
+          maxResults: 6,
+          excludeNames: favoritesToUse
+        });
+        setRecommendedVendors(recommendations);
         
         setLoading(false);
       }
@@ -1375,6 +1388,107 @@ export default function Dashboard() {
           )}
           </div>
         </div>
+
+        {/* Recommendations Section */}
+        {recommendedVendors.length > 0 && (
+          <div className="mt-8 pt-8 border-t border-slate-200">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-amber-500" />
+                  Recommended For You
+                </h3>
+                <p className="text-sm text-slate-600">Based on your favorites and browsing</p>
+              </div>
+              <p className="text-slate-600 mb-4">
+                Discover vendors similar to the ones you follow
+              </p>
+            </div>
+
+            {!recommendationsCollapsed && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {recommendedVendors.map((vendor, index) => (
+                  <Card 
+                    key={index}
+                    className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105 border-l-4 border-l-amber-500"
+                    onClick={() => {
+                      setSelectedVendor(vendor);
+                      setShowModal(true);
+                    }}
+                  >
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-slate-900 text-base line-clamp-2">{vendor["Company Name"]}</h4>
+                          <p className="text-xs text-amber-700 font-medium mt-1">Recommended Match</p>
+                        </div>
+                        <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0 ml-2" />
+                      </div>
+                      
+                      <p className="text-xs text-slate-600 mb-3 line-clamp-2">
+                        {vendor.Category}
+                      </p>
+                      
+                      {vendor["Products Offered"] && (
+                        <p className="text-xs text-slate-600 mb-3 line-clamp-2">
+                          {vendor["Products Offered"]}
+                        </p>
+                      )}
+                      
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedVendor(vendor);
+                            setShowModal(true);
+                          }}
+                          className="flex-1 text-xs bg-amber-600 hover:bg-amber-700 text-white"
+                        >
+                          View Details
+                        </Button>
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(vendor["Company Name"]);
+                          }}
+                          variant={favorites.includes(vendor["Company Name"]) ? "default" : "outline"}
+                          className={`${
+                            favorites.includes(vendor["Company Name"])
+                              ? "bg-red-500 hover:bg-red-600 text-white"
+                              : "border-amber-300 text-amber-700 hover:bg-amber-50"
+                          }`}
+                          size="sm"
+                        >
+                          <Heart className={`w-4 h-4 ${favorites.includes(vendor["Company Name"]) ? "fill-white" : ""}`} />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {recommendationsCollapsed && (
+              <div className="bg-white border border-amber-200 rounded-xl p-4 cursor-pointer hover:bg-amber-50 transition-colors" onClick={() => setRecommendationsCollapsed(false)}>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-600" />
+                  <span className="font-medium text-slate-900">Recommended for You</span>
+                  <span className="text-xs text-amber-600 font-medium">({recommendedVendors.length})</span>
+                  <ChevronDown className="w-4 h-4 ml-auto" />
+                </div>
+              </div>
+            )}
+
+            <Button
+              onClick={() => setRecommendationsCollapsed(!recommendationsCollapsed)}
+              variant="ghost"
+              size="sm"
+              className="mt-4 text-amber-700 hover:text-amber-800 hover:bg-amber-50"
+            >
+              {recommendationsCollapsed ? "Show recommendations" : "Collapse recommendations"}
+            </Button>
+          </div>
+        )}
       </main>
 
       {/* Comparison Modal */}
@@ -1758,6 +1872,32 @@ export default function Dashboard() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Similar Vendors Section */}
+              <div className="border-t border-slate-300 mt-6 pt-6">
+                <h3 className="text-sm font-semibold text-slate-600 uppercase mb-4 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  Similar Vendors
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {useMemo(() => {
+                    const similar = getSimilarVendors(selectedVendor["Company Name"], [selectedVendor["Company Name"]]);
+                    return similar.slice(0, 4).map((vendor, index) => (
+                      <div
+                        key={index}
+                        className="p-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg border border-amber-200 cursor-pointer hover:shadow-md transition-all hover:bg-amber-100"
+                        onClick={() => setSelectedVendor(vendor)}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <p className="font-medium text-slate-900 text-sm line-clamp-1">{vendor["Company Name"]}</p>
+                          <Sparkles className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                        </div>
+                        <p className="text-xs text-slate-600 line-clamp-1">{vendor.Category}</p>
+                      </div>
+                    ));
+                  }, [selectedVendor])}
+                </div>
               </div>
 
               {/* Display Reviews */}
