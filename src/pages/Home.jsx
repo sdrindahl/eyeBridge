@@ -270,6 +270,82 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Quick Search Templates */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">Popular Searches</h2>
+            <p className="text-lg text-slate-600">Start with one of these common searches or use the full vendor directory</p>
+          </div>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { 
+                title: "OCT Equipment", 
+                description: "Optical Coherence Tomography devices",
+                query: "OCT",
+                icon: "🔍"
+              },
+              { 
+                title: "Contact Lens Suppliers", 
+                description: "Contact lens products and solutions",
+                query: "Contact Lens",
+                icon: "👁️"
+              },
+              { 
+                title: "Practice Management", 
+                description: "Software and systems for practice operations",
+                query: "Software",
+                icon: "💼"
+              },
+              { 
+                title: "Diagnostic Equipment", 
+                description: "Diagnostic and testing instruments",
+                query: "Diagnostic",
+                icon: "🔬"
+              },
+              { 
+                title: "Pharmaceutical", 
+                description: "Eye care medications and pharmaceuticals",
+                query: "Pharmaceutical",
+                icon: "💊"
+              },
+              { 
+                title: "Optical Lab", 
+                description: "Lab equipment and lens processing",
+                query: "Optical Lab",
+                icon: "🔧"
+              }
+            ].map((search) => (
+              <motion.div
+                key={search.title}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Link 
+                  to={`/vendors?q=${encodeURIComponent(search.query)}`}
+                  className="block h-full"
+                >
+                  <Card className="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all cursor-pointer h-full">
+                    <CardContent className="p-6 flex flex-col justify-between h-full">
+                      <div>
+                        <div className="text-3xl mb-3">{search.icon}</div>
+                        <h3 className="text-lg font-semibold text-slate-900">{search.title}</h3>
+                        <p className="text-sm text-slate-600 mt-2">{search.description}</p>
+                      </div>
+                      <div className="flex items-center gap-2 mt-4 text-blue-600 font-medium">
+                        <span>Search</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Directory Preview */}
       <section id="directory" className="py-20 bg-white border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
