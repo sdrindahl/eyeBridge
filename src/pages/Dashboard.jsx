@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown, Eye, Bookmark, BookmarkCheck, Sparkles, BarChart3 } from "lucide-react";
+import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown, Eye, Bookmark, BookmarkCheck, Sparkles, BarChart3, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
@@ -477,7 +477,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats Grid */}
-        <div data-testid="quick-stats" className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+        <div data-testid="quick-stats" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           <Card 
             data-testid="favorites-stat-card"
             className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
@@ -554,6 +554,22 @@ export default function Dashboard() {
                   <p className="text-xs sm:text-sm text-amber-600 mt-2 font-medium">View Insights</p>
                 </div>
                 <BarChart3 className="w-8 h-8 sm:w-12 sm:h-12 text-amber-400 opacity-50" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            data-testid="reviews-stat-card"
+            className="bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
+            onClick={() => navigate('/reviews')}
+          >
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p data-testid="reviews-label" className="text-xs sm:text-sm text-cyan-700 font-medium">Reviews</p>
+                  <p className="text-xs sm:text-sm text-cyan-600 mt-2 font-medium">Analytics</p>
+                </div>
+                <MessageSquare className="w-8 h-8 sm:w-12 sm:h-12 text-cyan-400 opacity-50" />
               </div>
             </CardContent>
           </Card>
