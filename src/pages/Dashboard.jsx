@@ -1068,39 +1068,37 @@ export default function Dashboard() {
                     {getFavoriteVendors().map((vendor, index) => (
                       <div
                         key={index}
-                        className="p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all relative group"
+                        className="p-2 sm:p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all relative group border-l-4 border-l-blue-500"
                       >
                         <div
                           onClick={() => {
                             setSelectedVendor(vendor);
                             setShowModal(true);
                           }}
-                          className="cursor-pointer"
+                          className="cursor-pointer pr-20 sm:pr-28"
                         >
-                          <div className="pr-20 sm:pr-28">
-                            <p className="font-medium text-slate-900 text-sm sm:text-base">{vendor["Company Name"]}</p>
-                            {vendorReviews[vendor["Company Name"]] && 
-                             vendorReviews[vendor["Company Name"]].filter(r => r.rating && r.rating > 0).length > 0 && (
-                              <div className="flex items-center gap-1 mt-1">
-                                <div className="flex items-center gap-0.5">
-                                  {[1, 2, 3, 4, 5].map((star) => (
-                                    <Star
-                                      key={star}
-                                      className={`w-3 h-3 ${
-                                        star <= Math.round(calculateAverageRating(vendor["Company Name"]))
-                                          ? "fill-yellow-400 text-yellow-400"
-                                          : "text-slate-300"
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-xs text-slate-600 font-medium">
-                                  {calculateAverageRating(vendor["Company Name"])}
-                                </span>
+                          <p className="font-medium text-slate-900 text-sm sm:text-base">{vendor["Company Name"]}</p>
+                          {vendorReviews[vendor["Company Name"]] && 
+                           vendorReviews[vendor["Company Name"]].filter(r => r.rating && r.rating > 0).length > 0 && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`w-3 h-3 ${
+                                      star <= Math.round(calculateAverageRating(vendor["Company Name"]))
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "text-slate-300"
+                                    }`}
+                                  />
+                                ))}
                               </div>
-                            )}
-                            <p className="text-xs text-slate-600 mt-1">{vendor.Category}</p>
-                          </div>
+                              <span className="text-xs text-slate-600 font-medium">
+                                {calculateAverageRating(vendor["Company Name"])}
+                              </span>
+                            </div>
+                          )}
+                          <p className="text-xs text-slate-600 mt-1">{vendor.Category}</p>
                         </div>
                         <div className="absolute top-1 sm:top-2 right-1 sm:right-2 flex gap-1">
                           <button
