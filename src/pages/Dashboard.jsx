@@ -1039,7 +1039,8 @@ export default function Dashboard() {
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowComparison(true);
+                          localStorage.setItem("comparisonList", JSON.stringify(compareList));
+                          navigate("/comparison?" + compareList.map(v => `vendors=${encodeURIComponent(v)}`).join("&"));
                         }}
                         disabled={compareList.length < 2}
                         className="text-xs bg-blue-600 hover:bg-blue-700 text-white h-auto py-1 px-2 sm:px-3"
