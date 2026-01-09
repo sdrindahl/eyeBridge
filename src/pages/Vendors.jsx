@@ -511,8 +511,8 @@ function Vendors() {
 
   return (
     <div className="min-h-screen bg-gray-300">
-      {/* Header */}
-      <header data-testid="vendors-header" className="border-b border-slate-800 sticky top-0 z-10" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      {/* Header with sticky active filters bar */}
+      <header data-testid="vendors-header" className="border-b border-slate-800 sticky top-0 z-20 shadow-lg" style={{ backgroundImage: 'url(/banner.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 bg-slate-900/50"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
@@ -572,6 +572,103 @@ function Vendors() {
               )}
             </div>
           </div>
+
+          {/* Active Filters Display Bar (sticky) */}
+          {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all" || showFavoritesOnly) && (
+            <div className="mt-6 pb-2 border-t border-slate-700 pt-4">
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-slate-300 text-sm font-medium">Active filters:</span>
+                
+                {/* Search Query Chip */}
+                {appliedSearchQuery && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-full text-sm">
+                    <span>Search: "{appliedSearchQuery}"</span>
+                    <button
+                      onClick={() => {
+                        setAppliedSearchQuery("");
+                        setSearchQuery("");
+                        setAnimationKey(prev => prev + 1);
+                      }}
+                      className="hover:bg-blue-700 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                
+                {/* Category Chip */}
+                {appliedCategory !== "all" && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-600 text-white rounded-full text-sm">
+                    <span>{appliedCategory}</span>
+                    <button
+                      onClick={() => {
+                        setAppliedCategory("all");
+                        setSelectedCategory("all");
+                        setAppliedProduct("all");
+                        setSelectedProduct("all");
+                        setAnimationKey(prev => prev + 1);
+                      }}
+                      className="hover:bg-teal-700 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                
+                {/* Product Chip */}
+                {appliedProduct !== "all" && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-600 text-white rounded-full text-sm">
+                    <span>{appliedProduct}</span>
+                    <button
+                      onClick={() => {
+                        setAppliedProduct("all");
+                        setSelectedProduct("all");
+                        setAnimationKey(prev => prev + 1);
+                      }}
+                      className="hover:bg-indigo-700 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                
+                {/* Favorites Chip */}
+                {showFavoritesOnly && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-600 text-white rounded-full text-sm">
+                    <Heart className="w-3 h-3 fill-white" />
+                    <span>Favorites only</span>
+                    <button
+                      onClick={() => {
+                        setShowFavoritesOnly(false);
+                        setAnimationKey(prev => prev + 1);
+                      }}
+                      className="hover:bg-red-700 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                
+                {/* Clear All Button */}
+                <button
+                  onClick={() => {
+                    setAppliedSearchQuery("");
+                    setSearchQuery("");
+                    setAppliedCategory("all");
+                    setSelectedCategory("all");
+                    setAppliedProduct("all");
+                    setSelectedProduct("all");
+                    setShowFavoritesOnly(false);
+                    setViewAll(false);
+                    setAnimationKey(prev => prev + 1);
+                  }}
+                  className="px-3 py-1 text-slate-300 hover:text-white border border-slate-500 hover:border-slate-300 rounded-full text-sm transition-colors"
+                >
+                  Clear All
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Search Controls */}
           <div className="mt-6 space-y-4">
