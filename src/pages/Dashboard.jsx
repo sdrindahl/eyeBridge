@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown, Eye } from "lucide-react";
+import { Heart, Search, Phone, Mail, Globe, TrendingUp, Clock, Star, X, MapPin, Trash2, ChevronDown, Eye, Bookmark, BookmarkCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import vendorsData from "@/data/vendors.json";
@@ -38,6 +38,10 @@ export default function Dashboard() {
   const [recentSearchesCollapsed, setRecentSearchesCollapsed] = useState(false);
   const [recentlyViewedCollapsed, setRecentlyViewedCollapsed] = useState(false);
   const [favoriteVendorsCollapsed, setFavoriteVendorsCollapsed] = useState(false);
+  const [savedSearches, setSavedSearches] = useState([]);
+  const [savedSearchesCollapsed, setSavedSearchesCollapsed] = useState(false);
+  const [showSaveSearchModal, setShowSaveSearchModal] = useState(false);
+  const [saveSearchName, setSaveSearchName] = useState("");
 
   const categoryOptions = [
     "All Categories",
@@ -127,6 +131,10 @@ export default function Dashboard() {
         // Load recently viewed vendors from localStorage
         const storedRecentlyViewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
         setRecentlyViewed(storedRecentlyViewed);
+
+        // Load saved searches from localStorage
+        const storedSavedSearches = JSON.parse(localStorage.getItem("savedSearches") || "[]");
+        setSavedSearches(storedSavedSearches);
         
         setLoading(false);
         
@@ -348,6 +356,42 @@ export default function Dashboard() {
     navigate(`/vendors?${params.toString()}`);
   };
 
+  const saveCurrentSearch = (name) => {
+    if (!name.trim()) {
+      alert("Please enter a name for this search");
+      return;
+    }
+
+    const newSavedSearch = {
+      id: Date.now(),
+      name: name.trim(),
+      query: searchQuery,
+      category: selectedCategory,
+      product: selectedProduct,
+      createdAt: new Date().toISOString()
+    };
+
+    const updated = [newSavedSearch, ...savedSearches].slice(0, 20); // Keep max 20 saved searches
+    setSavedSearches(updated);
+    localStorage.setItem("savedSearches", JSON.stringify(updated));
+    setSaveSearchName("");
+    setShowSaveSearchModal(false);
+    alert("Search saved successfully!");
+  };
+
+  const deleteSavedSearch = (id) => {
+    const updated = savedSearches.filter(search => search.id !== id);
+    setSavedSearches(updated);
+    localStorage.setItem("savedSearches", JSON.stringify(updated));
+  };
+
+  const runSavedSearch = (search) => {
+    setSearchQuery(search.query);
+    setSelectedCategory(search.category);
+    setSelectedProduct(search.product);
+    executeSearch(search);
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -420,19 +464,19 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats Grid */}
-        <div data-testid="quick-stats" className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div data-testid="quick-stats" className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <Card 
             data-testid="favorites-stat-card"
             className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
             onClick={() => document.getElementById('favorites-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p data-testid="favorites-label" className="text-sm text-red-700 font-medium">Favorite Vendors</p>
-                  <p data-testid="favorites-count" className="text-4xl font-bold text-red-600 mt-2">{favorites.length}</p>
+                  <p data-testid="favorites-label" className="text-xs sm:text-sm text-red-700 font-medium">Favorite Vendors</p>
+                  <p data-testid="favorites-count" className="text-2xl sm:text-4xl font-bold text-red-600 mt-2">{favorites.length}</p>
                 </div>
-                <Heart className="w-12 h-12 text-red-400 fill-red-400 opacity-50" />
+                <Heart className="w-8 h-8 sm:w-12 sm:h-12 text-red-400 fill-red-400 opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -442,13 +486,13 @@ export default function Dashboard() {
             className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
             onClick={() => document.getElementById('searches-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p data-testid="searches-label" className="text-sm text-blue-700 font-medium">Recent Searches</p>
-                  <p data-testid="searches-count" className="text-4xl font-bold text-blue-600 mt-2">{recentSearches.length}</p>
+                  <p data-testid="searches-label" className="text-xs sm:text-sm text-blue-700 font-medium">Recent Searches</p>
+                  <p data-testid="searches-count" className="text-2xl sm:text-4xl font-bold text-blue-600 mt-2">{recentSearches.length}</p>
                 </div>
-                <Search className="w-12 h-12 text-blue-400 opacity-50" />
+                <Search className="w-8 h-8 sm:w-12 sm:h-12 text-blue-400 opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -458,13 +502,29 @@ export default function Dashboard() {
             className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
             onClick={() => document.getElementById('contacts-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p data-testid="contacted-label" className="text-sm text-green-700 font-medium">Vendors Contacted</p>
-                  <p data-testid="contacted-count" className="text-4xl font-bold text-green-600 mt-2">{contactHistory.length}</p>
+                  <p data-testid="contacted-label" className="text-xs sm:text-sm text-green-700 font-medium">Vendors Contacted</p>
+                  <p data-testid="contacted-count" className="text-2xl sm:text-4xl font-bold text-green-600 mt-2">{contactHistory.length}</p>
                 </div>
-                <Phone className="w-12 h-12 text-green-400 opacity-50" />
+                <Phone className="w-8 h-8 sm:w-12 sm:h-12 text-green-400 opacity-50" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            data-testid="saved-searches-stat-card"
+            className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 rounded-xl cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
+            onClick={() => document.getElementById('saved-searches-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p data-testid="saved-searches-label" className="text-xs sm:text-sm text-purple-700 font-medium">Saved Searches</p>
+                  <p data-testid="saved-searches-count" className="text-2xl sm:text-4xl font-bold text-purple-600 mt-2">{savedSearches.length}</p>
+                </div>
+                <BookmarkCheck className="w-8 h-8 sm:w-12 sm:h-12 text-purple-400 opacity-50" />
               </div>
             </CardContent>
           </Card>
@@ -859,14 +919,141 @@ export default function Dashboard() {
               >
                 Search Vendors
               </Button>
+
+              {/* Save Search Button */}
+              {(searchQuery || selectedCategory !== 'all' || selectedProduct !== 'all') && (
+                <Button
+                  onClick={() => setShowSaveSearchModal(true)}
+                  variant="outline"
+                  className="border-purple-400 text-purple-700 hover:bg-purple-50 bg-white whitespace-nowrap flex items-center gap-2"
+                >
+                  <Bookmark className="w-4 h-4" />
+                  Save Search
+                </Button>
+              )}
             </div>
           </div>
         </div>
 
+        {/* Save Search Modal */}
+        {showSaveSearchModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Save This Search</h3>
+              <p className="text-sm text-slate-600 mb-4">Give your search a name to save it for later</p>
+              <input
+                type="text"
+                value={saveSearchName}
+                onChange={(e) => setSaveSearchName(e.target.value)}
+                placeholder="e.g., 'Contact Lens Suppliers'"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    saveCurrentSearch(saveSearchName);
+                  }
+                }}
+              />
+              <div className="flex gap-2 justify-end">
+                <Button
+                  onClick={() => {
+                    setShowSaveSearchModal(false);
+                    setSaveSearchName("");
+                  }}
+                  variant="outline"
+                  className="border-slate-300"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => saveCurrentSearch(saveSearchName)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Save Search
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Column 1: Recent Searches & Recently Viewed (spans 1 column) */}
+          {/* Column 1: Saved Searches, Recent Searches & Recently Viewed (spans 1 column) */}
           <div className="lg:col-span-1 space-y-4 sm:space-y-6">
+            {/* Saved Searches */}
+            {!savedSearchesCollapsed && savedSearches.length > 0 && (
+              <Card id="saved-searches-section" className="bg-white border-purple-300 rounded-xl scroll-mt-8">
+              <CardHeader className="pb-3 sm:pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle 
+                    className="flex items-center gap-2 text-base sm:text-lg cursor-pointer hover:text-slate-600 transition-colors"
+                    onClick={() => setSavedSearchesCollapsed(!savedSearchesCollapsed)}
+                  >
+                    <BookmarkCheck className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+                    Saved Searches
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${savedSearchesCollapsed ? 'rotate-180' : ''}`} />
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2 sm:space-y-3">
+                  {savedSearches.map((search) => (
+                    <div
+                      key={search.id}
+                      className="p-2 sm:p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200 group relative hover:bg-purple-100 transition-colors"
+                    >
+                      <div 
+                        onClick={() => runSavedSearch(search)}
+                        className="flex items-center justify-between cursor-pointer"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-slate-900 text-sm sm:text-base">{search.name}</p>
+                          <div className="flex flex-wrap gap-1 sm:gap-2 mt-1">
+                            {search.query && (
+                              <span className="text-xs bg-blue-100 text-blue-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+                                "{search.query}"
+                              </span>
+                            )}
+                            {search.category !== "all" && (
+                              <span className="text-xs bg-teal-100 text-teal-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+                                {search.category}
+                              </span>
+                            )}
+                            {search.product !== "all" && (
+                              <span className="text-xs bg-indigo-100 text-indigo-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded truncate max-w-[120px]">
+                                {search.product}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteSavedSearch(search.id);
+                        }}
+                        className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-0.5 sm:p-1 transition-colors"
+                        title="Delete this saved search"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            )}
+
+            {/* Collapsed Saved Searches Button */}
+            {savedSearchesCollapsed && savedSearches.length > 0 && (
+              <div className="bg-white border-purple-300 rounded-xl p-1 cursor-pointer hover:bg-slate-50 transition-colors self-start" onClick={() => setSavedSearchesCollapsed(false)}>
+                <div className="flex items-center gap-1">
+                  <BookmarkCheck className="w-3 h-3 text-purple-600" />
+                  <span className="font-medium text-slate-900 text-xs">Saved Searches</span>
+                  <ChevronDown className="w-3 h-3 rotate-180" />
+                </div>
+              </div>
+            )}
+
             {/* Recent Searches */}
             {!recentSearchesCollapsed && (
               <Card id="searches-section" className="bg-white border-slate-300 rounded-xl scroll-mt-8 h-full">

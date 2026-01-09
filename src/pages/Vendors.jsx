@@ -5,7 +5,7 @@ import vendorsData from "@/data/vendors.json";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Heart, X, Star, Phone, Mail, Globe, Search, ChevronDown, MapPin } from "lucide-react";
+import { Heart, X, Star, Phone, Mail, Globe, Search, ChevronDown, MapPin, Bookmark, BookmarkCheck } from "lucide-react";
 import api from "@/services/api";
 // Add any other imports your component uses (e.g., icons, framer-motion, etc.)
 function Vendors() {
@@ -53,6 +53,8 @@ function Vendors() {
   const [currentNote, setCurrentNote] = useState("");
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
+  const [showSaveSearchModal, setShowSaveSearchModal] = useState(false);
+  const [saveSearchName, setSaveSearchName] = useState("");
 
   const categoryOptions = [
     "All Categories",
@@ -363,6 +365,29 @@ function Vendors() {
     localStorage.setItem("recentlyViewed", JSON.stringify(updated));
   };
 
+  const saveCurrentSearch = (name) => {
+    if (!name.trim()) {
+      alert("Please enter a name for this search");
+      return;
+    }
+
+    const newSavedSearch = {
+      id: Date.now(),
+      name: name.trim(),
+      query: searchQuery,
+      category: selectedCategory,
+      product: selectedProduct,
+      createdAt: new Date().toISOString()
+    };
+
+    const savedSearches = JSON.parse(localStorage.getItem("savedSearches") || "[]");
+    const updated = [newSavedSearch, ...savedSearches].slice(0, 20); // Keep max 20 saved searches
+    localStorage.setItem("savedSearches", JSON.stringify(updated));
+    setSaveSearchName("");
+    setShowSaveSearchModal(false);
+    alert("Search saved successfully! View it in your Dashboard.");
+  };
+
   const submitReview = async () => {
     if (!isLoggedIn) {
       alert("Please log in to submit a review");
@@ -666,6 +691,58 @@ function Vendors() {
                 >
                   Clear All
                 </button>
+                
+                {/* Save Search Button */}
+                {(appliedSearchQuery || appliedCategory !== "all" || appliedProduct !== "all") && (
+                  <button
+                    onClick={() => setShowSaveSearchModal(true)}
+                    className="px-3 py-1 text-slate-200 hover:text-white border border-purple-500 hover:border-purple-300 rounded-full text-sm transition-colors flex items-center gap-1 hover:bg-purple-600/20"
+                  >
+                    <Bookmark className="w-3 h-3" />
+                    Save Search
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Save Search Modal */}
+          {showSaveSearchModal && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                <h3 className="text-lg font-bold text-slate-900 mb-4">Save This Search</h3>
+                <p className="text-sm text-slate-600 mb-4">Give your search a name to save it for later</p>
+                <input
+                  type="text"
+                  value={saveSearchName}
+                  onChange={(e) => setSaveSearchName(e.target.value)}
+                  placeholder="e.g., 'Contact Lens Suppliers'"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      saveCurrentSearch(saveSearchName);
+                    }
+                  }}
+                  autoFocus
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    onClick={() => {
+                      setShowSaveSearchModal(false);
+                      setSaveSearchName("");
+                    }}
+                    variant="outline"
+                    className="border-slate-300"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => saveCurrentSearch(saveSearchName)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    Save Search
+                  </Button>
+                </div>
               </div>
             </div>
           )}
