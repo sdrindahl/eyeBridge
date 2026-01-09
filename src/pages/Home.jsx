@@ -82,6 +82,31 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
+  // Calculate category counts
+  const getCategoryCounts = () => {
+    const categoryMap = {};
+    
+    vendorsData.forEach(vendor => {
+      if (vendor.Category) {
+        // Split multiple categories and count each
+        vendor.Category.split(';').forEach(cat => {
+          const trimmedCat = cat.trim();
+          if (trimmedCat) {
+            categoryMap[trimmedCat] = (categoryMap[trimmedCat] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    // Convert to array and sort by count
+    return Object.entries(categoryMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6); // Top 6 categories
+  };
+
+  const topCategories = getCategoryCounts();
+
   useEffect(() => {
     let isMounted = true;
 
@@ -194,6 +219,53 @@ export default function Home() {
                 </div>
               </div>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Browse by Category */}
+      <section className="py-16 bg-gradient-to-b from-white to-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">Browse by Category</h2>
+            <p className="text-lg text-slate-600">Find exactly what you need by browsing our vendor categories</p>
+          </div>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {topCategories.map((category) => (
+              <motion.div
+                key={category.name}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Link 
+                  to={`/vendors?category=${encodeURIComponent(category.name)}`}
+                  className="block"
+                >
+                  <Card className="rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 border-slate-200 hover:border-slate-400 hover:shadow-lg transition-all cursor-pointer h-full">
+                    <CardContent className="p-6 flex flex-col items-start justify-between h-full">
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-900">{category.name}</h3>
+                      </div>
+                      <div className="flex items-center gap-3 mt-4">
+                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-slate-200 text-slate-700 font-medium text-sm">
+                          {category.count} vendors
+                        </span>
+                        <ArrowRight className="w-5 h-5 text-slate-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <Link to="/vendors">
+              <Button variant="outline" className="rounded-2xl px-8">
+                View All Categories →
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
