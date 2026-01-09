@@ -1216,8 +1216,11 @@ function Vendors() {
                     // Load existing note
                     setCurrentNote(vendorNotes[vendorName] || "");
                   }}
-                  className="bg-slate-50 rounded-xl shadow-md border border-slate-200 hover:shadow-xl hover:border-blue-400 transition-all cursor-pointer overflow-hidden group"
+                  className="bg-slate-50 rounded-xl shadow-md border border-slate-200 hover:shadow-xl hover:border-blue-400 transition-all cursor-pointer overflow-hidden group border-l-4 border-l-slate-600"
                 >
+                  {/* Colored accent bar */}
+                  <div className={`h-1 ${colorClass}`} />
+
                   {/* Colored Header with Company Name */}
                   <div className={`${colorClass} p-3 relative`}>
                     {/* Action Buttons */}
