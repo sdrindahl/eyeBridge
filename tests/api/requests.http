@@ -1,0 +1,322 @@
+### eyeBridge API Test Collection
+### REST Client for VS Code
+### Install: REST Client extension by Huachao Mao
+
+### ============================================
+### VARIABLES
+### ============================================
+@baseUrl = http://localhost:3001/api
+@contentType = application/json
+
+### Test User - Update email for each test run
+@testEmail = testuser-{{$timestamp}}@eyebridge.test
+@testPassword = TestPass123!
+@testFirstName = John
+@testLastName = Doe
+@testPracticeName = Doe Eye Care
+@testPhone = 555-0001
+
+### ============================================
+### AUTHENTICATION ENDPOINTS
+### ============================================
+
+### 1. Register New User - SUCCESS
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}",
+  "firstName": "{{testFirstName}}",
+  "lastName": "{{testLastName}}",
+  "practiceName": "{{testPracticeName}}",
+  "phone": "{{testPhone}}"
+}
+
+### 2. Register with Minimal Data
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "minimal-{{$timestamp}}@eyebridge.test",
+  "password": "MinPass456!",
+  "firstName": "Jane",
+  "lastName": "Smith"
+}
+
+### 3. Register - Duplicate Email (SHOULD FAIL)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "{{testEmail}}",
+  "password": "AnotherPass123!",
+  "firstName": "Duplicate",
+  "lastName": "User"
+}
+
+### 4. Register - Invalid Email Format (SHOULD FAIL)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "notanemail",
+  "password": "TestPass123!"
+}
+
+### 5. Register - Missing Email (SHOULD FAIL)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "password": "TestPass123!",
+  "firstName": "John"
+}
+
+### 6. Register - Missing Password (SHOULD FAIL)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "test@eyebridge.test",
+  "firstName": "John"
+}
+
+### 7. Register - Password Too Short (SHOULD FAIL)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "shortpass-{{$timestamp}}@eyebridge.test",
+  "password": "S1!"
+}
+
+### 8. Register - Password Missing Uppercase (SHOULD FAIL)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "noupper-{{$timestamp}}@eyebridge.test",
+  "password": "lowercase123!"
+}
+
+### 9. Register - Password Missing Lowercase (SHOULD FAIL)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "nolower-{{$timestamp}}@eyebridge.test",
+  "password": "UPPERCASE123!"
+}
+
+### 10. Register - Password Missing Number (SHOULD FAIL)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "nonumber-{{$timestamp}}@eyebridge.test",
+  "password": "NoNumbers!"
+}
+
+### 11. Register - Password Missing Special Character (SHOULD FAIL)
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "nospecial-{{$timestamp}}@eyebridge.test",
+  "password": "NoSpecial123"
+}
+
+### ============================================
+### LOGIN ENDPOINTS
+### ============================================
+
+### 12. Login - Valid Credentials (use email from registration)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "{{testEmail}}",
+  "password": "{{testPassword}}"
+}
+
+### 13. Login - Wrong Password (SHOULD FAIL)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "{{testEmail}}",
+  "password": "WrongPassword123!"
+}
+
+### 14. Login - Non-existent User (SHOULD FAIL)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "nonexistent@eyebridge.test",
+  "password": "SomePass123!"
+}
+
+### 15. Login - Missing Email (SHOULD FAIL)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "password": "SomePass123!"
+}
+
+### 16. Login - Missing Password (SHOULD FAIL)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "{{testEmail}}"
+}
+
+### ============================================
+### TOKEN VERIFICATION ENDPOINTS
+### ============================================
+
+### 17. Verify Valid Token
+### INSTRUCTIONS: 
+### 1. Run request #1 (Register) first
+### 2. Copy the token from the response
+### 3. Paste it in the Authorization header below (replace YOUR_TOKEN)
+GET {{baseUrl}}/auth/verify
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### 18. Verify - No Token Provided (SHOULD FAIL)
+GET {{baseUrl}}/auth/verify
+
+### 19. Verify - Invalid Token Format (SHOULD FAIL)
+GET {{baseUrl}}/auth/verify
+Authorization: Bearer invalid.token.format
+
+### 20. Verify - Missing Bearer Prefix (SHOULD FAIL)
+### (Replace TOKEN with actual token from registration)
+GET {{baseUrl}}/auth/verify
+Authorization: YOUR_TOKEN_HERE
+
+### ============================================
+### USER PROFILE ENDPOINTS (requires valid token)
+### ============================================
+
+### 21. Get User Profile
+### INSTRUCTIONS: Add valid token to Authorization header
+GET {{baseUrl}}/user/profile
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### 22. Update User Profile
+### INSTRUCTIONS: Add valid token to Authorization header
+PUT {{baseUrl}}/user/profile
+Content-Type: {{contentType}}
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "firstName": "James",
+  "lastName": "Johnson",
+  "practiceName": "Johnson Eye Center",
+  "phone": "555-1234"
+}
+
+### ============================================
+### FAVORITES ENDPOINTS (requires valid token)
+### ============================================
+
+### 23. Get User Favorites
+### INSTRUCTIONS: Add valid token to Authorization header
+GET {{baseUrl}}/user/favorites
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### 24. Add Favorite Vendor
+### INSTRUCTIONS: Add valid token to Authorization header
+POST {{baseUrl}}/user/favorites
+Content-Type: {{contentType}}
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "vendorName": "Smith Vision Center"
+}
+
+### 25. Remove Favorite Vendor
+### INSTRUCTIONS: Add valid token to Authorization header
+DELETE {{baseUrl}}/user/favorites/Smith%20Vision%20Center
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### ============================================
+### HEALTH CHECK
+### ============================================
+
+### 26. Server Health Check
+GET {{baseUrl}}/health
+
+### ============================================
+### WORKFLOW TESTS (Full User Journey)
+### ============================================
+
+### WORKFLOW 1: Complete Registration and Login Flow
+### Step 1: Register
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "workflow-{{$timestamp}}@eyebridge.test",
+  "password": "WorkFlow123!",
+  "firstName": "Workflow",
+  "lastName": "User"
+}
+
+### Step 2: Login (use email from Step 1)
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "workflow-{{$timestamp}}@eyebridge.test",
+  "password": "WorkFlow123!"
+}
+
+### Step 3: Verify Token (use token from Step 2)
+GET {{baseUrl}}/auth/verify
+Authorization: Bearer YOUR_TOKEN_FROM_LOGIN
+
+### Step 4: Get Profile
+GET {{baseUrl}}/user/profile
+Authorization: Bearer YOUR_TOKEN_FROM_LOGIN
+
+### ============================================
+### TIPS FOR USE
+### ============================================
+# 1. Click "Send Request" link above each request
+# 2. Response appears in split panel on right
+# 3. Use @variables for reusable values
+# 4. {{$timestamp}} generates unique timestamp
+# 5. Copy token from response and use in subsequent requests
+# 6. Comment out tests you don't want to run with #
+
+### ============================================
+### POSTMAN NOTES
+### ============================================
+# If you prefer Postman:
+# - POST http://localhost:3001/api/auth/register
+# - Body: raw JSON (paste from requests above)
+# - Headers: Content-Type: application/json
+# - For auth endpoints: Add Authorization header with Bearer token
+
+### ============================================
+### COMMON ISSUES & FIXES
+### ============================================
+# 1. Connection refused (111)?
+#    → Backend not running. Start: cd server && npm run dev
+#
+# 2. 400 Bad Request on register?
+#    → Check password requirements (uppercase, lowercase, number, special char)
+#    → Check email format is valid
+#
+# 3. 401 Unauthorized on protected endpoints?
+#    → Token missing or invalid
+#    → Make sure to use token from successful login/register
+#
+# 4. Database errors?
+#    → Restart backend: kill server, npm run dev
+#    → Or reset database if needed
