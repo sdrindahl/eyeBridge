@@ -75,27 +75,7 @@ jobs:
               owner,
               repo,
               title: '🚨 Production Smoke Tests Failed',
-              body: `
-## Post-Deployment Smoke Test Failure
-
-**Deployment Environment:** Production  
-**Triggered by:** @${{ github.actor }}  
-**Commit:** ${{ github.sha }}  
-**Branch:** ${{ github.ref_name }}
-
-### Details
-- Test logs available in GitHub Actions: [View Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-- Playwright report available in job artifacts
-
-### Immediate Actions
-1. Check the Playwright report for failing tests
-2. Verify production services are healthy
-3. Monitor user reports for issues
-4. If needed, consider rolling back the deployment
-
----
-*Automated issue created by post-deployment smoke tests*
-              `,
+              body: `## Post-Deployment Smoke Test Failure\n\n**Deployment Environment:** Production\n**Triggered by:** @${{ github.actor }}\n**Commit:** ${{ github.sha }}\n**Branch:** ${{ github.ref_name }}\n\n### Details\n- Test logs available in GitHub Actions: [View Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n- Playwright report available in job artifacts\n\n### Immediate Actions\n1. Check the Playwright report for failing tests\n2. Verify production services are healthy\n3. Monitor user reports for issues\n4. If needed, consider rolling back the deployment\n\n---\n*Automated issue created by post-deployment smoke tests*`,
               labels: ['🚨 Critical', 'deployment', 'smoke-tests'],
             });
             

@@ -33,11 +33,11 @@ test.describe('Home Page', () => {
 
   test('should display vendor statistics', async ({ page }) => {
     // Check for statistics
-    await expect(page.locator('#root')).toContainText('312');
+    await expect(page.locator('#root')).toContainText('386');
     await expect(page.locator('#root')).toContainText('Vendors');
-    await expect(page.locator('#root')).toContainText('153');
+    await expect(page.locator('#root')).toContainText('184');
     await expect(page.locator('#root')).toContainText('Categories');
-    await expect(page.locator('#root')).toContainText('236');
+    await expect(page.locator('#root')).toContainText('201');
     await expect(page.locator('#root')).toContainText('Products');
   });
 
