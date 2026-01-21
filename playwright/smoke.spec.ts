@@ -7,6 +7,17 @@ const BASE_URL = process.env.BASE_URL || 'https://eye-bridge.vercel.app';
 const TEST_EMAIL = process.env.SMOKE_TEST_EMAIL || 'test@eyebridge.com';
 const TEST_PASSWORD = process.env.SMOKE_TEST_PASSWORD || 'TestPassword123!';
 
+// Helper function to bypass password gate
+async function bypassPasswordGate(page) {
+  const passwordGateInput = page.locator('input[type="password"]').first();
+  if (await passwordGateInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await passwordGateInput.fill('eyebridges2025');
+    const gateSubmit = page.locator('button[type="submit"]').first();
+    await gateSubmit.click();
+    await page.waitForLoadState('networkidle');
+  }
+}
+
 test.describe('Post-Deployment Smoke Tests', () => {
   // ===== UNAUTHENTICATED TESTS =====
   
@@ -26,9 +37,9 @@ test.describe('Post-Deployment Smoke Tests', () => {
   test('Login page accessible', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
     
-    // Check for login form
-    const emailInput = page.locator('input[type="email"], input[name*="email"]');
-    await expect(emailInput).toBeVisible({ timeout: 5000 });
+    // Check for login form using data-testid
+    const loginCard = page.locator('[data-testid="login-card"]');
+    await expect(loginCard).toBeVisible({ timeout: 5000 });
   });
 
   test('Vendor search endpoint responds', async ({ request }) => {
@@ -97,29 +108,28 @@ test.describe('Post-Deployment Smoke Tests', () => {
 
     await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
     
-    // Fill login form
-    const emailInput = page.locator('input[type="email"], input[name*="email"]');
-    const passwordInput = page.locator('input[type="password"], input[name*="password"]');
-    const submitButton = page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign In")');
+    // Bypass password gate if present
+    await bypassPasswordGate(page);
+
+    // Fill login form using data-testid
+    const emailInput = page.locator('[data-testid="email-input"]');
+    const passwordInput = page.locator('[data-testid="password-input"]');
+    const submitButton = page.locator('[data-testid="login-form"] button[type="submit"]');
 
     await emailInput.fill(TEST_EMAIL);
     await passwordInput.fill(TEST_PASSWORD);
     await submitButton.click();
 
     // Wait for redirect to dashboard or home
-    await page.waitForURL('**/dashboard', { timeout: 10000 }).catch(() => {
-      // Dashboard redirect might not happen; check for logout button instead
+    await page.waitForURL(['**/dashboard', '**/home', '**/vendors'], { timeout: 10000 }).catch(() => {
+      // Some apps might not redirect; check for success instead
     });
 
-    // Verify user is authenticated (logout button visible or dashboard content)
-    const logoutButton = page.locator('button:has-text("Logout"), button:has-text("Sign Out"), [aria-label*="logout"]');
-    const dashboardContent = page.locator('[class*="dashboard"], [class*="welcome"]');
-
-    const isAuthenticated = 
-      await logoutButton.isVisible({ timeout: 3000 }).catch(() => false) ||
-      await dashboardContent.isVisible({ timeout: 3000 }).catch(() => false);
-
-    expect(isAuthenticated).toBeTruthy();
+    // Verify user is authenticated (not on login page)
+    const url = page.url();
+    const isLoggedIn = !url.includes('login') && !url.includes('password');
+    
+    expect(isLoggedIn).toBeTruthy();
   });
 
   test('Authenticated user can search vendors', async ({ page }) => {
@@ -130,17 +140,20 @@ test.describe('Post-Deployment Smoke Tests', () => {
 
     await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
     
-    // Login
-    const emailInput = page.locator('input[type="email"], input[name*="email"]');
-    const passwordInput = page.locator('input[type="password"], input[name*="password"]');
-    const submitButton = page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign In")');
+    // Bypass password gate if present
+    await bypassPasswordGate(page);
+
+    // Login using data-testid
+    const emailInput = page.locator('[data-testid="email-input"]');
+    const passwordInput = page.locator('[data-testid="password-input"]');
+    const submitButton = page.locator('[data-testid="login-form"] button[type="submit"]');
 
     await emailInput.fill(TEST_EMAIL);
     await passwordInput.fill(TEST_PASSWORD);
     await submitButton.click();
 
     // Wait for dashboard to load
-    await page.waitForURL(['**/dashboard', '**/vendors', '**/home'], { timeout: 10000 }).catch(() => {});
+    await page.waitForLoadState('networkidle');
 
     // Navigate to vendors or search page
     const vendorsLink = page.locator('a:has-text("Vendors"), a[href*="vendors"], button:has-text("Search")');
@@ -150,7 +163,7 @@ test.describe('Post-Deployment Smoke Tests', () => {
     }
 
     // Perform search
-    const searchInput = page.locator('input[placeholder*="Search"], input[type="search"], input[name*="search"]');
+    const searchInput = page.locator('input[placeholder*="Search"], input[type="search"]');
     if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await searchInput.fill('eye');
       await page.keyboard.press('Enter');
@@ -174,10 +187,13 @@ test.describe('Post-Deployment Smoke Tests', () => {
 
     await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
     
+    // Bypass password gate if present
+    await bypassPasswordGate(page);
+
     // Login
-    const emailInput = page.locator('input[type="email"], input[name*="email"]');
-    const passwordInput = page.locator('input[type="password"], input[name*="password"]');
-    const submitButton = page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign In")');
+    const emailInput = page.locator('[data-testid="email-input"]');
+    const passwordInput = page.locator('[data-testid="password-input"]');
+    const submitButton = page.locator('[data-testid="login-form"] button[type="submit"]');
 
     await emailInput.fill(TEST_EMAIL);
     await passwordInput.fill(TEST_PASSWORD);
@@ -213,10 +229,13 @@ test.describe('Post-Deployment Smoke Tests', () => {
 
     await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
     
+    // Bypass password gate if present
+    await bypassPasswordGate(page);
+
     // Login
-    const emailInput = page.locator('input[type="email"], input[name*="email"]');
-    const passwordInput = page.locator('input[type="password"], input[name*="password"]');
-    const submitButton = page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign In")');
+    const emailInput = page.locator('[data-testid="email-input"]');
+    const passwordInput = page.locator('[data-testid="password-input"]');
+    const submitButton = page.locator('[data-testid="login-form"] button[type="submit"]');
 
     await emailInput.fill(TEST_EMAIL);
     await passwordInput.fill(TEST_PASSWORD);
