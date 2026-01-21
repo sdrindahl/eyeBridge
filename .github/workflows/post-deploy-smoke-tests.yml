@@ -1,0 +1,153 @@
+name: Post-Deployment Smoke Tests
+
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to test'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  smoke-tests:
+    name: Run Smoke Tests
+    runs-on: ubuntu-latest
+    
+    # Only run on successful deployments
+    if: |
+      github.event.deployment_status.state == 'success' ||
+      github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run smoke tests against production
+        run: npm run test:prod
+        env:
+          BASE_URL: https://eye-bridge.vercel.app
+          SMOKE_TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
+          SMOKE_TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD }}
+        continue-on-error: true
+        id: smoke-test
+
+      - name: Generate test report
+        if: always()
+        run: |
+          if [ -d "playwright-report" ]; then
+            echo "## 🎭 Playwright Test Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Tests completed. Report available in artifacts." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Create GitHub Issue on test failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue = await github.rest.issues.create({
+              owner,
+              repo,
+              title: '🚨 Production Smoke Tests Failed',
+              body: `
+## Post-Deployment Smoke Test Failure
+
+**Deployment Environment:** Production  
+**Triggered by:** @${{ github.actor }}  
+**Commit:** ${{ github.sha }}  
+**Branch:** ${{ github.ref_name }}
+
+### Details
+- Test logs available in GitHub Actions: [View Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+- Playwright report available in job artifacts
+
+### Immediate Actions
+1. Check the Playwright report for failing tests
+2. Verify production services are healthy
+3. Monitor user reports for issues
+4. If needed, consider rolling back the deployment
+
+---
+*Automated issue created by post-deployment smoke tests*
+              `,
+              labels: ['🚨 Critical', 'deployment', 'smoke-tests'],
+            });
+            
+            console.log(`Created issue #${issue.data.number}`);
+
+      - name: Post test results to GitHub summary
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "## ✅ Production Smoke Tests: PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All critical paths verified. Deployment is healthy." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Production Smoke Tests: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Action Required" >> $GITHUB_STEP_SUMMARY
+            echo "- Check Playwright report in artifacts" >> $GITHUB_STEP_SUMMARY
+            echo "- Investigate failing tests" >> $GITHUB_STEP_SUMMARY
+            echo "- GitHub issue created for tracking" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "[View Full Test Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Send failure notification via email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: '🚨 eyeBridge Production Deployment - Smoke Tests Failed'
+          to: ${{ secrets.ALERT_EMAIL }}
+          from: 'eyeBridge CI/CD <${{ secrets.EMAIL_USERNAME }}>'
+          body: |
+            PRODUCTION SMOKE TEST FAILURE
+            ===============================
+            
+            Deployment to production has been completed, but smoke tests have failed.
+            
+            Details:
+            - Repository: ${{ github.repository }}
+            - Branch: ${{ github.ref_name }}
+            - Commit: ${{ github.sha }}
+            - Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            A GitHub issue has been created for tracking.
+            
+            Action Required:
+            1. Review the Playwright test report
+            2. Check production service health
+            3. Consider rolling back if needed
+            
+            ---
+            This is an automated notification from eyeBridge CI/CD
