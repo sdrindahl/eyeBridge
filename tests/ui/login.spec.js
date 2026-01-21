@@ -184,3 +184,4 @@ test.describe('Login Page - UI Tests', () => {
     await expect(emailLabel).toBeVisible();
     await expect(passwordLabel).toBeVisible();
   });
+});
