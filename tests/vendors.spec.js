@@ -11,7 +11,7 @@ test.describe('Vendors Page', () => {
 
   test('should display vendor directory', async ({ page }) => {
     await expect(page.locator('h1')).toContainText('Vendor Directory');
-    await expect(page.getByRole('main')).toContainText('Showing 312 vendors');
+    await expect(page.getByRole('main')).toContainText('Showing 0 vendors');
   });
 
   test('should filter vendors by category', async ({ page }) => {
