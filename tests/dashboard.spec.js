@@ -97,7 +97,17 @@ test.describe('Dashboard Page', () => {
   });
 
   test('should logout successfully', async ({ page }) => {
-    await page.click('button:has-text("Logout")');
+    // Use test ID for more reliable selector
+    const logoutButton = page.getByTestId('logout-button');
+    
+    // Wait for button to be available and visible
+    await expect(logoutButton).toBeVisible({ timeout: 5000 });
+    
+    // Force scroll into view in case it's off-screen (Firefox issue)
+    await logoutButton.scrollIntoViewIfNeeded();
+    
+    // Click logout
+    await logoutButton.click();
     
     // Should redirect to home
     await page.waitForURL('/');
