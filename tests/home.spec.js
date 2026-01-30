@@ -44,16 +44,19 @@ test.describe('Home Page', () => {
   test('should navigate to Dashboard when logged in', async ({ page }) => {
     // First login
     await page.goto('/login');
-    await page.fill('input[type="email"]', 'test@example.com');
-    await page.fill('input[type="password"]', 'Test@123');
+    await page.fill('input[type="email"]', 'sdrindahl@gmail.com');
+    await page.fill('input[type="password"]', 'Jessie34!!');
     await page.click('button[type="submit"]');
+    
+    // Wait for redirect after login
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
     
     // Go back to home
     await page.goto('/');
     
     // Should have Dashboard link
     const dashboardLink = page.getByRole('link', { name: /Dashboard/i });
-    await expect(dashboardLink).toBeVisible();
+    await expect(dashboardLink).toBeVisible({ timeout: 10000 });
     await dashboardLink.click();
     await page.waitForURL('**/dashboard');
     expect(page.url()).toContain('/dashboard');

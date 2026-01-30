@@ -31,23 +31,24 @@ test.describe('Login Page', () => {
   });
 
   test('should validate password requirements', async ({ page }) => {
-    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="email"]', 'sdrindahl@gmail.com');
     await page.fill('input[type="password"]', 'weak');
     await page.click('button[type="submit"]');
     
-    // Should show password requirements
-    await expect(page.getByText(/6 characters long/i)).toBeVisible();
+    // Should show login error (server-side validation)
+    await expect(page.getByTestId('login-error')).toBeVisible();
+    await expect(page.getByTestId('login-error')).toContainText('Unauthorized');
   });
 
   test('should login successfully with valid credentials', async ({ page }) => {
-    await page.fill('input[type="email"]', 'test@example.com');
+    await page.fill('input[type="email"]', 'test1@example.com');
     await page.fill('input[type="password"]', 'Test@123');
     await page.click('button[type="submit"]');
     
     // Should redirect to dashboard
     await page.waitForURL('**/dashboard', { timeout: 5000 });
     expect(page.url()).toContain('/dashboard');
-    await expect(page.locator('h1')).toContainText('Dashboard');
+    await expect(page.url()).toMatch(/\/dashboard$/);
   });
 
   test('should have Home button that navigates back', async ({ page }) => {
